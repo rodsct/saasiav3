@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: saasiav3-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: saasiav3
+      POSTGRES_USER: saasiav3
+      POSTGRES_PASSWORD: saasiav3_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - saasiav3-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saasiav3 -d saasiav3"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: saasiav3-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://saasiav3:saasiav3_password@postgres:5432/saasiav3
+      - SHADOW_DATABASE_URL=postgresql://saasiav3:saasiav3_password@postgres:5432/saasiav3_shadow
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=your-super-secret-nextauth-key-change-this-in-production
+      - SECRET=your-super-secret-nextauth-key-change-this-in-production
+      - NEXT_PUBLIC_SITE_URL=http://localhost:3000
+      - DEFAULT_N8N_WEBHOOK=https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - saasiav3-network
+    volumes:
+      - ./public/uploads:/app/public/uploads
+      - app_uploads:/app/public/uploads
+
+  # Redis for session storage (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: saasiav3-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - saasiav3-network
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  app_uploads:
+
+networks:
+  saasiav3-network:
+    driver: bridge

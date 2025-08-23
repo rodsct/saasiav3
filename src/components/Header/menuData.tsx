@@ -15,24 +15,36 @@ const menuData: Menu[] = [
   },
   {
     id: 3,
+    title: "Chatbot",
+    path: "/chatbot",
+    newTab: false,
+  },
+  {
+    id: 4,
+    title: "Downloads",
+    path: "/downloads",
+    newTab: false,
+  },
+  {
+    id: 5,
     title: "Pricing",
     path: "/pricing",
     newTab: false,
   },
   {
-    id: 5,
+    id: 6,
     title: "Contact",
     path: "/contact",
     newTab: false,
   },
   {
-    id: 5,
+    id: 7,
     title: "Blog",
     path: "/blogs",
     newTab: false,
   },
   {
-    id: 6,
+    id: 8,
     title: "Pages",
     newTab: false,
     submenu: [
@@ -61,19 +73,31 @@ const menuData: Menu[] = [
         newTab: false,
       },
       {
+        id: 65,
+        title: "Chatbot Dashboard",
+        path: "/chatbot",
+        newTab: false,
+      },
+      {
         id: 66,
+        title: "Downloads Area",
+        path: "/downloads",
+        newTab: false,
+      },
+      {
+        id: 67,
         title: "Sign Up Page",
         path: "/signup",
         newTab: false,
       },
       {
-        id: 67,
+        id: 68,
         title: "Sign In Page",
         path: "/signin",
         newTab: false,
       },
       {
-        id: 68,
+        id: 69,
         title: "Error Page",
         path: "/error",
         newTab: false,

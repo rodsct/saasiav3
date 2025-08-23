@@ -7,6 +7,9 @@ export const pricingData: Price[] = [
     nickname: "Basic",
     offers: [
       "1 User",
+      "1 Chatbot with n8n integration",
+      "1GB file storage",
+      "Basic downloads area",
       "All UI components",
       "Lifetime access",
       "Free updates",
@@ -20,6 +23,10 @@ export const pricingData: Price[] = [
     nickname: "Premium",
     offers: [
       "5 Users",
+      "5 Chatbots with n8n integration",
+      "10GB file storage",
+      "Advanced downloads management",
+      "Public/private file sharing",
       "All UI components",
       "Lifetime access",
       "Free updates",
@@ -33,6 +40,11 @@ export const pricingData: Price[] = [
     nickname: "Business",
     offers: [
       "10 Users",
+      "Unlimited Chatbots",
+      "100GB file storage",
+      "Advanced downloads management",
+      "Public/private file sharing",
+      "Team collaboration features",
       "All UI components",
       "Lifetime access",
       "Free updates",

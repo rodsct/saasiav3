@@ -49,6 +49,9 @@ model User {
   passwordResetTokenExp DateTime?
   accounts              Account[]
   sessions              Session[]
+  chatbots              Chatbot[]
+  conversations         Conversation[]
+  downloads             Download[]
 }
 
 model VerificationToken {
@@ -57,4 +60,52 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Chatbot {
+  id              String         @id @default(cuid())
+  name            String
+  description     String?
+  n8nWebhookUrl   String
+  isActive        Boolean        @default(true)
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversations   Conversation[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model Conversation {
+  id         String    @id @default(cuid())
+  chatbotId  String
+  userId     String
+  messages   Message[]
+  chatbot    Chatbot   @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  content        String       @db.Text
+  isFromUser     Boolean
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+}
+
+model Download {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  fileName    String
+  filePath    String
+  fileSize    Int
+  mimeType    String
+  isPublic    Boolean  @default(false)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

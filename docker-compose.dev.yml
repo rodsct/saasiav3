@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Development
+  postgres:
+    image: postgres:15-alpine
+    container_name: saasiav3-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: saasiav3
+      POSTGRES_USER: saasiav3
+      POSTGRES_PASSWORD: saasiav3_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - saasiav3-network
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  saasiav3-network:
+    driver: bridge

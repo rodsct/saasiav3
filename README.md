@@ -1,28 +1,32 @@
-Play Next.js is a free and **Open-source SaaS starter kit and boilerplate, designed and built for SaaS startups**, apps, businesses, and more. With its premium design and essential UI components and pages, it provides everything you need to kickstart a feature-rich SaaS website.
+SaaS v3 is a complete **AI-powered SaaS platform with chatbot integration and downloads management**, built on Next.js. Features include n8n webhook chatbots, secure file downloads, user authentication, and payment processing - everything you need to launch your AI-powered business.
 
 [![Play Next.js](https://github.com/NextJSTemplates/play-nextjs/blob/main/nextjs-play.png)](https://play.nextjstemplates.com)
 
-## Free SaaS Boilerplate and Starter Kit for Next.js 🚀
+## AI-Powered SaaS Platform with Chatbot & Downloads 🤖
 
-Play Next.js SaaS Boilerplate and Starter Kit is a free, open-source solution ideal for startups, SaaS companies, and more. It offers essential UI components, authentication and database integration, and Stripe integration. Its superior design and functionality make it a go-to choice for launching a feature-rich SaaS website efficiently.
+SaaS v3 is a complete platform featuring AI chatbots with n8n integration, secure file downloads, user authentication, and payment processing. Built with Next.js 15, TypeScript, Prisma, and Docker for easy deployment.
 
 ### [🚀 View Live Demo](https://play.nextjstemplates.com/)
 
 ### [🔌 Documentation](https://nextjstemplates.com/docs)
 
-### All Essential Integrations - DB, Auth, Payment, MDX, and more ⚡
+### Key Features ⚡
 
-Play Next.js SaaS Starter kit includes all the key integrations required to build a fully functional SaaS platform.
+SaaS v3 includes all essential integrations for a modern AI-powered platform:
 
-- **PostgreSQL for Database**: Comes with PostgreSQL integration with Prisma which is a powerful and open-source relational database system ensures data integrity and reliability.
+- **🤖 AI Chatbots with n8n Integration**: Create unlimited chatbots that connect to your n8n workflows via webhooks for intelligent responses.
 
-- **NextAuth for Authentication**: Play Next.js utilizes NextAuth, a versatile solution that provides secure login and user management.
+- **📁 Downloads Management**: Secure file upload, organization, and sharing with public/private access controls.
 
-- **MDX for Blogs**: MDX uniquely combines Markdown and JSX, Play Next.js comes with complete blogging solution to create and maintain blog using MDX.
+- **🗄️ PostgreSQL Database**: Complete database setup with Prisma ORM, including Docker deployment.
 
-- **Stripe for Subscription Payments**: Stripe, a globally trusted payment processing platform, offers robust security features and smooth checkout experiences.
+- **🔐 NextAuth Authentication**: Multi-provider authentication (credentials, GitHub, Google, email magic links).
 
-These integrations work together to simplify development and enhance the user experience.
+- **📝 MDX Blog System**: Full-featured blog with markdown and JSX support.
+
+- **💳 Stripe Payments**: Integrated subscription billing with multiple pricing tiers.
+
+- **🐳 Docker Ready**: Complete Docker setup for easy deployment and development.
 
 ### Essential SaaS Pages & Components and Styled Using Tailwind CSS 🎨
 
@@ -40,29 +44,60 @@ Play Next.js SaaS boilerplate, you can enjoy a professional-looking website that
 
 [![Deploy with Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/NextJSTemplates/play-nextjs)
 
-### Setup Instructions
+### 🚀 Quick Start with Docker (Recommended)
 
-Follow these steps to set up and run this template on your local machine:
-
-1. Begin by downloading and extracting the template from **Next.js Templates**.
-
-2. Once you've done that, navigate into the template directory using the **cd** command.
-
-3. Install the necessary dependencies by running the following commands:
+The fastest way to get SaaS v3 running with database included:
 
 ```bash
-    npm install --legacy-peer-deps
+# Clone and navigate to the project
+git clone <repository-url>
+cd play-nextjs
+
+# Run setup script (Windows)
+scripts\setup-docker.bat
+
+# Or run setup script (Linux/Mac)
+chmod +x scripts/setup-docker.sh
+./scripts/setup-docker.sh
+
+# Start development
+npm run dev
 ```
 
-**Note:** As of right now React 19 causes peer dependencies issues with some packages, so the `legacy-peer-deps` flag is required.
+### 🐳 Full Docker Deployment
 
-4. Now you're ready to start the project on your local server. Use the following command to get it up and running:
+To run everything in containers:
 
 ```bash
-    npm run dev
+# Build and start all services
+docker-compose up --build
+
+# Or run in background
+docker-compose up -d --build
 ```
 
-This will launch the template on [localhost:3000](http://localhost:3000).
+### 🛠 Manual Setup (Alternative)
+
+If you prefer manual setup:
+
+1. **Install Dependencies:**
+```bash
+npm install --legacy-peer-deps
+```
+
+2. **Setup Database:**
+```bash
+# Start PostgreSQL with Docker
+docker-compose -f docker-compose.dev.yml up -d postgres
+
+# Run migrations
+npx prisma migrate dev
+```
+
+3. **Start Development:**
+```bash
+npm run dev
+```
 
 Our comprehensive documentation includes all the guides you'll need for integrating various features.
 
