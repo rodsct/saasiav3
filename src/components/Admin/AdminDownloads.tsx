@@ -1,0 +1,282 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
+
+interface AdminDownload {
+  id: string;
+  title: string;
+  description?: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  isPublic: boolean;
+  createdAt: string;
+  user: {
+    id: string;
+    name?: string;
+    email?: string;
+  };
+}
+
+export default function AdminDownloads() {
+  const [downloads, setDownloads] = useState<AdminDownload[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadData, setUploadData] = useState({
+    title: "",
+    description: "",
+    isPublic: true,
+  });
+
+  useEffect(() => {
+    loadDownloads();
+  }, []);
+
+  const loadDownloads = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/downloads");
+      const data = await response.json();
+      
+      if (response.ok) {
+        setDownloads(data.downloads);
+      } else {
+        toast.error("Error loading downloads");
+      }
+    } catch (error) {
+      toast.error("Error loading downloads");
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadFile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    const form = e.currentTarget;
+    const fileInput = form.elements.namedItem("file") as HTMLInputElement;
+    const file = fileInput.files?.[0];
+
+    if (!file || !uploadData.title.trim()) {
+      toast.error("File and title are required");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", uploadData.title);
+      formData.append("description", uploadData.description);
+      formData.append("isPublic", uploadData.isPublic.toString());
+
+      const response = await fetch("/api/admin/downloads", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("File uploaded successfully!");
+        setUploadData({ title: "", description: "", isPublic: true });
+        setShowUpload(false);
+        form.reset();
+        loadDownloads();
+      } else {
+        toast.error(data.error || "Upload failed");
+      }
+    } catch (error) {
+      toast.error("Upload failed");
+      console.error("Upload error:", error);
+    }
+  };
+
+  const deleteDownload = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this file?")) return;
+
+    try {
+      const response = await fetch(`/api/admin/downloads/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("File deleted successfully!");
+        loadDownloads();
+      } else {
+        toast.error("Failed to delete file");
+      }
+    } catch (error) {
+      toast.error("Failed to delete file");
+      console.error("Delete error:", error);
+    }
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Downloads Management
+        </h2>
+        <button
+          onClick={() => setShowUpload(!showUpload)}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+        >
+          {showUpload ? "Cancel" : "Upload File"}
+        </button>
+      </div>
+
+      {showUpload && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Upload New File
+          </h3>
+          
+          <form onSubmit={uploadFile} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                File
+              </label>
+              <input
+                type="file"
+                name="file"
+                required
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Title
+              </label>
+              <input
+                type="text"
+                value={uploadData.title}
+                onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
+                required
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Enter file title..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description
+              </label>
+              <textarea
+                value={uploadData.description}
+                onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Enter file description..."
+              />
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={uploadData.isPublic}
+                onChange={(e) => setUploadData({ ...uploadData, isPublic: e.target.checked })}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+              />
+              <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                Make publicly accessible
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg"
+            >
+              Upload File
+            </button>
+          </form>
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            All Downloads ({downloads.length})
+          </h3>
+        </div>
+
+        {downloads.length === 0 ? (
+          <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+            No downloads available
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {downloads.map((download) => (
+              <div key={download.id} className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h4 className="text-base font-medium text-gray-900 dark:text-white">
+                        {download.title}
+                      </h4>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        download.isPublic 
+                          ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100" 
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+                      }`}>
+                        {download.isPublic ? "Public" : "Private"}
+                      </span>
+                    </div>
+                    
+                    {download.description && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        {download.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                      <span>{download.fileName}</span>
+                      <span>{formatFileSize(download.fileSize)}</span>
+                      <span>by {download.user.name || download.user.email}</span>
+                      <span>{new Date(download.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2 ml-4">
+                    <a
+                      href={`/${download.filePath}`}
+                      download={download.fileName}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Download
+                    </a>
+                    <button
+                      onClick={() => deleteDownload(download.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

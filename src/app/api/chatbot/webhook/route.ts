@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/utils/auth";
+import { getWebhookUrlForModel } from "@/utils/chatbotModels";
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,7 +51,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const response = await fetch(chatbot.n8nWebhookUrl, {
+    const webhookUrl = chatbot.n8nWebhookUrl || getWebhookUrlForModel(chatbot.model);
+    
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

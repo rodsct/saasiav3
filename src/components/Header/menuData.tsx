@@ -98,6 +98,12 @@ const menuData: Menu[] = [
       },
       {
         id: 69,
+        title: "Admin Panel",
+        path: "/admin", 
+        newTab: false,
+      },
+      {
+        id: 70,
         title: "Error Page",
         path: "/error",
         newTab: false,

@@ -35,11 +35,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, description, n8nWebhookUrl } = await request.json();
+    const { name, description, model } = await request.json();
 
-    if (!name || !n8nWebhookUrl) {
+    if (!name || !model) {
       return NextResponse.json(
-        { error: "Name and webhook URL are required" },
+        { error: "Name and model are required" },
+        { status: 400 }
+      );
+    }
+
+    const validModels = ["MODEL_A", "MODEL_B", "MODEL_C"];
+    if (!validModels.includes(model)) {
+      return NextResponse.json(
+        { error: "Invalid model selection" },
         { status: 400 }
       );
     }
@@ -48,7 +56,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
-        n8nWebhookUrl,
+        model,
         userId: session.user.id,
       }
     });

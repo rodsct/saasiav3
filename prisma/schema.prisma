@@ -47,11 +47,17 @@ model User {
   password              String?
   passwordResetToken    String?   @unique
   passwordResetTokenExp DateTime?
+  role                  UserRole  @default(USER)
   accounts              Account[]
   sessions              Session[]
   chatbots              Chatbot[]
   conversations         Conversation[]
   downloads             Download[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 model VerificationToken {
@@ -66,13 +72,20 @@ model Chatbot {
   id              String         @id @default(cuid())
   name            String
   description     String?
-  n8nWebhookUrl   String
+  model           ChatbotModel   @default(MODEL_A)
+  n8nWebhookUrl   String?
   isActive        Boolean        @default(true)
   userId          String
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   conversations   Conversation[]
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+}
+
+enum ChatbotModel {
+  MODEL_A
+  MODEL_B
+  MODEL_C
 }
 
 model Conversation {

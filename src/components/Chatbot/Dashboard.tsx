@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import Chatbot from "./index";
+import { CHATBOT_MODELS } from "@/utils/chatbotModels";
 
 interface ChatbotData {
   id: string;
   name: string;
   description?: string;
-  n8nWebhookUrl: string;
+  model: string;
+  n8nWebhookUrl?: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -23,7 +25,7 @@ export default function ChatbotDashboard() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    n8nWebhookUrl: "",
+    model: "MODEL_A",
   });
 
   useEffect(() => {
@@ -57,8 +59,8 @@ export default function ChatbotDashboard() {
   const createChatbot = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.n8nWebhookUrl.trim()) {
-      toast.error("Name and webhook URL are required");
+    if (!formData.name.trim()) {
+      toast.error("Name is required");
       return;
     }
 
@@ -75,7 +77,7 @@ export default function ChatbotDashboard() {
 
       if (response.ok) {
         toast.success("Chatbot created successfully!");
-        setFormData({ name: "", description: "", n8nWebhookUrl: "" });
+        setFormData({ name: "", description: "", model: "MODEL_A" });
         setShowCreateForm(false);
         loadChatbots();
       } else {
@@ -140,6 +142,11 @@ export default function ChatbotDashboard() {
                       <h4 className="font-medium text-gray-900 dark:text-white">
                         {chatbot.name}
                       </h4>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 px-2 py-0.5 rounded">
+                          {CHATBOT_MODELS[chatbot.model]?.name || chatbot.model}
+                        </span>
+                      </div>
                       {chatbot.description && (
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           {chatbot.description}
@@ -190,16 +197,22 @@ export default function ChatbotDashboard() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  n8n Webhook URL
+                  AI Model
                 </label>
-                <input
-                  type="url"
-                  value={formData.n8nWebhookUrl}
-                  onChange={(e) => setFormData({ ...formData, n8nWebhookUrl: e.target.value })}
-                  required
+                <select
+                  value={formData.model}
+                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://your-n8n-instance.com/webhook/..."
-                />
+                >
+                  {Object.values(CHATBOT_MODELS).map((model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.name} - {model.description}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Webhook: {CHATBOT_MODELS[formData.model]?.webhookUrl}
+                </p>
               </div>
 
               <div className="flex space-x-3">
