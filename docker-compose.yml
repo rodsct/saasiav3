@@ -41,6 +41,8 @@ services:
       - SECRET=your-super-secret-nextauth-key-change-this-in-production
       - NEXT_PUBLIC_SITE_URL=http://localhost:3000
       - DEFAULT_N8N_WEBHOOK=https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3
+      - GOOGLE_CLIENT_ID=4989507711-olbqib84sdpkp1g93eu2lstli67cg9j0.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
     depends_on:
       postgres:
         condition: service_healthy
