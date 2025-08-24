@@ -114,13 +114,13 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
     const styles = {
       PUBLIC: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
       REGISTERED: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800", 
-      PREMIUM: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800"
+      PRO: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800"
     };
 
     const labels = {
       PUBLIC: "Público",
       REGISTERED: "Registrado",
-      PREMIUM: "Premium"
+      PRO: "PRO"
     };
 
     return (

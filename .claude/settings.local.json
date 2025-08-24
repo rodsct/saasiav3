@@ -44,7 +44,8 @@
       "Bash(docker volume prune:*)",
       "Bash(docker network prune:*)",
       "Bash(start http://localhost:3000)",
-      "Bash(quick-start.bat)"
+      "Bash(quick-start.bat)",
+      "Bash(start http://localhost:3000/chatbot)"
     ],
     "deny": [],
     "ask": []

@@ -14,9 +14,10 @@ export const authOptions: NextAuthOptions = {
     signIn: "/signin",
   },
   adapter: PrismaAdapter(prisma) as Adapter,
-  secret: process.env.NEXTAUTH_SECRET || process.env.SECRET,
+  secret: process.env.NEXTAUTH_SECRET || process.env.SECRET || "fallback-development-secret-key",
   session: {
-    strategy: "jwt",
+    strategy: "database",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
   providers: [
@@ -94,26 +95,29 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    jwt: async (payload: any) => {
-      const { token } = payload;
-      const user = payload.user;
-
-      if (user) {
-        return {
-          ...token,
-          id: user.id,
-        };
-      }
-      return token;
-    },
-
-    session: async ({ session, token }) => {
+    session: async ({ session, user }) => {
       if (session?.user) {
+        // Fetch complete user data including subscription
+        const fullUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            subscription: true,
+            subscriptionEndsAt: true,
+          },
+        });
+
         return {
           ...session,
           user: {
             ...session.user,
-            id: token?.id,
+            id: user.id,
+            role: fullUser?.role,
+            subscription: fullUser?.subscription,
+            subscriptionEndsAt: fullUser?.subscriptionEndsAt,
           },
         };
       }

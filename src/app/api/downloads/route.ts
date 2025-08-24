@@ -21,11 +21,11 @@ export async function GET(request: NextRequest) {
     
     let whereCondition: any;
     
-    if (userSubscription === "PREMIUM") {
-      // Premium users can see registered and premium content
+    if (userSubscription === "PRO") {
+      // PRO users can see registered and PRO content
       whereCondition = {
         accessLevel: {
-          in: ["REGISTERED", "PREMIUM"]
+          in: ["REGISTERED", "PRO"]
         }
       };
     } else {

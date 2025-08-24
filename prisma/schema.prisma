@@ -64,13 +64,13 @@ enum UserRole {
 
 enum SubscriptionType {
   FREE
-  PREMIUM
+  PRO
 }
 
 enum DownloadAccessLevel {
   PUBLIC
   REGISTERED
-  PREMIUM
+  PRO
 }
 
 model VerificationToken {

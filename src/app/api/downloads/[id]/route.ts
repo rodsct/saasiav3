@@ -82,9 +82,9 @@ function checkDownloadAccess(accessLevel: string, session: any): boolean {
     return true;
   }
   
-  if (accessLevel === "PREMIUM") {
+  if (accessLevel === "PRO") {
     const userSubscription = (session.user as any).subscription || "FREE";
-    return userSubscription === "PREMIUM";
+    return userSubscription === "PRO";
   }
   
   return false;

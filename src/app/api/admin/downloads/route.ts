@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         filePath,
         fileSize,
         mimeType,
-        accessLevel: accessLevel as "REGISTERED" | "PREMIUM",
+        accessLevel: accessLevel as "REGISTERED" | "PRO",
         category: category || null,
         tags: tagsArray,
         userId: adminCheck.id,
