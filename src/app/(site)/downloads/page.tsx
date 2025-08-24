@@ -17,8 +17,8 @@ export default async function DownloadsPage() {
   }
 
   return (
-    <section className="pb-[120px] pt-[120px]">
-      <div className="container">
+    <section className="py-16">
+      <div className="container px-4">
         <Downloads />
       </div>
     </section>

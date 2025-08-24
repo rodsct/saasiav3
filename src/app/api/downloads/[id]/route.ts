@@ -73,10 +73,7 @@ export async function GET(
 }
 
 function checkDownloadAccess(accessLevel: string, session: any): boolean {
-  if (accessLevel === "PUBLIC") {
-    return true;
-  }
-  
+  // No public downloads - authentication required
   if (!session?.user?.id) {
     return false;
   }

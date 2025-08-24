@@ -7,34 +7,32 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    // Allow both authenticated and unauthenticated users to see public files
+    // Only authenticated users can access downloads - no public access
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    // Show content based on user subscription level
+    const user = session.user as any;
+    const userSubscription = user.subscription || "FREE";
+    
     let whereCondition: any;
     
-    if (!session?.user?.id) {
-      // Not authenticated - only show public files
+    if (userSubscription === "PREMIUM") {
+      // Premium users can see registered and premium content
       whereCondition = {
-        accessLevel: "PUBLIC"
+        accessLevel: {
+          in: ["REGISTERED", "PREMIUM"]
+        }
       };
     } else {
-      // Authenticated - show public, registered, and premium based on user subscription
-      const user = session.user as any;
-      const userSubscription = user.subscription || "FREE";
-      
-      if (userSubscription === "PREMIUM") {
-        // Premium users can see everything
-        whereCondition = {
-          accessLevel: {
-            in: ["PUBLIC", "REGISTERED", "PREMIUM"]
-          }
-        };
-      } else {
-        // Free users can see public and registered content
-        whereCondition = {
-          accessLevel: {
-            in: ["PUBLIC", "REGISTERED"]
-          }
-        };
-      }
+      // Registered users can only see registered content
+      whereCondition = {
+        accessLevel: "REGISTERED"
+      };
     }
 
     const downloads = await prisma.download.findMany({

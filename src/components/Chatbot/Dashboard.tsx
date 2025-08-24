@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import ChatInterface from "./ChatInterface";
+import ClaudeStyleInterface from "./ClaudeStyleInterface";
 import { CHATBOT_MODELS } from "@/utils/chatbotModels";
 
 interface ChatbotData {
@@ -28,12 +28,6 @@ export default function ChatbotDashboard() {
     model: "MODEL_A",
   });
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      loadChatbots();
-    }
-  }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const loadChatbots = async () => {
     try {
       setIsLoading(true);
@@ -55,6 +49,44 @@ export default function ChatbotDashboard() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      loadChatbots();
+    }
+  }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-create chatbot if none exists
+  useEffect(() => {
+    if (session?.user?.id && !isLoading && chatbots.length === 0) {
+      const autoCreateChatbot = async () => {
+        try {
+          const response = await fetch("/api/chatbot", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: "Aranza",
+              description: "Asistente Virtual IA",
+              model: "MODEL_A",
+            }),
+          });
+          if (response.ok) {
+            loadChatbots();
+          }
+        } catch (error) {
+          console.error("Auto-create error:", error);
+        }
+      };
+      autoCreateChatbot();
+    }
+  }, [session, isLoading, chatbots.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-select first chatbot and go directly to chat
+  useEffect(() => {
+    if (chatbots.length > 0 && !selectedChatbot) {
+      setSelectedChatbot(chatbots[0]);
+    }
+  }, [chatbots, selectedChatbot]);
 
   const createChatbot = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,64 +149,11 @@ export default function ChatbotDashboard() {
     );
   }
 
-  // Auto-create chatbot if none exists
-  useEffect(() => {
-    if (session?.user?.id && !isLoading && chatbots.length === 0) {
-      const autoCreateChatbot = async () => {
-        try {
-          const response = await fetch("/api/chatbot", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: "Aranza",
-              description: "Asistente Virtual IA",
-              model: "MODEL_A",
-            }),
-          });
-          if (response.ok) {
-            loadChatbots();
-          }
-        } catch (error) {
-          console.error("Auto-create error:", error);
-        }
-      };
-      autoCreateChatbot();
-    }
-  }, [session, isLoading, chatbots.length]);
-
-  // Auto-select first chatbot and go directly to chat
-  useEffect(() => {
-    if (chatbots.length > 0 && !selectedChatbot) {
-      setSelectedChatbot(chatbots[0]);
-    }
-  }, [chatbots, selectedChatbot]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {selectedChatbot ? (
-        <div className="h-screen flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">A</span>
-              </div>
-              <h1 className="text-lg font-medium text-gray-900 dark:text-white">
-                Aranza
-              </h1>
-            </div>
-            <button
-              onClick={() => setSelectedChatbot(null)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex-1">
-            <ChatInterface chatbotId={selectedChatbot.id} />
-          </div>
-        </div>
+        <ClaudeStyleInterface chatbotId={selectedChatbot.id} />
       ) : (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center max-w-2xl mx-auto px-6">
