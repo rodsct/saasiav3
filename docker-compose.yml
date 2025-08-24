@@ -9,18 +9,18 @@ services:
       POSTGRES_DB: saasiav3
       POSTGRES_USER: saasiav3
       POSTGRES_PASSWORD: saasiav3_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - saasiav3-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U saasiav3 -d saasiav3"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # Next.js Application
   app:
@@ -34,21 +34,21 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://saasiav3:saasiav3_password@postgres:5432/saasiav3
-      - SHADOW_DATABASE_URL=postgresql://saasiav3:saasiav3_password@postgres:5432/saasiav3_shadow
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=your-super-secret-nextauth-key-change-this-in-production
-      - SECRET=your-super-secret-nextauth-key-change-this-in-production
-      - NEXT_PUBLIC_SITE_URL=http://localhost:3000
+      - NEXTAUTH_URL=https://tu-dominio.com
+      - NEXTAUTH_SECRET=tu-super-secreto-nextauth-cambiar-en-produccion-muy-largo-y-seguro
+      - SECRET=tu-super-secreto-nextauth-cambiar-en-produccion-muy-largo-y-seguro
+      - NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
       - DEFAULT_N8N_WEBHOOK=https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3
-      - GOOGLE_CLIENT_ID=4989507711-olbqib84sdpkp1g93eu2lstli67cg9j0.apps.googleusercontent.com
-      - GOOGLE_CLIENT_SECRET=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
+      - GOOGLE_CLIENT_ID=tu-google-client-id
+      - GOOGLE_CLIENT_SECRET=tu-google-client-secret
+      - GITHUB_CLIENT_ID=tu-github-client-id
+      - GITHUB_CLIENT_SECRET=tu-github-client-secret
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - saasiav3-network
     volumes:
-      - ./public/uploads:/app/public/uploads
       - app_uploads:/app/public/uploads
 
   # Redis for session storage (optional)
