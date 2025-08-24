@@ -15,7 +15,7 @@ const menuData: Menu[] = [
   },
   {
     id: 3,
-    title: "Chatbot",
+    title: "Aranza",
     path: "/chatbot",
     newTab: false,
   },
@@ -74,7 +74,7 @@ const menuData: Menu[] = [
       },
       {
         id: 65,
-        title: "Chatbot Dashboard",
+        title: "Dashboard de Aranza",
         path: "/chatbot",
         newTab: false,
       },

@@ -5,14 +5,14 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title:
-    "About Us | Play SaaS Starter Kit and Boilerplate for Next.js",
-  description: "This is About page description",
+    "Sobre Nosotros | Aranza.io - Agencia de Inteligencia Artificial",
+  description: "Conoce a Aranza.io y a nuestro fundador Rodrigo Gtz. Agencia especializada en soluciones de inteligencia artificial y nuestro asistente virtual Aranza.",
 };
 
 const AboutPage = () => {
   return (
     <main>
-      <Breadcrumb pageName="About Us Page" />
+      <Breadcrumb pageName="Sobre Nosotros" />
       <About />
       <Team />
     </main>

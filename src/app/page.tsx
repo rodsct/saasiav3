@@ -14,8 +14,8 @@ import { getAllPosts } from "@/utils/markdown";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Play Next.js - SaaS Starter Kit and Boilerplate for Next.js",
-  description: "Free Next.js SaaS Boilerplate and Starter Kit designed and built for SaaS startups. It comes with all necessary integrations, pages, and components you need to launch a feature-rich SaaS websites.",
+  title: "Aranza.io - Agencia de Inteligencia Artificial",
+  description: "Agencia de Inteligencia Artificial con Aranza, nuestro asistente virtual. Plataforma completa con chatbot IA, descargas seguras y componentes premium para potenciar tu negocio.",
 };
 
 export default function Home() {

@@ -16,12 +16,12 @@ const Hero = () => {
                 data-wow-delay=".2s"
               >
                 <h1 className="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]">
-                  AI-Powered SaaS Platform with Chatbot & Downloads
+                  Agencia de Inteligencia Artificial Aranza.io
                 </h1>
                 <p className="mx-auto mb-9 max-w-[600px] text-base font-medium text-white sm:text-lg sm:leading-[1.44]">
-                  Complete SaaS solution featuring AI chatbots with n8n integration,
-                  secure file downloads, and premium components. Everything you need
-                  to launch your next AI-powered business.
+                  Plataforma completa de inteligencia artificial con Aranza, nuestro
+                  asistente virtual, descargas seguras y componentes premium. Todo lo que
+                  necesitas para potenciar tu negocio con IA.
                 </p>
                 <ul className="mb-10 flex flex-wrap items-center justify-center gap-5">
                   <li>
@@ -29,7 +29,7 @@ const Hero = () => {
                       href="/chatbot"
                       className="inline-flex items-center justify-center rounded-md bg-white px-7 py-[14px] text-center text-base font-medium text-dark shadow-1 transition duration-300 ease-in-out hover:bg-gray-2"
                     >
-                      Try Chatbot
+                      Conoce a Aranza
                     </Link>
                   </li>
                   <li>

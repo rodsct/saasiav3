@@ -16,7 +16,16 @@
       "Bash(git push:*)",
       "Bash(curl:*)",
       "Bash(node:*)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "Bash(taskkill:*)",
+      "Bash(npm install:*)",
+      "Bash(docker system prune:*)",
+      "Bash(scripts\\setup-docker.bat)",
+      "Bash(.scriptssetup-docker.bat)",
+      "Bash(cmd /c:*)",
+      "Bash(timeout:*)",
+      "Bash(npm start)",
+      "Bash(docker logs:*)"
     ],
     "deny": [],
     "ask": []

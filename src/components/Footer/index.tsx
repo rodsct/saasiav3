@@ -21,8 +21,8 @@ const Footer = () => {
                 />
               </Link>
               <p className="mb-8 max-w-[270px] text-base text-gray-7">
-                We create digital experiences for brands and companies by using
-                technology.
+                Agencia de Inteligencia Artificial especializada en crear
+                experiencias digitales innovadoras con nuestro asistente Aranza.
               </p>
               <div className="-mx-3 flex items-center">
                 <Link

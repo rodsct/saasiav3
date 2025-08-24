@@ -53,6 +53,13 @@ export async function POST(request: NextRequest) {
 
     const webhookUrl = chatbot.n8nWebhookUrl || getWebhookUrlForModel(chatbot.model);
     
+    if (!webhookUrl || typeof webhookUrl !== 'string') {
+      throw new Error("No valid webhook URL configured");
+    }
+    
+    console.log('Sending to webhook:', webhookUrl);
+    console.log('Payload:', { message, conversationId: conversation.id, chatbotId, userId: chatbot.userId });
+    
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
@@ -66,16 +73,21 @@ export async function POST(request: NextRequest) {
       }),
     });
 
+    console.log('Webhook response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error("n8n webhook failed");
+      const errorText = await response.text();
+      console.error('Webhook error response:', errorText);
+      throw new Error(`n8n webhook failed: ${response.status} - ${errorText}`);
     }
 
     const n8nResponse = await response.json();
+    console.log('n8n response:', n8nResponse);
 
     await prisma.message.create({
       data: {
         conversationId: conversation.id,
-        content: n8nResponse.message || "Error processing your request",
+        content: n8nResponse.output || n8nResponse.message || "Error processing your request",
         isFromUser: false,
       }
     });
@@ -83,7 +95,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       conversationId: conversation.id,
-      response: n8nResponse.message || "Error processing your request",
+      response: n8nResponse.output || n8nResponse.message || "Error processing your request",
     });
 
   } catch (error) {
