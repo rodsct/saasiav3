@@ -39,15 +39,17 @@ model Session {
 }
 
 model User {
-  id                    String    @id @default(cuid())
+  id                    String          @id @default(cuid())
   name                  String?
-  email                 String?   @unique
+  email                 String?         @unique
   emailVerified         DateTime?
   image                 String?
   password              String?
-  passwordResetToken    String?   @unique
+  passwordResetToken    String?         @unique
   passwordResetTokenExp DateTime?
-  role                  UserRole  @default(USER)
+  role                  UserRole        @default(USER)
+  subscription          SubscriptionType @default(FREE)
+  subscriptionEndsAt    DateTime?
   accounts              Account[]
   sessions              Session[]
   chatbots              Chatbot[]
@@ -58,6 +60,17 @@ model User {
 enum UserRole {
   USER
   ADMIN
+}
+
+enum SubscriptionType {
+  FREE
+  PREMIUM
+}
+
+enum DownloadAccessLevel {
+  PUBLIC
+  REGISTERED
+  PREMIUM
 }
 
 model VerificationToken {
@@ -109,16 +122,19 @@ model Message {
 }
 
 model Download {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  fileName    String
-  filePath    String
-  fileSize    Int
-  mimeType    String
-  isPublic    Boolean  @default(false)
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String              @id @default(cuid())
+  title         String
+  description   String?
+  fileName      String
+  filePath      String
+  fileSize      Int
+  mimeType      String
+  accessLevel   DownloadAccessLevel @default(PUBLIC)
+  category      String?             // Para organizar por categorías
+  tags          String[]            // Para filtros
+  downloadCount Int                 @default(0)
+  userId        String              // Admin que subió el archivo
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 }

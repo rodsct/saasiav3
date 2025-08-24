@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import Chatbot from "./index";
+import ChatInterface from "./ChatInterface";
 import { CHATBOT_MODELS } from "@/utils/chatbotModels";
 
 interface ChatbotData {
@@ -252,10 +252,24 @@ export default function ChatbotDashboard() {
         )}
         
         {selectedChatbot && (
-          <Chatbot
-            chatbotId={selectedChatbot.id}
-            chatbotName={selectedChatbot.name}
-          />
+          <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {selectedChatbot.name}
+              </h2>
+              <button
+                onClick={() => setSelectedChatbot(null)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="h-[calc(100vh-73px)]">
+              <ChatInterface chatbotId={selectedChatbot.id} />
+            </div>
+          </div>
         )}
       </div>
     </div>

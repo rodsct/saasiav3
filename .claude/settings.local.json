@@ -25,7 +25,8 @@
       "Bash(cmd /c:*)",
       "Bash(timeout:*)",
       "Bash(npm start)",
-      "Bash(docker logs:*)"
+      "Bash(docker logs:*)",
+      "Bash(npx next lint:*)"
     ],
     "deny": [],
     "ask": []

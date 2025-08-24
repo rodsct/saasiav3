@@ -7,16 +7,42 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
+    // Allow both authenticated and unauthenticated users to see public files
+    let whereCondition: any;
+    
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      // Not authenticated - only show public files
+      whereCondition = {
+        accessLevel: "PUBLIC"
+      };
+    } else {
+      // Authenticated - show public, registered, and premium based on user subscription
+      const user = session.user as any;
+      const userSubscription = user.subscription || "FREE";
+      
+      if (userSubscription === "PREMIUM") {
+        // Premium users can see everything
+        whereCondition = {
+          accessLevel: {
+            in: ["PUBLIC", "REGISTERED", "PREMIUM"]
+          }
+        };
+      } else {
+        // Free users can see public and registered content
+        whereCondition = {
+          accessLevel: {
+            in: ["PUBLIC", "REGISTERED"]
+          }
+        };
+      }
     }
 
     const downloads = await prisma.download.findMany({
-      where: {
-        OR: [
-          { userId: session.user.id },
-          { isPublic: true }
-        ]
+      where: whereCondition,
+      include: {
+        user: {
+          select: { name: true }
+        }
       },
       orderBy: { createdAt: "desc" }
     });
@@ -32,65 +58,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Regular users cannot upload files - only admins can upload
+// This endpoint is disabled for regular users
 export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const isPublic = formData.get("isPublic") === "true";
-
-    if (!file || !title) {
-      return NextResponse.json(
-        { error: "File and title are required" },
-        { status: 400 }
-      );
-    }
-
-    const fileName = file.name;
-    const fileSize = file.size;
-    const mimeType = file.type;
-    
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    
-    const filePath = `uploads/${session.user.id}/${Date.now()}-${fileName}`;
-    
-    const fs = require('fs').promises;
-    const path = require('path');
-    
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', session.user.id);
-    await fs.mkdir(uploadDir, { recursive: true });
-    
-    const fullFilePath = path.join(process.cwd(), 'public', filePath);
-    await fs.writeFile(fullFilePath, buffer);
-
-    const download = await prisma.download.create({
-      data: {
-        title,
-        description,
-        fileName,
-        filePath,
-        fileSize,
-        mimeType,
-        isPublic,
-        userId: session.user.id,
-      }
-    });
-
-    return NextResponse.json({ download });
-
-  } catch (error) {
-    console.error("Upload file error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    { error: "Only administrators can upload files" },
+    { status: 403 }
+  );
 }

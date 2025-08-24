@@ -36,7 +36,9 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
-    const isPublic = formData.get("isPublic") === "true";
+    const accessLevel = formData.get("accessLevel") as string;
+    const category = formData.get("category") as string;
+    const tags = formData.get("tags") as string;
 
     if (!file || !title) {
       return NextResponse.json(
@@ -63,15 +65,20 @@ export async function POST(request: NextRequest) {
     const fullFilePath = path.join(process.cwd(), 'public', filePath);
     await fs.writeFile(fullFilePath, buffer);
 
+    // Parse tags from comma-separated string
+    const tagsArray = tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
+
     const download = await prisma.download.create({
       data: {
         title,
-        description,
+        description: description || null,
         fileName,
         filePath,
         fileSize,
         mimeType,
-        isPublic,
+        accessLevel: accessLevel as "PUBLIC" | "REGISTERED" | "PREMIUM",
+        category: category || null,
+        tags: tagsArray,
         userId: adminCheck.id,
       }
     });

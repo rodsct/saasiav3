@@ -57,14 +57,21 @@ export async function PATCH(
 
   try {
     const { id } = await params;
-    const { title, description, isPublic } = await request.json();
+    const { title, description, accessLevel, category, tags } = await request.json();
+
+    // Parse tags if provided
+    const tagsArray = tags && typeof tags === 'string' 
+      ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
+      : tags;
 
     const download = await prisma.download.update({
       where: { id },
       data: {
         title,
         description,
-        isPublic,
+        accessLevel,
+        category,
+        tags: tagsArray,
       }
     });
 
