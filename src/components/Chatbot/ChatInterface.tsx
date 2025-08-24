@@ -12,11 +12,6 @@ interface Message {
   createdAt: string;
 }
 
-interface Conversation {
-  id: string;
-  messages: Message[];
-}
-
 interface ChatInterfaceProps {
   chatbotId: string;
 }
@@ -28,7 +23,6 @@ export default function ChatInterface({ chatbotId }: ChatInterfaceProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -49,10 +43,10 @@ export default function ChatInterface({ chatbotId }: ChatInterfaceProps) {
       const response = await fetch(`/api/chatbot/conversations?chatbotId=${chatbotId}`);
       const data = await response.json();
       
-      if (data.conversations && data.conversations.length > 0) {
-        const latestConversation = data.conversations[0];
-        setConversationId(latestConversation.id);
-        setMessages(latestConversation.messages);
+      if (response.ok && data.conversations.length > 0) {
+        const conversation = data.conversations[0];
+        setConversationId(conversation.id);
+        setMessages(conversation.messages);
       }
     } catch (error) {
       console.error("Error loading conversations:", error);
@@ -66,49 +60,49 @@ export default function ChatInterface({ chatbotId }: ChatInterfaceProps) {
     setInput("");
     setIsLoading(true);
 
-    // Ajustar altura del textarea
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-
-    // Agregar mensaje del usuario
-    const userMsg = {
+    const tempUserMessage: Message = {
       id: Date.now().toString(),
       content: userMessage,
       isFromUser: true,
       createdAt: new Date().toISOString(),
     };
-    setMessages(prev => [...prev, userMsg]);
+
+    setMessages(prev => [...prev, tempUserMessage]);
 
     try {
-      const response = await fetch("/api/chatbot/webhook", {
+      const response = await fetch("/api/chatbot/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chatbotId,
           message: userMessage,
+          chatbotId,
           conversationId,
         }),
       });
 
       const data = await response.json();
 
-      if (data.success) {
-        setConversationId(data.conversationId);
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
-          content: data.response,
+      if (response.ok) {
+        if (!conversationId) {
+          setConversationId(data.conversationId);
+        }
+
+        const botMessage: Message = {
+          id: data.messageId,
+          content: data.content,
           isFromUser: false,
           createdAt: new Date().toISOString(),
-        }]);
+        };
+
+        setMessages(prev => [...prev, botMessage]);
       } else {
-        toast.error("Error enviando mensaje");
+        toast.error("Error al enviar mensaje");
+        setMessages(prev => prev.slice(0, -1));
       }
     } catch (error) {
-      toast.error("Error enviando mensaje");
-      console.error("Error:", error);
+      console.error("Error sending message:", error);
+      toast.error("Error al enviar mensaje");
+      setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
@@ -121,27 +115,15 @@ export default function ChatInterface({ chatbotId }: ChatInterfaceProps) {
     }
   };
 
-  const adjustTextareaHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
-    }
-  };
-
   if (!session) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L15 1H5C3.89 1 3 1.89 3 3V19C3 20.1 3.89 21 5 21H11V19.5L19 12.5V11H21V9"/>
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Acceso Requerido
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Inicia sesión
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Inicia sesión para chatear con Aranza
+            Necesitas una cuenta para chatear con Aranza
           </p>
         </div>
       </div>
@@ -149,161 +131,125 @@ export default function ChatInterface({ chatbotId }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Aranza
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Asistente de IA
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Messages Area */}
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto">
-          {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full py-12">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L15 1H5C3.89 1 3 1.89 3 3V19C3 20.1 3.89 21 5 21H11V19.5L19 12.5V11H21V9"/>
-                </svg>
+        {messages.length === 0 ? (
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center max-w-lg mx-auto px-6">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <span className="text-gray-700 dark:text-gray-300 font-medium">A</span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                ¡Hola! Soy Aranza
+              <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
+                ¿En qué puedo ayudarte?
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-                Tu asistente de inteligencia artificial. Puedo ayudarte con preguntas, análisis, 
-                escritura y mucho más. ¿En qué puedo asistirte hoy?
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Haz cualquier pregunta para comenzar
               </p>
             </div>
-          ) : (
-            <div className="py-6">
-              {messages.map((message, index) => (
-                <div
-                  key={message.id}
-                  className={`mb-6 ${message.isFromUser ? 'ml-auto' : ''}`}
-                >
-                  <div className="flex items-start space-x-4 px-6">
-                    {!message.isFromUser && (
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span className="text-white font-bold text-xs">A</span>
+          </div>
+        ) : (
+          <div className="py-6">
+            {messages.map((message) => (
+              <div key={message.id} className="mb-6 px-6">
+                <div className="flex items-start space-x-3 max-w-4xl mx-auto">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    {message.isFromUser ? (
+                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                        <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">
+                          {session?.user?.name?.[0] || 'U'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                        <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">A</span>
                       </div>
                     )}
-                    
-                    <div className={`flex-1 ${message.isFromUser ? 'text-right' : ''}`}>
-                      {message.isFromUser && (
-                        <div className="flex justify-end mb-1">
-                          <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                            <span className="text-gray-700 dark:text-gray-300 font-bold text-xs">
-                              {session?.user?.name?.[0] || 'U'}
-                            </span>
-                          </div>
-                        </div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="text-gray-900 dark:text-white">
+                      {message.isFromUser ? (
+                        <p>{message.content}</p>
+                      ) : (
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
+                            code: ({ children }) => (
+                              <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono">
+                                {children}
+                              </code>
+                            ),
+                            pre: ({ children }) => (
+                              <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto my-4">
+                                {children}
+                              </pre>
+                            ),
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
                       )}
-                      
-                      <div className={`prose prose-gray dark:prose-invert max-w-none ${
-                        message.isFromUser 
-                          ? 'bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-br-md px-4 py-3 inline-block max-w-lg ml-auto' 
-                          : ''
-                      }`}>
-                        {message.isFromUser ? (
-                          <p className="m-0 text-gray-900 dark:text-white">{message.content}</p>
-                        ) : (
-                          <ReactMarkdown
-                            className="text-gray-900 dark:text-white"
-                            components={{
-                              p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
-                              code: ({ children, className }) => (
-                                <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm">
-                                  {children}
-                                </code>
-                              ),
-                              pre: ({ children }) => (
-                                <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto">
-                                  {children}
-                                </pre>
-                              ),
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
-                        )}
-                      </div>
-                      
-                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(message.createdAt).toLocaleTimeString([], { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </div>
                     </div>
                   </div>
                 </div>
-              ))}
-              
-              {isLoading && (
-                <div className="mb-6">
-                  <div className="flex items-start space-x-4 px-6">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-white font-bold text-xs">A</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                      </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Aranza está escribiendo...</span>
+              </div>
+            ))}
+            
+            {isLoading && (
+              <div className="mb-6 px-6">
+                <div className="flex items-start space-x-3 max-w-4xl mx-auto">
+                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">A</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+        )}
       </div>
 
       {/* Input Area */}
       <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="max-w-3xl mx-auto p-4">
+        <div className="max-w-4xl mx-auto p-6">
           <div className="relative">
             <textarea
               ref={textareaRef}
               value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                adjustTextareaHeight();
-              }}
-              onKeyPress={handleKeyPress}
-              placeholder="Escribe un mensaje a Aranza..."
-              className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 pr-12 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 min-h-[50px] max-h-[200px]"
-              style={{ height: "50px" }}
-              disabled={isLoading}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Escribe tu mensaje..."
               rows={1}
+              className="w-full resize-none border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 pr-12 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-transparent"
+              style={{ 
+                minHeight: '44px',
+                maxHeight: '200px',
+              }}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = 'auto';
+                target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
+              }}
             />
             <button
               onClick={sendMessage}
-              disabled={isLoading || !input.trim()}
-              className="absolute right-2 bottom-2 p-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200"
+              disabled={!input.trim() || isLoading}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
             </button>
           </div>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-            Aranza puede cometer errores. Considera verificar información importante.
-          </p>
         </div>
       </div>
     </div>

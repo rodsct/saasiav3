@@ -91,8 +91,20 @@ export default function ChatbotDashboard() {
 
   if (!session) {
     return (
-      <div className="flex items-center justify-center h-96 bg-gray-50 dark:bg-gray-900 rounded-lg">
-        <p className="text-gray-600 dark:text-gray-400">Please sign in to manage chatbots</p>
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Inicia sesión para continuar
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Necesitas una cuenta para acceder a Aranza
+          </p>
+        </div>
       </div>
     );
   }
@@ -105,173 +117,144 @@ export default function ChatbotDashboard() {
     );
   }
 
+  // Auto-create chatbot if none exists
+  useEffect(() => {
+    if (session?.user?.id && !isLoading && chatbots.length === 0) {
+      const autoCreateChatbot = async () => {
+        try {
+          const response = await fetch("/api/chatbot", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: "Aranza",
+              description: "Asistente Virtual IA",
+              model: "MODEL_A",
+            }),
+          });
+          if (response.ok) {
+            loadChatbots();
+          }
+        } catch (error) {
+          console.error("Auto-create error:", error);
+        }
+      };
+      autoCreateChatbot();
+    }
+  }, [session, isLoading, chatbots.length]);
+
+  // Auto-select first chatbot and go directly to chat
+  useEffect(() => {
+    if (chatbots.length > 0 && !selectedChatbot) {
+      setSelectedChatbot(chatbots[0]);
+    }
+  }, [chatbots, selectedChatbot]);
+
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="text-center mb-12">
-        <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-xl">
-          <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L15 1H5C3.89 1 3 1.89 3 3V19C3 20.1 3.89 21 5 21H11V19.5L19 12.5V11H21V9M20 15L18 17H22L20 15M16 21L14 23H18L16 21Z"/>
-          </svg>
-        </div>
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          Aranza - Asistente Virtual IA
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Interactúa con nuestro asistente de inteligencia artificial diseñado para ayudarte en todas tus consultas
-        </p>
-      </div>
-      
-      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
-        {chatbots.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L15 1H5C3.89 1 3 1.89 3 3V19C3 20.1 3.89 21 5 21H11V19.5L19 12.5V11H21V9"/>
-              </svg>
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      {selectedChatbot ? (
+        <div className="h-screen flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">A</span>
+              </div>
+              <h1 className="text-lg font-medium text-gray-900 dark:text-white">
+                Aranza
+              </h1>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Crea tu primera conversación con Aranza
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Comienza a interactuar con nuestro asistente virtual de IA
-            </p>
             <button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
+              onClick={() => setSelectedChatbot(null)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
-              Iniciar Chat con Aranza
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
-        ) : (
-          chatbots.map((chatbot) => (
-            <div key={chatbot.id} className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">A</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-gray-900 dark:text-white">
-                      {chatbot.name}
-                    </h4>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <div className={`w-2 h-2 rounded-full ${chatbot.isActive ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {chatbot.isActive ? "Activo" : "Inactivo"}
-                      </span>
-                      <span className="text-xs bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 px-3 py-1 rounded-full">
-                        {CHATBOT_MODELS[chatbot.model]?.name || chatbot.model}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          <div className="flex-1">
+            <ChatInterface chatbotId={selectedChatbot.id} />
+          </div>
+        </div>
+      ) : (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center max-w-2xl mx-auto px-6">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <span className="text-gray-700 dark:text-gray-300 font-medium text-xl">A</span>
+            </div>
+            <h1 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">
+              Hola, soy Aranza
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">
+              Tu asistente virtual de inteligencia artificial
+            </p>
+            {isLoading ? (
+              <div className="w-6 h-6 mx-auto border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+            ) : (
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+              >
+                Comenzar conversación
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showCreateForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-6">
+              Configurar Aranza
+            </h2>
+          
+            <form onSubmit={createChatbot} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Nombre
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-gray-500 focus:border-gray-500"
+                  placeholder="Aranza"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Descripción
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-gray-500 focus:border-gray-500"
+                  placeholder="Asistente virtual IA"
+                />
+              </div>
+
+              <div className="flex space-x-3 pt-4">
                 <button
-                  onClick={() => setSelectedChatbot(chatbot)}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-6 py-2 rounded-xl font-medium shadow-lg transition-all duration-200"
+                  type="submit"
+                  className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
                 >
-                  Chatear
+                  Crear
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateForm(false)}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white py-2.5 px-4 rounded-lg font-medium transition-colors"
+                >
+                  Cancelar
                 </button>
               </div>
-              {chatbot.description && (
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  {chatbot.description}
-                </p>
-              )}
-            </div>
-          ))
-        )}
-
-        {showCreateForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md">
-              <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-                Configurar Aranza
-              </h4>
-            
-              <form onSubmit={createChatbot} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter chatbot name..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter description..."
-                  />
-                </div>
-
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-xl mb-4">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">A</span>
-                    </div>
-                    <div>
-                      <h5 className="font-semibold text-gray-900 dark:text-white">Aranza IA</h5>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Modelo único disponible</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Webhook: https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3
-                  </p>
-                </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white py-3 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200"
-                  >
-                    Crear Chat
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateForm(false)}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white py-3 px-6 rounded-xl font-semibold transition-all duration-200"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
+            </form>
           </div>
-        )}
-        
-        {selectedChatbot && (
-          <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {selectedChatbot.name}
-              </h2>
-              <button
-                onClick={() => setSelectedChatbot(null)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="h-[calc(100vh-73px)]">
-              <ChatInterface chatbotId={selectedChatbot.id} />
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

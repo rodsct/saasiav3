@@ -26,7 +26,10 @@
       "Bash(timeout:*)",
       "Bash(npm start)",
       "Bash(docker logs:*)",
-      "Bash(npx next lint:*)"
+      "Bash(npx next lint:*)",
+      "Bash(true)",
+      "Bash(wmic process where:*)",
+      "Bash(docker exec:*)"
     ],
     "deny": [],
     "ask": []
