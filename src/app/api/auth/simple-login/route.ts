@@ -37,6 +37,66 @@ export async function POST(request: NextRequest) {
     console.log("User found:", user ? "Yes" : "No");
     if (!user) {
       console.log("User not found in database");
+      
+      // Auto-create test users if they don't exist
+      if (email === "test@aranza.io" && password === "test123") {
+        console.log("Creating test user automatically...");
+        const hashedPassword = await bcrypt.hash("test123", 12);
+        
+        const newUser = await prisma.user.create({
+          data: {
+            email: "test@aranza.io",
+            name: "Usuario de Pruebas PRO",
+            password: hashedPassword,
+            subscription: "PRO",
+            subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            role: "USER"
+          }
+        });
+        
+        console.log("✅ Test user created automatically:", newUser.email);
+        
+        // Continue with the new user
+        const user = newUser;
+        
+        // Create JWT token
+        const token = jwt.sign(
+          {
+            userId: user.id,
+            email: user.email,
+            name: user.name,
+            subscription: user.subscription,
+            role: user.role,
+          },
+          JWT_SECRET,
+          { expiresIn: "24h" }
+        );
+
+        // Create response with secure cookie
+        const response = NextResponse.json({
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            subscription: user.subscription,
+            subscriptionEndsAt: user.subscriptionEndsAt,
+            role: user.role,
+          },
+        });
+
+        // Set HTTP-only cookie
+        response.cookies.set("auth-token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 60 * 60 * 24, // 24 hours
+          path: "/",
+        });
+
+        return response;
+      }
+      
       return NextResponse.json(
         { error: "User not found" },
         { status: 401 }
