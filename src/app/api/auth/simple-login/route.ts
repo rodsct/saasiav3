@@ -38,12 +38,14 @@ export async function POST(request: NextRequest) {
     if (!user) {
       console.log("User not found in database");
       
-      // Auto-create test users if they don't exist
+      // Auto-create users if they don't exist
+      let newUser = null;
+      
       if (email === "test@aranza.io" && password === "test123") {
         console.log("Creating test user automatically...");
         const hashedPassword = await bcrypt.hash("test123", 12);
         
-        const newUser = await prisma.user.create({
+        newUser = await prisma.user.create({
           data: {
             email: "test@aranza.io",
             name: "Usuario de Pruebas PRO",
@@ -55,8 +57,26 @@ export async function POST(request: NextRequest) {
         });
         
         console.log("✅ Test user created automatically:", newUser.email);
+      } else if (email === "admin@aranza.io" && password === "test123") {
+        console.log("Creating admin user automatically...");
+        const hashedPassword = await bcrypt.hash("test123", 12);
         
-        // Continue with the new user
+        newUser = await prisma.user.create({
+          data: {
+            email: "admin@aranza.io",
+            name: "Administrator",
+            password: hashedPassword,
+            subscription: "PRO",
+            subscriptionEndsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            role: "ADMIN"
+          }
+        });
+        
+        console.log("✅ Admin user created automatically:", newUser.email);
+      }
+      
+      if (newUser) {
+        // Continue with the newly created user
         const user = newUser;
         
         // Create JWT token
