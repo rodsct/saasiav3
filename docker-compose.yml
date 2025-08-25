@@ -45,9 +45,14 @@ services:
         RUN if [ -f package.json ]; then npm install --legacy-peer-deps; fi
         RUN echo "Creating app directory structure if missing"
         RUN mkdir -p app
-        RUN echo '@tailwind base; @tailwind components; @tailwind utilities; body { margin: 0; padding: 20px; font-family: system-ui; }' > app/globals.css
-        RUN echo 'export default function Home() { return <div><h1 style={{color: "green"}}>🚀 SaaS v3 - Running Successfully!</h1><p>Your Next.js application is working on EasyPanel!</p><p>PostgreSQL and Redis are connected and ready.</p></div>; }' > app/page.tsx
-        RUN echo 'import "./globals.css"; export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="en"><body>{children}</body></html>; }' > app/layout.tsx
+        RUN echo "Ensuring required files exist"
+        RUN test -f app/globals.css || echo '@tailwind base; @tailwind components; @tailwind utilities; body { margin: 0; padding: 20px; font-family: system-ui; }' > app/globals.css
+        RUN test -f app/page.tsx || echo 'export default function Home() { return <div><h1 style={{color: "green"}}>🚀 SaaS v3 - Running Successfully!</h1><p>Your Next.js application is working on EasyPanel!</p><p>PostgreSQL and Redis are connected and ready.</p></div>; }' > app/page.tsx
+        RUN test -f app/layout.tsx || echo 'import "./globals.css"; export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="en"><body>{children}</body></html>; }' > app/layout.tsx
+        RUN echo "Final file check:"
+        RUN ls -la app/
+        RUN cat app/globals.css || echo "globals.css missing!"
+        RUN echo "NODE_ENV: $NODE_ENV"
         EXPOSE 3000
         HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:3000 || exit 1
         CMD ["sh", "-c", "npm run dev 2>/dev/null || npm run start 2>/dev/null || npx next dev"]
@@ -61,7 +66,7 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_123}@redis:6379
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-tu_nextauth_secret_muy_largo_32_caracteres_2024}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://tu-proyecto.easypanel.app}
-      NODE_ENV: production
+      NODE_ENV: development
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-proyecto.easypanel.app}
       SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-proyecto.easypanel.app}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
