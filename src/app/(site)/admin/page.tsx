@@ -1,26 +1,34 @@
-import { Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
-import { redirect } from "next/navigation";
-import { checkAdminAuth } from "@/utils/adminAuth";
+"use client";
+
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import AdminDashboard from "@/components/Admin/AdminDashboard";
 
-export const metadata: Metadata = {
-  title: "Admin Panel | SaaS v3",
-  description: "Admin panel for managing downloads and webhooks",
-};
+export default function AdminPage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
-export default async function AdminPage() {
-  const session = await getServerSession(authOptions);
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.push("/signin");
+      } else if (user.role !== "ADMIN") {
+        router.push("/");
+      }
+    }
+  }, [user, isLoading, router]);
 
-  if (!session) {
-    redirect("/signin");
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      </div>
+    );
   }
 
-  const admin = await checkAdminAuth();
-  
-  if (!admin) {
-    redirect("/");
+  if (!user || user.role !== "ADMIN") {
+    return null;
   }
 
   return (

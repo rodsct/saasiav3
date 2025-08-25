@@ -3,13 +3,21 @@
 import { useState } from "react";
 import AdminDownloads from "./AdminDownloads";
 import WebhookConfig from "./WebhookConfig";
+import AdminOverview from "./AdminOverview";
+import PricingManagement from "./PricingManagement";
+import PromotionsManagement from "./PromotionsManagement";
+import UserManagement from "./UserManagement";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("downloads");
+  const [activeTab, setActiveTab] = useState("overview");
 
   const tabs = [
-    { id: "downloads", label: "Downloads Management", icon: "📁" },
-    { id: "webhooks", label: "Webhook Configuration", icon: "🔗" },
+    { id: "overview", label: "Panel General", icon: "📊" },
+    { id: "pricing", label: "Gestión de Precios", icon: "💰" },
+    { id: "promotions", label: "Promociones", icon: "🎁" },
+    { id: "users", label: "Usuarios", icon: "👥" },
+    { id: "downloads", label: "Descargas", icon: "📁" },
+    { id: "webhooks", label: "Webhooks", icon: "🔗" },
   ];
 
   return (
@@ -44,6 +52,10 @@ export default function AdminDashboard() {
         </div>
 
         <div className="p-6">
+          {activeTab === "overview" && <AdminOverview />}
+          {activeTab === "pricing" && <PricingManagement />}
+          {activeTab === "promotions" && <PromotionsManagement />}
+          {activeTab === "users" && <UserManagement />}
           {activeTab === "downloads" && <AdminDownloads />}
           {activeTab === "webhooks" && <WebhookConfig />}
         </div>
