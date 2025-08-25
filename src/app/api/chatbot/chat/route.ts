@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
+import { getAuthenticatedUser } from "@/utils/jwtAuth";
 import { getWebhookUrlForModel } from "@/utils/chatbotModels";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const user = await getAuthenticatedUser(request);
+    if (!user?.id) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -48,7 +47,7 @@ export async function POST(request: NextRequest) {
       conversation = await prisma.conversation.create({
         data: {
           chatbotId,
-          userId: session.user.id,
+          userId: user.id,
         }
       });
     }
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest) {
         message,
         conversationId: conversation.id,
         chatbotId,
-        userId: session.user.id,
+        userId: user.id,
       }),
     });
 

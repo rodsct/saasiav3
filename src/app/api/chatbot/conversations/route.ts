@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
+import { getAuthenticatedUser } from "@/utils/jwtAuth";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthenticatedUser(request);
     
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -24,7 +23,7 @@ export async function GET(request: NextRequest) {
     const chatbot = await prisma.chatbot.findUnique({
       where: { 
         id: chatbotId,
-        userId: session.user.id 
+        userId: user.id 
       }
     });
 
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
     const conversations = await prisma.conversation.findMany({
       where: {
         chatbotId,
-        userId: session.user.id,
+        userId: user.id,
       },
       include: {
         messages: {

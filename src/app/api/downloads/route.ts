@@ -1,48 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || "simple-auth-secret-key";
+import { getAuthenticatedUser } from "@/utils/jwtAuth";
 
 export async function GET(request: NextRequest) {
   try {
-    let user: any = null;
-    
-    // First try NextAuth session
-    const session = await getServerSession(authOptions);
-    if (session?.user?.id) {
-      user = session.user;
-    } else {
-      // Try JWT cookie
-      const token = request.cookies.get("auth-token")?.value;
-      if (token) {
-        try {
-          const decoded = jwt.verify(token, JWT_SECRET) as any;
-          
-          const dbUser = await prisma.user.findUnique({
-            where: { id: decoded.userId },
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              subscription: true,
-              subscriptionEndsAt: true,
-              role: true,
-            },
-          });
-
-          if (dbUser) {
-            user = dbUser;
-          }
-        } catch (error) {
-          console.error("JWT verification error:", error);
-        }
-      }
-    }
-    
     // Only authenticated users can access downloads - no public access
+    const user = await getAuthenticatedUser(request);
     if (!user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },

@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
+import { getAuthenticatedUser } from "@/utils/jwtAuth";
 import { prisma } from "@/utils/prismaDB";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthenticatedUser(request);
     
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -29,14 +28,14 @@ export async function POST(request: NextRequest) {
 
     // Update user subscription in database
     const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         subscription: "PRO",
         subscriptionEndsAt: subscriptionEndsAt,
       },
     });
 
-    console.log(`✅ PRO subscription activated for user: ${session.user.email}`);
+    console.log(`✅ PRO subscription activated for user: ${user.email}`);
 
     return NextResponse.json({
       success: true,

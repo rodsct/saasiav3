@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
+import { getAuthenticatedUser } from "@/utils/jwtAuth";
 import { prisma } from "@/utils/prismaDB";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthenticatedUser(request);
     
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -15,15 +14,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user subscription data
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
       select: {
         subscription: true,
         subscriptionEndsAt: true,
       },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
@@ -31,15 +30,15 @@ export async function GET(request: NextRequest) {
     }
 
     const now = new Date();
-    const isActive = user.subscription === "PRO" && 
-                    (!user.subscriptionEndsAt || user.subscriptionEndsAt > now);
+    const isActive = dbUser.subscription === "PRO" && 
+                    (!dbUser.subscriptionEndsAt || dbUser.subscriptionEndsAt > now);
 
     return NextResponse.json({
-      subscription: user.subscription,
-      endsAt: user.subscriptionEndsAt,
+      subscription: dbUser.subscription,
+      endsAt: dbUser.subscriptionEndsAt,
       isActive,
-      daysRemaining: user.subscriptionEndsAt 
-        ? Math.max(0, Math.ceil((user.subscriptionEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+      daysRemaining: dbUser.subscriptionEndsAt 
+        ? Math.max(0, Math.ceil((dbUser.subscriptionEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
         : 0,
     });
 

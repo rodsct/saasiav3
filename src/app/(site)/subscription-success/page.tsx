@@ -2,57 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SubscriptionSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, update } = useSession();
-  const [isActivating, setIsActivating] = useState(true);
+  const { user, refreshUser } = useAuth();
+  const [isActivating, setIsActivating] = useState(false);
   const [error, setError] = useState("");
 
   const plan = searchParams.get("plan");
   const price = searchParams.get("price");
 
   useEffect(() => {
-    const activateSubscription = async () => {
-      if (!session?.user?.id) {
-        router.push("/signin");
-        return;
-      }
-
-      try {
-        const response = await fetch("/api/subscription/activate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            plan: "PRO",
-            price: 49,
-          }),
-        });
-
-        if (response.ok) {
-          // Update session to reflect new subscription
-          await update();
-          setIsActivating(false);
-        } else {
-          const data = await response.json();
-          setError(data.error || "Error activating subscription");
-          setIsActivating(false);
-        }
-      } catch (error) {
-        console.error("Activation error:", error);
-        setError("Error activating subscription");
-        setIsActivating(false);
-      }
-    };
-
-    if (session?.user?.id) {
-      activateSubscription();
+    // Just refresh user data since payment API already activated the subscription
+    if (user?.id) {
+      refreshUser();
     }
-  }, [session, router, update]);
+  }, [user, refreshUser]);
+
 
   if (isActivating) {
     return (
@@ -146,10 +114,10 @@ export default function SubscriptionSuccessPage() {
         </div>
 
         {/* User Info */}
-        {session?.user && (
+        {user && (
           <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Suscripción activada para: <span className="font-medium">{session.user.email}</span>
+              Suscripción activada para: <span className="font-medium">{user.email}</span>
             </p>
           </div>
         )}

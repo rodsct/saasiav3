@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
+import { getAuthenticatedUser } from "@/utils/jwtAuth";
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -10,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthenticatedUser(request);
     const { id } = await params;
 
     const download = await prisma.download.findUnique({
@@ -25,7 +24,7 @@ export async function GET(
     }
 
     // Check access permissions
-    const canAccess = checkDownloadAccess(download.accessLevel, session);
+    const canAccess = checkDownloadAccess(download.accessLevel, user);
     if (!canAccess) {
       return NextResponse.json(
         { error: "Insufficient permissions to download this file" },
@@ -72,9 +71,9 @@ export async function GET(
   }
 }
 
-function checkDownloadAccess(accessLevel: string, session: any): boolean {
+function checkDownloadAccess(accessLevel: string, user: any): boolean {
   // No public downloads - authentication required
-  if (!session?.user?.id) {
+  if (!user?.id) {
     return false;
   }
   
@@ -83,7 +82,7 @@ function checkDownloadAccess(accessLevel: string, session: any): boolean {
   }
   
   if (accessLevel === "PRO") {
-    const userSubscription = (session.user as any).subscription || "FREE";
+    const userSubscription = user.subscription || "FREE";
     return userSubscription === "PRO";
   }
   
