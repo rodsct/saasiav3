@@ -7,14 +7,14 @@ const Pricing = () => {
   return (
     <section
       id="pricing"
-      className="relative z-20 overflow-hidden bg-white pb-12 pt-20 dark:bg-dark lg:pb-[90px] lg:pt-[120px]"
+      className="relative z-20 overflow-hidden bg-[#2f2f2f] pb-12 pt-20 lg:pb-[90px] lg:pt-[120px]"
     >
       <div className="container">
         <div className="mb-[60px]">
           <SectionTitle
-            subtitle="Pricing Table"
-            title="Our Pricing Plan"
-            paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+            subtitle="Planes de Suscripción"
+            title="Nuestros Planes"
+            paragraph="Elige el plan que mejor se adapte a tus necesidades y comienza a transformar tu negocio con Aranza.io"
             center
           />
         </div>

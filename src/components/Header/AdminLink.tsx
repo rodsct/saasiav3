@@ -1,18 +1,18 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function AdminLink() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (user?.id) {
       checkAdminStatus();
     }
-  }, [session]);
+  }, [user]);
 
   const checkAdminStatus = async () => {
     try {
@@ -23,7 +23,7 @@ export default function AdminLink() {
     }
   };
 
-  if (!session || !isAdmin) {
+  if (!user || !isAdmin) {
     return null;
   }
 

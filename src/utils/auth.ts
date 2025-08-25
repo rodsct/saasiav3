@@ -1,129 +1,100 @@
 import bcrypt from "bcrypt";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
-import EmailProvider from "next-auth/providers/email";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import GitHubProvider from "next-auth/providers/github";
 import { prisma } from "./prismaDB";
-import type { Adapter } from "next-auth/adapters";
 
 export const authOptions: NextAuthOptions = {
-  pages: {
-    signIn: "/signin",
-  },
-  adapter: PrismaAdapter(prisma) as Adapter,
-  secret: process.env.NEXTAUTH_SECRET || process.env.SECRET || "fallback-development-secret-key",
-  session: {
-    strategy: "database",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-
+  secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
+  
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID || "",
+      clientSecret: process.env.GITHUB_SECRET || "",
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "text", placeholder: "Jhondoe" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        username: { label: "Username", type: "text", placeholder: "Jhon Doe" },
       },
-
       async authorize(credentials) {
-        // check to see if email and password is there
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Please enter an email or password");
+          return null;
         }
 
-        // check to see if user already exist
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          });
 
-        // if user was not found
-        if (!user || !user?.password) {
-          throw new Error("Invalid email or password");
+          if (!user || !user.password) {
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isPasswordValid) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
+          return null;
         }
-
-        // check to see if passwords match
-        const passwordMatch = await bcrypt.compare(
-          credentials.password,
-          user.password,
-        );
-
-        // console.log(passwordMatch);
-
-        if (!passwordMatch) {
-          console.log("test", passwordMatch);
-          throw new Error("Incorrect password");
-        }
-
-        return user;
       },
-    }),
-
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    }),
-
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
-        }
-      }
-    }),
-
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: Number(process.env.EMAIL_SERVER_PORT),
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
-      },
-      from: process.env.EMAIL_FROM,
     }),
   ],
 
   callbacks: {
-    session: async ({ session, user }) => {
-      if (session?.user) {
-        // Fetch complete user data including subscription
-        const fullUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            subscription: true,
-            subscriptionEndsAt: true,
-          },
-        });
-
-        return {
-          ...session,
-          user: {
-            ...session.user,
-            id: user.id,
-            role: fullUser?.role,
-            subscription: fullUser?.subscription,
-            subscriptionEndsAt: fullUser?.subscriptionEndsAt,
-          },
-        };
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        (session.user as any).id = token.id;
+        
+        // Get current user data including subscription
+        try {
+          const userData = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: {
+              subscription: true,
+              subscriptionEndsAt: true,
+              role: true,
+            },
+          });
+          
+          (session.user as any).subscription = userData?.subscription || "FREE";
+          (session.user as any).subscriptionEndsAt = userData?.subscriptionEndsAt;
+          (session.user as any).role = userData?.role || "USER";
+        } catch (error) {
+          console.error("Session callback error:", error);
+          (session.user as any).subscription = "FREE";
+          (session.user as any).role = "USER";
+        }
       }
       return session;
     },
   },
 
-  // debug: process.env.NODE_ENV === "developement",
+  pages: {
+    signIn: "/signin",
+  },
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 import ClaudeStyleInterface from "./ClaudeStyleInterface";
 import { CHATBOT_MODELS } from "@/utils/chatbotModels";
@@ -17,7 +17,7 @@ interface ChatbotData {
 }
 
 export default function ChatbotDashboard() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [chatbots, setChatbots] = useState<ChatbotData[]>([]);
   const [selectedChatbot, setSelectedChatbot] = useState<ChatbotData | null>(null);
   const [isLoading, setIsLoading] = useState(true);

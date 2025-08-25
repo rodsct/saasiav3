@@ -1,13 +1,13 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
+import AuthProvider from "@/components/Auth/AuthProvider";
 import { ThemeProvider } from "next-themes";
 import { PropsWithChildren } from "react";
 import { Toaster } from "react-hot-toast";
 
 export default function Providers({ children }: PropsWithChildren) {
   return (
-    <SessionProvider>
+    <AuthProvider>
       <ThemeProvider
         attribute="class"
         enableSystem={false}
@@ -17,6 +17,6 @@ export default function Providers({ children }: PropsWithChildren) {
 
         {children}
       </ThemeProvider>
-    </SessionProvider>
+    </AuthProvider>
   );
 }

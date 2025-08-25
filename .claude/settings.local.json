@@ -45,7 +45,10 @@
       "Bash(docker network prune:*)",
       "Bash(start http://localhost:3000)",
       "Bash(quick-start.bat)",
-      "Bash(start http://localhost:3000/chatbot)"
+      "Bash(start http://localhost:3000/chatbot)",
+      "Bash(start http://localhost:3000/signin)",
+      "Bash(start:*)",
+      "Bash(npx prisma:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,26 +1,36 @@
+"use client";
+
 import { Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
-import { redirect } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import ClaudeStyleInterface from "@/components/Chatbot/ClaudeStyleInterface";
 import ProSubscriptionRequired from "@/components/Subscription/ProSubscriptionRequired";
-
-export const metadata: Metadata = {
-  title: "Aranza - Asistente Virtual IA | Aranza.io",
-  description: "Interactúa con Aranza, nuestro asistente virtual de inteligencia artificial. Chatea y obtén respuestas inteligentes a todas tus consultas.",
-};
 
 // Get default chatbot ID - in production this would come from database
 const DEFAULT_CHATBOT_ID = "cmepuxaoj0004kndw8g42uma8";
 
-export default async function ChatbotPage() {
-  const session = await getServerSession(authOptions);
+export default function ChatbotPage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
-  if (!session) {
-    redirect("/signin");
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/signin");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      </div>
+    );
   }
 
-  const user = session.user as any;
+  if (!user) {
+    return null;
+  }
   
   // Check if user has PRO subscription
   if (user.subscription !== "PRO") {
@@ -32,5 +42,9 @@ export default async function ChatbotPage() {
     return <ProSubscriptionRequired expired={true} />;
   }
 
-  return <ClaudeStyleInterface chatbotId={DEFAULT_CHATBOT_ID} />;
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <ClaudeStyleInterface chatbotId={DEFAULT_CHATBOT_ID} />
+    </div>
+  );
 }

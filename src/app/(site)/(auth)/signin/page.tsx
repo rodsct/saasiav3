@@ -1,20 +1,13 @@
-import Signin from "@/components/Auth/SignIn";
-import Breadcrumb from "@/components/Common/Breadcrumb";
+import SimpleLogin from "@/components/Auth/SimpleLogin";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title:
-    "Sign In | Play SaaS Starter Kit and Boilerplate for Next.js",
+  title: "Iniciar Sesión | Aranza.io",
+  description: "Inicia sesión en tu cuenta de Aranza.io para acceder a nuestros servicios de inteligencia artificial.",
 };
 
 const SigninPage = () => {
-  return (
-    <>
-      <Breadcrumb pageName="Sign In Page" />
-
-      <Signin />
-    </>
-  );
+  return <SimpleLogin />;
 };
 
 export default SigninPage;

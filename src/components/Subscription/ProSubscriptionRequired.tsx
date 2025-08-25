@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 
 interface ProSubscriptionRequiredProps {
@@ -8,7 +8,7 @@ interface ProSubscriptionRequiredProps {
 }
 
 export default function ProSubscriptionRequired({ expired = false }: ProSubscriptionRequiredProps) {
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
@@ -104,10 +104,10 @@ export default function ProSubscriptionRequired({ expired = false }: ProSubscrip
           </div>
 
           {/* User Info */}
-          {session?.user && (
+          {user && (
             <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Conectado como: <span className="font-medium">{session.user.email}</span>
+                Conectado como: <span className="font-medium">{user.email}</span>
               </p>
             </div>
           )}

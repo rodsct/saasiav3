@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 
 interface Download {
@@ -21,15 +21,15 @@ interface DownloadsListProps {
 }
 
 export default function DownloadsList({ refreshTrigger }: DownloadsListProps) {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (user?.id) {
       loadDownloads();
     }
-  }, [session, refreshTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, refreshTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadDownloads = async () => {
     try {
@@ -81,7 +81,7 @@ export default function DownloadsList({ refreshTrigger }: DownloadsListProps) {
     }
   };
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-900 rounded-lg">
         <p className="text-gray-600 dark:text-gray-400">Please sign in to view downloads</p>

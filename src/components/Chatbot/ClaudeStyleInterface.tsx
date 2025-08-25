@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 
@@ -23,7 +24,7 @@ interface ChatbotProps {
 }
 
 export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -42,10 +43,10 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
   }, [messages]);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (user?.id) {
       loadConversations();
     }
-  }, [session, chatbotId]);
+  }, [user, chatbotId]);
 
   const loadConversations = async () => {
     try {
@@ -146,7 +147,8 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
   };
 
   return (
-    <div className="flex h-screen bg-[#2f2f2f] text-white">
+    <div className="flex min-h-[calc(100vh-120px)] bg-[#2f2f2f] text-white rounded-lg overflow-hidden"
+         style={{ height: 'calc(100vh - 120px)' }}>
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-80' : 'w-16'} bg-[#1e1e1e] border-r border-[#3f3f3f] transition-all duration-300 flex flex-col`}>
         {/* Header */}
@@ -166,8 +168,33 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
           </div>
         </div>
 
-        {/* New Chat Button */}
-        <div className="p-4">
+        {/* Navigation & New Chat */}
+        <div className="p-4 space-y-3">
+          {/* Navigation Links */}
+          <div className={`space-y-2 mb-4 ${sidebarOpen ? '' : 'flex flex-col items-center'}`}>
+            <Link
+              href="/"
+              className={`${sidebarOpen ? 'w-full flex items-center space-x-3 py-2 px-3' : 'p-3'} text-gray-300 hover:text-white hover:bg-[#3f3f3f] rounded-lg transition-colors`}
+              title="Inicio"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              {sidebarOpen && <span className="text-sm">Inicio</span>}
+            </Link>
+            <Link
+              href="/downloads"
+              className={`${sidebarOpen ? 'w-full flex items-center space-x-3 py-2 px-3' : 'p-3'} text-gray-300 hover:text-white hover:bg-[#3f3f3f] rounded-lg transition-colors`}
+              title="Descargas"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {sidebarOpen && <span className="text-sm">Descargas</span>}
+            </Link>
+          </div>
+
+          {/* New Chat Button */}
           <button
             onClick={createNewChat}
             className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-lg transition-colors"
@@ -209,17 +236,17 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
         )}
 
         {/* User Info */}
-        {sidebarOpen && session && (
+        {sidebarOpen && user && (
           <div className="p-4 border-t border-[#3f3f3f]">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-[#ff6b35] rounded-full flex items-center justify-center">
                 <span className="text-white font-medium text-sm">
-                  {session.user?.name?.[0] || 'U'}
+                  {user.name?.[0] || 'U'}
                 </span>
               </div>
               <div className="flex-1">
                 <div className="text-sm font-medium text-white">
-                  {session.user?.name || 'Usuario'}
+                  {user.name || 'Usuario'}
                 </div>
                 <div className="text-xs text-gray-400">
                   Plan Pro
@@ -294,7 +321,7 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
                       {message.isFromUser ? (
                         <div className="w-8 h-8 bg-[#ff6b35] rounded-lg flex items-center justify-center">
                           <span className="text-white font-medium text-sm">
-                            {session?.user?.name?.[0] || 'U'}
+                            {user?.name?.[0] || 'U'}
                           </span>
                         </div>
                       ) : (

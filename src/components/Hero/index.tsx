@@ -6,7 +6,7 @@ const Hero = () => {
     <>
       <section
         id="home"
-        className="relative overflow-hidden bg-primary pt-[120px] md:pt-[130px] lg:pt-[160px]"
+        className="relative overflow-hidden bg-[#2f2f2f] pt-[120px] md:pt-[130px] lg:pt-[160px]"
       >
         <div className="container">
           <div className="-mx-4 flex flex-wrap items-center">
@@ -15,10 +15,19 @@ const Hero = () => {
                 className="hero-content wow fadeInUp mx-auto max-w-[780px] text-center"
                 data-wow-delay=".2s"
               >
+                {/* Logo/Icon */}
+                <div className="mb-8 flex justify-center">
+                  <div className="inline-block p-4 bg-[#ff6b35] rounded-2xl">
+                    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z" />
+                    </svg>
+                  </div>
+                </div>
+
                 <h1 className="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]">
-                  Agencia de Inteligencia Artificial Aranza.io
+                  Agencia de Inteligencia Artificial <span className="text-[#ff6b35]">Aranza.io</span>
                 </h1>
-                <p className="mx-auto mb-9 max-w-[600px] text-base font-medium text-white sm:text-lg sm:leading-[1.44]">
+                <p className="mx-auto mb-9 max-w-[600px] text-base font-medium text-gray-300 sm:text-lg sm:leading-[1.44]">
                   Plataforma completa de inteligencia artificial con Aranza, nuestro
                   asistente virtual, descargas seguras y componentes premium. Todo lo que
                   necesitas para potenciar tu negocio con IA.
@@ -27,7 +36,7 @@ const Hero = () => {
                   <li>
                     <Link
                       href="/chatbot"
-                      className="inline-flex items-center justify-center rounded-md bg-white px-7 py-[14px] text-center text-base font-medium text-dark shadow-1 transition duration-300 ease-in-out hover:bg-gray-2"
+                      className="inline-flex items-center justify-center rounded-xl bg-[#ff6b35] px-8 py-4 text-center text-base font-semibold text-white shadow-lg transition duration-300 ease-in-out hover:bg-[#e55a2b] hover:shadow-xl"
                     >
                       Conoce a Aranza
                     </Link>
@@ -35,12 +44,12 @@ const Hero = () => {
                   <li>
                     <Link
                       href="/downloads"
-                      className="flex items-center gap-4 rounded-md bg-white/[0.12] px-6 py-[14px] text-base font-medium text-white transition duration-300 ease-in-out hover:bg-white hover:text-dark"
+                      className="flex items-center gap-4 rounded-xl bg-[#3f3f3f] px-6 py-4 text-base font-medium text-white transition duration-300 ease-in-out hover:bg-[#4f4f4f]"
                     >
                       <svg
                         className="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
