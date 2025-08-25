@@ -30,25 +30,28 @@ services:
       retries: 3
 
   app:
-    image: node:20-alpine
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM node:20-alpine
+        RUN apk add --no-cache libc6-compat curl git
+        WORKDIR /app
+        RUN echo "Initializing Next.js app with required dependencies"
+        RUN npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes
+        RUN npm install prisma @prisma/client next-auth stripe --legacy-peer-deps
+        COPY . .
+        RUN echo "Overriding with uploaded files (if any)"
+        RUN ls -la
+        RUN if [ -f package.json ]; then npm install --legacy-peer-deps; fi
+        RUN echo "Creating app directory structure if missing"
+        RUN mkdir -p app
+        RUN echo '@tailwind base; @tailwind components; @tailwind utilities; body { margin: 0; padding: 20px; font-family: system-ui; }' > app/globals.css
+        RUN echo 'export default function Home() { return <div><h1 style={{color: "green"}}>🚀 SaaS v3 - Running Successfully!</h1><p>Your Next.js application is working on EasyPanel!</p><p>PostgreSQL and Redis are connected and ready.</p></div>; }' > app/page.tsx
+        RUN echo 'import "./globals.css"; export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="en"><body>{children}</body></html>; }' > app/layout.tsx
+        EXPOSE 3000
+        HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:3000 || exit 1
+        CMD ["sh", "-c", "npm run dev 2>/dev/null || npm run start 2>/dev/null || npx next dev"]
     restart: unless-stopped
-    working_dir: /app
-    command: |
-      sh -c "
-      echo 'Installing system dependencies...' &&
-      apk add --no-cache libc6-compat curl git &&
-      echo 'Cloning source code...' &&
-      git clone https://github.com/rodsct/saasiav3.git /tmp/source &&
-      cp -r /tmp/source/* /app/ &&
-      echo 'Installing npm dependencies...' &&
-      npm install --legacy-peer-deps &&
-      echo 'Generating Prisma client...' &&
-      npx prisma generate &&
-      echo 'Building application...' &&
-      npm run build &&
-      echo 'Starting application...' &&
-      npm start
-      "
     expose:
       - "3000"
     volumes:

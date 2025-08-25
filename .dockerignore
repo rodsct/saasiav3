@@ -4,7 +4,6 @@ npm-debug.log*
 
 # Local env files
 .env*.local
-.env
 
 # Build outputs
 .next/
@@ -29,12 +28,3 @@ Thumbs.db
 
 # Git
 .git
-.gitignore
-
-# Docker
-Dockerfile*
-docker-compose*
-
-# Misc
-README.md
-*.md
