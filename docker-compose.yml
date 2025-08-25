@@ -45,7 +45,7 @@ services:
       npx prisma db push --force-reset --accept-data-loss &&
       npx prisma generate &&
       node scripts/create-users.js || echo 'User creation failed - continuing' &&
-      npm run build && npm start"
+      npm run dev"
     restart: unless-stopped
     expose:
       - "3000"
@@ -56,7 +56,7 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_123}@redis:6379
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-tu_nextauth_secret_muy_largo_32_caracteres_2024}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://saasiav3-play-nextjs.uclxiv.easypanel.host}
-      NODE_ENV: production
+      NODE_ENV: development
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://saasiav3-play-nextjs.uclxiv.easypanel.host}
       SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://saasiav3-play-nextjs.uclxiv.easypanel.host}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
