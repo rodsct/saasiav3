@@ -36,21 +36,18 @@ services:
         FROM node:20-alpine
         RUN apk add --no-cache libc6-compat curl git
         WORKDIR /app
-        COPY . .
-        RUN echo "=== FILES UPLOADED TO CONTAINER ==="
-        RUN ls -la
-        RUN echo "=== CHECKING FOR PROJECT FILES ==="
-        RUN if [ -f package.json ]; then echo "✅ Found package.json - Real project detected"; cat package.json | head -20; else echo "❌ No package.json found"; fi
-        RUN if [ -d src ]; then echo "✅ Found src directory"; ls -la src/; else echo "❌ No src directory"; fi
-        RUN echo "=== BUILDING APPLICATION ==="
-        RUN if [ -f package.json ]; then npm install --legacy-peer-deps && echo "✅ Dependencies installed"; else echo "❌ Creating fallback app" && npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes && npm install prisma @prisma/client next-auth stripe --legacy-peer-deps; fi
-        RUN if [ -f prisma/schema.prisma ]; then echo "✅ Found Prisma schema, generating client" && npx prisma generate; else echo "⚠️ No Prisma schema found"; fi
-        RUN echo "=== FINAL STRUCTURE CHECK ==="
-        RUN find . -name "*.tsx" -o -name "*.ts" -o -name "*.js" | head -20
-        RUN ls -la src/ 2>/dev/null || ls -la app/ 2>/dev/null || echo "No app structure found"
+        RUN rm -rf /tmp/* && mkdir -p /tmp
+        RUN echo "Cloning public repository source code..."
+        RUN git clone https://github.com/rodsct/saasiav3.git /tmp/source || echo "Clone failed, creating basic app"
+        RUN if [ -d "/tmp/source" ]; then echo "✅ Repository cloned successfully" && cp -r /tmp/source/* . && ls -la; else echo "❌ Clone failed, creating basic Next.js app" && npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes; fi
+        RUN echo "Installing dependencies..."
+        RUN npm install --legacy-peer-deps
+        RUN if [ -f prisma/schema.prisma ]; then echo "Generating Prisma client..." && npx prisma generate; fi
+        RUN echo "Building application..."
+        RUN npm run build
         EXPOSE 3000
         HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:3000 || exit 1
-        CMD ["sh", "-c", "npm run dev 2>/dev/null || npm run start 2>/dev/null || npx next dev"]
+        CMD ["npm", "start"]
     restart: unless-stopped
     expose:
       - "3000"
