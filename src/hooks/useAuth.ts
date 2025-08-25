@@ -68,7 +68,10 @@ export const useAuthState = () => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      console.log("Attempting login for:", email);
+      console.log("🔐 Starting login attempt for:", email);
+      console.log("🔐 Password provided:", password ? "Yes" : "No");
+      console.log("🔐 Making request to /api/auth/simple-login");
+      
       const response = await fetch("/api/auth/simple-login", {
         method: "POST",
         headers: {
@@ -78,22 +81,28 @@ export const useAuthState = () => {
         credentials: "include", // Ensure cookies are included
       });
 
-      console.log("Login response status:", response.status);
+      console.log("🔐 Login response status:", response.status);
+      console.log("🔐 Login response headers:", Object.fromEntries(response.headers.entries()));
+      
       const data = await response.json();
-      console.log("Login response data:", data);
+      console.log("🔐 Login response data:", data);
 
       if (response.ok) {
-        console.log("Login successful, user data:", data.user);
+        console.log("✅ Login successful, user data:", data.user);
         setUser(data.user);
         // Force refresh auth state to ensure consistency
         await checkAuth();
         return true;
       } else {
-        console.error("Login failed with status:", response.status, "error:", data.error);
+        console.error("❌ Login failed with status:", response.status, "error:", data.error);
+        console.error("❌ Full response data:", data);
         throw new Error(data.error || "Login failed");
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("💥 Login error:", error);
+      if (error instanceof TypeError) {
+        console.error("💥 Network error - check if server is running");
+      }
       throw error; // Re-throw so the component can handle it
     }
   };
