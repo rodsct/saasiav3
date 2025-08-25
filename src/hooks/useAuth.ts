@@ -68,6 +68,7 @@ export const useAuthState = () => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log("Attempting login for:", email);
       const response = await fetch("/api/auth/simple-login", {
         method: "POST",
         headers: {
@@ -77,7 +78,9 @@ export const useAuthState = () => {
         credentials: "include", // Ensure cookies are included
       });
 
+      console.log("Login response status:", response.status);
       const data = await response.json();
+      console.log("Login response data:", data);
 
       if (response.ok) {
         console.log("Login successful, user data:", data.user);
@@ -86,12 +89,12 @@ export const useAuthState = () => {
         await checkAuth();
         return true;
       } else {
-        console.error("Login failed:", data.error);
-        return false;
+        console.error("Login failed with status:", response.status, "error:", data.error);
+        throw new Error(data.error || "Login failed");
       }
     } catch (error) {
       console.error("Login error:", error);
-      return false;
+      throw error; // Re-throw so the component can handle it
     }
   };
 

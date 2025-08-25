@@ -49,7 +49,10 @@
       "Bash(start http://localhost:3000/signin)",
       "Bash(start:*)",
       "Bash(npx prisma:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(docker:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)"
     ],
     "deny": [],
     "ask": []

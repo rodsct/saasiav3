@@ -7,9 +7,12 @@ const JWT_SECRET = process.env.NEXTAUTH_SECRET || "simple-auth-secret-key";
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Simple login attempt started");
     const { email, password } = await request.json();
+    console.log("Login attempt for email:", email);
 
     if (!email || !password) {
+      console.log("Missing email or password");
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 }
@@ -17,6 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
+    console.log("Searching for user in database...");
     const user = await prisma.user.findUnique({
       where: { email },
       select: {
@@ -30,18 +34,32 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!user || !user.password) {
+    console.log("User found:", user ? "Yes" : "No");
+    if (!user) {
+      console.log("User not found in database");
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "User not found" },
+        { status: 401 }
+      );
+    }
+
+    if (!user.password) {
+      console.log("User has no password (OAuth user?)");
+      return NextResponse.json(
+        { error: "User has no password. Please use social login." },
         { status: 401 }
       );
     }
 
     // Verify password
+    console.log("Verifying password...");
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log("Password valid:", isPasswordValid);
+    
     if (!isPasswordValid) {
+      console.log("Invalid password");
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "Invalid password" },
         { status: 401 }
       );
     }

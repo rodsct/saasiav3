@@ -17,18 +17,14 @@ export default function SimpleLogin() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      
-      if (success) {
-        toast.success("¡Login exitoso!");
-        router.push("/chatbot");
-        router.refresh();
-      } else {
-        toast.error("Error al iniciar sesión");
-      }
-    } catch (error) {
+      await login(email, password);
+      toast.success("¡Login exitoso!");
+      router.push("/chatbot");
+      router.refresh();
+    } catch (error: any) {
       console.error("Login error:", error);
-      toast.error("Error al iniciar sesión");
+      const errorMessage = error.message || "Error al iniciar sesión. Verifica tus credenciales.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
