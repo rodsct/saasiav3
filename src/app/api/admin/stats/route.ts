@@ -28,9 +28,8 @@ export async function GET(request: NextRequest) {
         name: true,
         email: true,
         subscription: true,
-        createdAt: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
       take: 10,
     });
 

@@ -12,7 +12,6 @@ interface AdminStats {
     name: string;
     email: string;
     subscription: string;
-    createdAt: string;
   }>;
 }
 
@@ -143,7 +142,7 @@ export default function AdminOverview() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    ID: {user.id.slice(-8)}
                   </td>
                 </tr>
               ))}

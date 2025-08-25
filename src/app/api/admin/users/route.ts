@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
         subscription: true,
         subscriptionEndsAt: true,
         role: true,
-        createdAt: true,
         _count: {
           select: {
             downloads: true,
@@ -23,7 +22,7 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
     });
 
     return NextResponse.json({ users });

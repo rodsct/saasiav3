@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Show content based on user subscription level
-    const userSubscription = user.subscription || "FREE";
+    const userSubscription = (user as any).subscription || "FREE";
     
     let whereCondition: any;
     

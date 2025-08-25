@@ -1,16 +1,12 @@
--- Initialize PostgreSQL database for SaaS v3
--- This script runs when the database container starts for the first time
+-- Initialize PostgreSQL for SaaS v3
+-- This script runs only when the database is first created
 
 -- Create shadow database for Prisma migrations
 CREATE DATABASE saasiav3_shadow;
 
--- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE saasiav3 TO saasiav3;
-GRANT ALL PRIVILEGES ON DATABASE saasiav3_shadow TO saasiav3;
+-- Set proper encoding and collation
+ALTER DATABASE saasiav3 SET timezone TO 'UTC';
+ALTER DATABASE saasiav3_shadow SET timezone TO 'UTC';
 
--- Create extensions if needed
-\c saasiav3;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-\c saasiav3_shadow;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Log the initialization
+\echo 'SaaS v3 database initialized successfully'

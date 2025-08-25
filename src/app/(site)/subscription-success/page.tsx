@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function SubscriptionSuccessPage() {
+function SubscriptionSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, refreshUser } = useAuth();
@@ -13,13 +13,18 @@ export default function SubscriptionSuccessPage() {
 
   const plan = searchParams.get("plan");
   const price = searchParams.get("price");
+  const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
-    // Just refresh user data since payment API already activated the subscription
-    if (user?.id) {
+    // If we have a session_id, the payment was processed by Stripe
+    // Refresh user data to get updated subscription
+    if (sessionId && user?.id) {
+      refreshUser();
+    } else if (user?.id) {
+      // Fallback: refresh user data 
       refreshUser();
     }
-  }, [user, refreshUser]);
+  }, [sessionId, user, refreshUser]);
 
 
   if (isActivating) {
@@ -123,5 +128,17 @@ export default function SubscriptionSuccessPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SubscriptionSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="animate-spin w-16 h-16 border-4 border-green-200 border-t-green-500 rounded-full"></div>
+      </div>
+    }>
+      <SubscriptionSuccessContent />
+    </Suspense>
   );
 }

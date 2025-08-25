@@ -51,14 +51,14 @@ export default function ChatbotDashboard() {
   };
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (user?.id) {
       loadChatbots();
     }
-  }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-create chatbot if none exists
   useEffect(() => {
-    if (session?.user?.id && !isLoading && chatbots.length === 0) {
+    if (user?.id && !isLoading && chatbots.length === 0) {
       const autoCreateChatbot = async () => {
         try {
           const response = await fetch("/api/chatbot", {
@@ -79,7 +79,7 @@ export default function ChatbotDashboard() {
       };
       autoCreateChatbot();
     }
-  }, [session, isLoading, chatbots.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, isLoading, chatbots.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-select first chatbot and go directly to chat
   useEffect(() => {
@@ -121,7 +121,7 @@ export default function ChatbotDashboard() {
     }
   };
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="text-center max-w-md mx-auto px-6">

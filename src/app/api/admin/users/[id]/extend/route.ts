@@ -4,8 +4,9 @@ import { requireAdmin } from "@/utils/adminAuth";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   const adminCheck = await requireAdmin(request);
   if (adminCheck instanceof NextResponse) return adminCheck;
 

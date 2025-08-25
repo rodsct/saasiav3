@@ -10,7 +10,6 @@ interface User {
   subscription: string;
   subscriptionEndsAt?: string;
   role: string;
-  createdAt: string;
   _count?: {
     downloads: number;
     conversations: number;
@@ -224,7 +223,7 @@ export default function UserManagement() {
                     <div>Chats: {user._count?.conversations || 0}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    ID: {user.id.slice(-8)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                     <select

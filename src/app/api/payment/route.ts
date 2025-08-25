@@ -24,32 +24,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For demo/development: simulate payment and activate subscription directly
-    if (priceId === "price_pro_monthly_49") {
-      // Calculate subscription end date (1 month from now)
-      const subscriptionEndsAt = new Date();
-      subscriptionEndsAt.setMonth(subscriptionEndsAt.getMonth() + 1);
-
-      // Update user subscription in database
-      const updatedUser = await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          subscription: "PRO",
-          subscriptionEndsAt: subscriptionEndsAt,
-        },
-      });
-
-      console.log(`✅ PRO subscription activated for user: ${user.email}`);
-
-      // Return success URL for redirect
-      const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-      return NextResponse.json(`${baseUrl}/subscription-success?plan=pro&price=49`);
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { error: "Stripe not configured. Please add STRIPE_SECRET_KEY to environment." },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json(
-      { error: "Invalid price ID" },
-      { status: 400 }
-    );
+    // Initialize Stripe
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2023-10-16",
+    });
+
+    // Create Stripe checkout session
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    
+    const session = await stripe.checkout.sessions.create({
+      customer_email: user.email || undefined,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: `${baseUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}&plan=pro&price=49`,
+      cancel_url: `${baseUrl}/pricing?canceled=true`,
+      metadata: {
+        userId: user.id,
+        userEmail: user.email || '',
+      },
+    });
+
+    // Return checkout URL
+    return NextResponse.json(session.url);
 
   } catch (error) {
     console.error("Payment API error:", error);

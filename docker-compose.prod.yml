@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: saasiav3-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: saasiav3
+      POSTGRES_USER: saasiav3
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-saasiav3_secure_password_change_me}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - saasiav3-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saasiav3 -d saasiav3"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: saasiav3-redis-prod
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_secure_password_change_me}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - saasiav3-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      args:
+        - NODE_ENV=production
+    container_name: saasiav3-app-prod
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      # Core Application
+      - NODE_ENV=production
+      - PORT=3000
+      
+      # Database
+      - DATABASE_URL=postgresql://saasiav3:${POSTGRES_PASSWORD:-saasiav3_secure_password_change_me}@postgres:5432/saasiav3
+      
+      # Authentication
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-super-secret-change-in-production-must-be-very-long-and-secure}
+      - SECRET=${NEXTAUTH_SECRET:-super-secret-change-in-production-must-be-very-long-and-secure}
+      
+      # Site Configuration
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      - SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      - SITE_NAME=${SITE_NAME:-Aranza.io}
+      - AUTHOR_NAME=${AUTHOR_NAME:-Aranza Team}
+      
+      # n8n Webhook
+      - DEFAULT_N8N_WEBHOOK=${DEFAULT_N8N_WEBHOOK:-https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3}
+      
+      # OAuth Providers (optional)
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      
+      # Email Configuration (optional)
+      - EMAIL_SERVER_HOST=${EMAIL_SERVER_HOST:-}
+      - EMAIL_SERVER_PORT=${EMAIL_SERVER_PORT:-}
+      - EMAIL_SERVER_USER=${EMAIL_SERVER_USER:-}
+      - EMAIL_SERVER_PASSWORD=${EMAIL_SERVER_PASSWORD:-}
+      - EMAIL_FROM=${EMAIL_FROM:-}
+      
+      # Stripe Configuration (optional)
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      
+      # Redis Configuration
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_secure_password_change_me}@redis:6379
+      
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - saasiav3-network
+    volumes:
+      - app_uploads:/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy (optional for production)
+  nginx:
+    image: nginx:alpine
+    container_name: saasiav3-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+      - "${NGINX_SSL_PORT:-8443}:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - app_uploads:/var/www/uploads:ro
+    depends_on:
+      - app
+    networks:
+      - saasiav3-network
+
+volumes:
+  postgres_prod_data:
+    driver: local
+  redis_prod_data:
+    driver: local
+  app_uploads:
+    driver: local
+
+networks:
+  saasiav3-network:
+    driver: bridge

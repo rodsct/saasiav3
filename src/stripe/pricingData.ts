@@ -2,7 +2,7 @@ import { Price } from "@/types/price";
 
 export const pricingData: Price[] = [
   {
-    id: "price_pro_monthly_49",
+    id: "price_1RzoxvIXvj4hGUgkm0F1JN6p", // Real Stripe Price ID
     unit_amount: 49 * 100, // $49.00 monthly
     nickname: "PRO",
     offers: [
