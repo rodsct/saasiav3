@@ -32,22 +32,7 @@ services:
   app:
     build:
       context: .
-      dockerfile_inline: |
-        FROM node:20-alpine
-        RUN apk add --no-cache libc6-compat curl
-        WORKDIR /app
-        COPY package*.json ./
-        RUN echo "📦 Installing dependencies..."
-        RUN npm install --legacy-peer-deps
-        COPY . .
-        RUN echo "🔧 Generating Prisma client..."
-        RUN npx prisma generate
-        RUN echo "✅ SaaS v3 project built successfully!"
-        RUN printf '#!/bin/sh\necho "🗄️ Running database migrations..."\nnpx prisma migrate deploy || echo "Migration failed"\necho "🔧 Generating Prisma client..."\nnpx prisma generate || echo "Prisma generate failed"\necho "👥 Creating test users..."\nnode scripts/create-users.js || echo "User creation failed"\necho "🚀 Starting application..."\nnpm run dev 2>/dev/null || npm start 2>/dev/null || npx next dev\n' > start.sh
-        RUN chmod +x start.sh
-        EXPOSE 3000
-        HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:3000 || exit 1
-        CMD ["sh", "./start.sh"]
+      dockerfile: Dockerfile.easypanel
     restart: unless-stopped
     expose:
       - "3000"

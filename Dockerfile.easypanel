@@ -22,6 +22,20 @@ RUN npx prisma generate
 # Build application
 RUN npm run build
 
+# Create startup script with migrations and user creation
+RUN printf '#!/bin/sh\n\
+echo "🗄️ Running database migrations..."\n\
+npx prisma migrate deploy || echo "Migration failed"\n\
+echo "🔧 Generating Prisma client..."\n\
+npx prisma generate || echo "Prisma generate failed"\n\
+echo "👥 Creating test users..."\n\
+node scripts/create-users.js || echo "User creation failed"\n\
+echo "🚀 Starting application in production mode..."\n\
+npm start\n\
+' > start.sh
+
+RUN chmod +x start.sh
+
 # Expose port
 EXPOSE 3000
 
@@ -29,5 +43,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start application
-CMD ["npm", "start"]
+# Start application with migrations
+CMD ["sh", "./start.sh"]
