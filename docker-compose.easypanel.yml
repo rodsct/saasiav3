@@ -1,10 +1,6 @@
-# Docker Compose for EasyPanel Deployment
-# SaaS v3 - AI Platform with Chatbot, Downloads & Admin Panel
-
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     restart: unless-stopped
@@ -20,7 +16,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # Redis Cache
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -35,12 +30,11 @@ services:
       timeout: 10s
       retries: 3
 
-  # Next.js Application
   app:
     image: node:20-alpine
     restart: unless-stopped
     working_dir: /app
-    command: >
+    command: |
       sh -c "
       apk add --no-cache libc6-compat curl &&
       npm install --legacy-peer-deps &&
@@ -54,46 +48,29 @@ services:
       - /app/node_modules
       - app_uploads:/app/public/uploads
     environment:
-      # Database
       DATABASE_URL: postgresql://saasiav3:${POSTGRES_PASSWORD:-saasiav3_secure_password_123}@postgres:5432/saasiav3
-      
-      # Redis
       REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_123}@redis:6379
-      
-      # Authentication
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-tu_nextauth_secret_muy_largo_y_seguro_32_caracteres_minimo}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://tu-dominio.com}
-      
-      # App Configuration  
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-tu_nextauth_secret_muy_largo_32_caracteres_2024}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://tu-proyecto.easypanel.app}
       NODE_ENV: production
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-dominio.com}
-      SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-dominio.com}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-proyecto.easypanel.app}
+      SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-proyecto.easypanel.app}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
       AUTHOR_NAME: ${AUTHOR_NAME:-Aranza Team}
-      
-      # n8n Webhook
       DEFAULT_N8N_WEBHOOK: ${DEFAULT_N8N_WEBHOOK:-https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3}
-      
-      # OAuth Providers (optional)
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@tu-proyecto.easypanel.app}
+      PORT: 3000
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      
-      # Email Configuration (optional)
-      EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-}
-      EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-}
       EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST:-}
       EMAIL_SERVER_PORT: ${EMAIL_SERVER_PORT:-587}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@tu-dominio.com}
-      
-      # Stripe Configuration (configure when ready)
+      EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-}
+      EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-      
-      # Port
-      PORT: 3000
     depends_on:
       postgres:
         condition: service_healthy
@@ -108,7 +85,6 @@ volumes:
   app_uploads:
     driver: local
 
-# EasyPanel Network (EasyPanel maneja automáticamente las redes)
 networks:
   default:
     external: false
