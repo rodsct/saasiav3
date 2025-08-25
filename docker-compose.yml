@@ -30,23 +30,19 @@ services:
       retries: 3
 
   app:
-    image: node:20-alpine
-    working_dir: /app
-    command: sh -c "
-      apk add --no-cache git curl &&
-      rm -rf /tmp/source 2>/dev/null || true &&
-      cd /tmp &&
-      git clone https://github.com/rodsct/saasiav3.git source &&
-      cd /app &&
-      rm -rf * .git .gitignore .dockerignore 2>/dev/null || true &&
-      cp -r /tmp/source/* . &&
-      cp -r /tmp/source/.* . 2>/dev/null || true &&
-      npm install --legacy-peer-deps &&
-      npx prisma db push --force-reset --accept-data-loss &&
-      npx prisma generate &&
-      node scripts/create-users.js || echo 'User creation failed - continuing' &&
-      (npm run build || echo 'Build failed, using dev mode') &&
-      (npm start || npm run dev)"
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM node:20-alpine
+        WORKDIR /app
+        RUN apk add --no-cache git curl
+        COPY package*.json ./
+        RUN npm install --legacy-peer-deps
+        COPY . .
+        RUN npx prisma generate
+        RUN npm run build
+        EXPOSE 3000
+        CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node scripts/create-users.js || echo 'User creation failed - continuing' && npm start"]
     restart: unless-stopped
     expose:
       - "3000"
