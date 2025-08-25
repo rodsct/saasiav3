@@ -40,15 +40,12 @@ services:
         RUN npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes
         RUN npm install prisma @prisma/client next-auth stripe --legacy-peer-deps
         COPY . .
-        RUN echo "Overriding with uploaded files (if any)"
+        RUN echo "Checking uploaded files"
         RUN ls -la
-        RUN if [ -f package.json ]; then npm install --legacy-peer-deps; fi
-        RUN echo "Creating app directory structure if missing"
-        RUN mkdir -p app
-        RUN echo "Ensuring required files exist"
-        RUN test -f app/globals.css || echo '@tailwind base; @tailwind components; @tailwind utilities; body { margin: 0; padding: 20px; font-family: system-ui; }' > app/globals.css
-        RUN test -f app/page.tsx || echo 'export default function Home() { return <div><h1 style={{color: "green"}}>🚀 SaaS v3 - Running Successfully!</h1><p>Your Next.js application is working on EasyPanel!</p><p>PostgreSQL and Redis are connected and ready.</p></div>; }' > app/page.tsx
-        RUN test -f app/layout.tsx || echo 'import "./globals.css"; export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="en"><body>{children}</body></html>; }' > app/layout.tsx
+        RUN if [ -f package.json ]; then echo "Found package.json - using real project"; npm install --legacy-peer-deps; else echo "No package.json - creating fallback app"; npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes; npm install prisma @prisma/client next-auth stripe --legacy-peer-deps; fi
+        RUN echo "Ensuring app structure exists"
+        RUN mkdir -p src/app app
+        RUN if [ -d "src/app" ]; then echo "Using src/app directory"; elif [ -d "app" ]; then echo "Using app directory"; else echo "Creating fallback pages"; mkdir -p app; echo '@tailwind base; @tailwind components; @tailwind utilities; body { margin: 0; padding: 20px; font-family: system-ui; }' > app/globals.css; echo 'export default function Home() { return <div><h1 style={{color: "green"}}>🚀 SaaS v3 - Running Successfully!</h1><p>Your Next.js application is working on EasyPanel!</p><p>PostgreSQL and Redis are connected and ready.</p></div>; }' > app/page.tsx; echo 'import "./globals.css"; export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="en"><body>{children}</body></html>; }' > app/layout.tsx; fi
         RUN echo "Final file check:"
         RUN ls -la app/
         RUN cat app/globals.css || echo "globals.css missing!"
