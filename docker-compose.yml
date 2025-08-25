@@ -56,14 +56,14 @@ services:
       DATABASE_URL: postgresql://saasiav3:${POSTGRES_PASSWORD:-saasiav3_secure_password_123}@postgres:5432/saasiav3
       REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_123}@redis:6379
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-tu_nextauth_secret_muy_largo_32_caracteres_2024}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://tu-proyecto.easypanel.app}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://saasiav3-play-nextjs.uclxiv.easypanel.host}
       NODE_ENV: development
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-proyecto.easypanel.app}
-      SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-proyecto.easypanel.app}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://saasiav3-play-nextjs.uclxiv.easypanel.host}
+      SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://saasiav3-play-nextjs.uclxiv.easypanel.host}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
       AUTHOR_NAME: ${AUTHOR_NAME:-Aranza Team}
       DEFAULT_N8N_WEBHOOK: ${DEFAULT_N8N_WEBHOOK:-https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@tu-proyecto.easypanel.app}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@saasiav3-play-nextjs.uclxiv.easypanel.host}
       PORT: 3000
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
