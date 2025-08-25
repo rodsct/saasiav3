@@ -8,6 +8,9 @@ import { prisma } from "./prismaDB";
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
   
+  // Force production URL for callbacks
+  url: process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host",
+  
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -62,10 +65,26 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async redirect({ url, baseUrl }) {
       const prodUrl = process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
-      // If url is relative, prepend prodUrl
-      if (url.startsWith("/")) return `${prodUrl}${url}`;
+      console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl, "prodUrl:", prodUrl);
+      
+      // Force production URL for all redirects
+      if (url.startsWith("/")) {
+        const finalUrl = `${prodUrl}${url}`;
+        console.log("🔀 Redirecting to:", finalUrl);
+        return finalUrl;
+      }
+      
+      // If it's a localhost URL, replace with production URL
+      if (url.includes("localhost")) {
+        const finalUrl = url.replace(/http:\/\/localhost:\d+/, prodUrl);
+        console.log("🔀 Replacing localhost with:", finalUrl);
+        return finalUrl;
+      }
+      
       // Allow prodUrl domain
       if (new URL(url).origin === prodUrl) return url;
+      
+      console.log("🔀 Default redirect to prodUrl:", prodUrl);
       return prodUrl;
     },
     async jwt({ token, user }) {
