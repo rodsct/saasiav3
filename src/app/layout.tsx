@@ -1,8 +1,7 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import ScrollToTop from "@/components/ScrollToTop";
-// Temporarily removed CSS import to fix build errors - will restore after OAuth works
-// import "../styles/index.css";
+import "../styles/index.css";
 import Providers from "./providers";
 
 export default function RootLayout({
