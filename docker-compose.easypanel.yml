@@ -43,13 +43,23 @@ services:
 
   # Next.js Application
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
+    image: node:20-alpine
     container_name: saasiav3-app
     restart: unless-stopped
+    working_dir: /app
+    command: >
+      sh -c "
+      apk add --no-cache libc6-compat &&
+      npm ci --legacy-peer-deps &&
+      npx prisma generate &&
+      npm run build &&
+      npm start
+      "
     ports:
       - "3000:3000"
+    volumes:
+      - .:/app
+      - app_uploads:/app/public/uploads
     environment:
       # Database
       DATABASE_URL: postgresql://saasiav3:${POSTGRES_PASSWORD:-saasiav3_secure_password_123}@postgres:5432/saasiav3
@@ -91,19 +101,11 @@ services:
       
       # Port
       PORT: 3000
-    volumes:
-      - app_uploads:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "node", "healthcheck.js"]
-      interval: 30s
-      timeout: 10s
-      start_period: 60s
-      retries: 3
 
 volumes:
   postgres_data:
