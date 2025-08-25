@@ -36,20 +36,18 @@ services:
         FROM node:20-alpine
         RUN apk add --no-cache libc6-compat curl git
         WORKDIR /app
-        RUN echo "Initializing Next.js app with required dependencies"
-        RUN npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes
-        RUN npm install prisma @prisma/client next-auth stripe --legacy-peer-deps
         COPY . .
-        RUN echo "Checking uploaded files"
+        RUN echo "=== FILES UPLOADED TO CONTAINER ==="
         RUN ls -la
-        RUN if [ -f package.json ]; then echo "Found package.json - using real project"; npm install --legacy-peer-deps; else echo "No package.json - creating fallback app"; npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes; npm install prisma @prisma/client next-auth stripe --legacy-peer-deps; fi
-        RUN echo "Ensuring app structure exists"
-        RUN mkdir -p src/app app
-        RUN if [ -d "src/app" ]; then echo "Using src/app directory"; elif [ -d "app" ]; then echo "Using app directory"; else echo "Creating fallback pages"; mkdir -p app; echo '@tailwind base; @tailwind components; @tailwind utilities; body { margin: 0; padding: 20px; font-family: system-ui; }' > app/globals.css; echo 'export default function Home() { return <div><h1 style={{color: "green"}}>🚀 SaaS v3 - Running Successfully!</h1><p>Your Next.js application is working on EasyPanel!</p><p>PostgreSQL and Redis are connected and ready.</p></div>; }' > app/page.tsx; echo 'import "./globals.css"; export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="en"><body>{children}</body></html>; }' > app/layout.tsx; fi
-        RUN echo "Final file check:"
-        RUN ls -la app/
-        RUN cat app/globals.css || echo "globals.css missing!"
-        RUN echo "NODE_ENV: $NODE_ENV"
+        RUN echo "=== CHECKING FOR PROJECT FILES ==="
+        RUN if [ -f package.json ]; then echo "✅ Found package.json - Real project detected"; cat package.json | head -20; else echo "❌ No package.json found"; fi
+        RUN if [ -d src ]; then echo "✅ Found src directory"; ls -la src/; else echo "❌ No src directory"; fi
+        RUN echo "=== BUILDING APPLICATION ==="
+        RUN if [ -f package.json ]; then npm install --legacy-peer-deps && echo "✅ Dependencies installed"; else echo "❌ Creating fallback app" && npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes && npm install prisma @prisma/client next-auth stripe --legacy-peer-deps; fi
+        RUN if [ -f prisma/schema.prisma ]; then echo "✅ Found Prisma schema, generating client" && npx prisma generate; else echo "⚠️ No Prisma schema found"; fi
+        RUN echo "=== FINAL STRUCTURE CHECK ==="
+        RUN find . -name "*.tsx" -o -name "*.ts" -o -name "*.js" | head -20
+        RUN ls -la src/ 2>/dev/null || ls -la app/ 2>/dev/null || echo "No app structure found"
         EXPOSE 3000
         HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:3000 || exit 1
         CMD ["sh", "-c", "npm run dev 2>/dev/null || npm run start 2>/dev/null || npx next dev"]
