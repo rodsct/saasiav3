@@ -40,9 +40,8 @@ services:
         RUN npm install --legacy-peer-deps
         COPY . .
         RUN npx prisma generate
-        RUN npm run build
         EXPOSE 3000
-        CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node scripts/create-users.js || echo 'User creation failed - continuing' && npm start"]
+        CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node scripts/create-users.js || echo 'User creation failed - continuing' && npm run dev"]
     restart: unless-stopped
     expose:
       - "3000"
@@ -55,7 +54,7 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
       NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
       AUTH_TRUST_HOST: true
-      NODE_ENV: production
+      NODE_ENV: development
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
       SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
