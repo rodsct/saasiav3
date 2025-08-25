@@ -45,7 +45,8 @@ services:
       npx prisma db push --force-reset --accept-data-loss &&
       npx prisma generate &&
       node scripts/create-users.js || echo 'User creation failed - continuing' &&
-      npm run dev"
+      (npm run build || echo 'Build failed, using dev mode') &&
+      (npm start || npm run dev)"
     restart: unless-stopped
     expose:
       - "3000"
@@ -58,7 +59,7 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
       NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
       AUTH_TRUST_HOST: true
-      NODE_ENV: development
+      NODE_ENV: production
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
       SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
