@@ -42,9 +42,8 @@ services:
       cp -r /tmp/source/* . &&
       cp -r /tmp/source/.* . 2>/dev/null || true &&
       npm install --legacy-peer-deps &&
-      npx prisma db push --force-reset &&
+      npx prisma db push --force-reset --accept-data-loss &&
       npx prisma generate &&
-      npx prisma migrate deploy &&
       node scripts/create-users.js || echo 'User creation failed - continuing' &&
       npm run build && npm start"
     restart: unless-stopped
