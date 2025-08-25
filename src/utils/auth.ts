@@ -20,8 +20,10 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
+        url: "https://accounts.google.com/oauth/authorize",
         params: {
-          redirect_uri: `${process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host"}/api/auth/callback/google`
+          scope: "openid email profile",
+          redirect_uri: "https://proyectonuevo-saasiav3.uclxiv.easypanel.host/api/auth/callback/google"
         }
       }
     }),
@@ -72,8 +74,12 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
+    async signIn({ user, account, profile }) {
+      console.log("🔐 SignIn callback - account:", account?.provider);
+      return true;
+    },
     async redirect({ url, baseUrl }) {
-      const prodUrl = process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+      const prodUrl = "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
       console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl, "prodUrl:", prodUrl);
       
       // Force production URL for all redirects
@@ -91,7 +97,7 @@ export const authOptions: NextAuthOptions = {
       }
       
       // Allow prodUrl domain
-      if (new URL(url).origin === prodUrl) return url;
+      if (url.includes("proyectonuevo-saasiav3.uclxiv.easypanel.host")) return url;
       
       console.log("🔀 Default redirect to prodUrl:", prodUrl);
       return prodUrl;
