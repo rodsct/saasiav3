@@ -6,9 +6,12 @@ const nextConfig = {
   // External packages for server
   serverExternalPackages: ['@prisma/client', 'prisma'],
   
+  // Allow development origins
+  allowedDevOrigins: ['proyectonuevo-saasiav3.uclxiv.easypanel.host'],
+  
   // Optimize images
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'proyectonuevo-saasiav3.uclxiv.easypanel.host'],
     unoptimized: process.env.NODE_ENV === 'development',
   },
   
@@ -35,10 +38,7 @@ const nextConfig = {
     ];
   },
 
-  // Experimental features
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
-  },
+  // Remove deprecated experimental feature
 };
 
 module.exports = nextConfig
