@@ -36,16 +36,16 @@ services:
         FROM node:20-alpine
         RUN apk add --no-cache libc6-compat curl git
         WORKDIR /app
-        RUN echo "Creating SaaS v3 application structure..."
-        RUN npm create next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias '@/*' --yes
-        RUN echo "Installing SaaS dependencies..."
-        RUN npm install prisma @prisma/client next-auth stripe bcryptjs react-hook-form @hookform/resolvers zod lucide-react @radix-ui/react-dropdown-menu @radix-ui/react-dialog --legacy-peer-deps
-        RUN echo "Creating basic SaaS structure..."
-        RUN mkdir -p src/app src/components src/lib src/types
-        RUN echo 'import Link from "next/link"; export default function Home() { return <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100"><div className="container mx-auto px-4 py-16 text-center"><h1 className="text-5xl font-bold text-gray-900 mb-6">🚀 SaaS v3</h1><p className="text-xl text-gray-600 mb-8">Next.js SaaS Platform with Authentication & Payments</p><div className="flex gap-4 justify-center"><Link href="/auth/signin" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Sign In</Link><Link href="/auth/signup" className="bg-gray-200 text-gray-900 px-6 py-3 rounded-lg hover:bg-gray-300">Sign Up</Link></div><div className="mt-12 grid md:grid-cols-3 gap-8"><div className="bg-white p-6 rounded-lg shadow-md"><h3 className="font-semibold mb-2">🔐 Authentication</h3><p className="text-gray-600">NextAuth with multiple providers</p></div><div className="bg-white p-6 rounded-lg shadow-md"><h3 className="font-semibold mb-2">💳 Payments</h3><p className="text-gray-600">Stripe integration ready</p></div><div className="bg-white p-6 rounded-lg shadow-md"><h3 className="font-semibred mb-2">📊 Dashboard</h3><p className="text-gray-600">User dashboard and analytics</p></div></div></div></main>; }' > src/app/page.tsx
-        RUN echo "Checking available scripts..."
-        RUN npm run || echo "No scripts available"
-        RUN echo "Application ready for development mode"
+        RUN echo "Cloning real SaaS v3 project..."
+        RUN git clone https://github.com/rodsct/saasiav3.git /tmp/source
+        RUN echo "✅ Repository cloned successfully"
+        RUN cp -r /tmp/source/* . && rm -rf /tmp/source
+        RUN echo "📦 Installing project dependencies..."
+        RUN npm install --legacy-peer-deps
+        RUN echo "🔧 Generating Prisma client..."
+        RUN npx prisma generate
+        RUN echo "✅ Real SaaS v3 project ready!"
+        RUN ls -la src/
         EXPOSE 3000
         HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:3000 || exit 1
         CMD ["sh", "-c", "npm run dev 2>/dev/null || npm start 2>/dev/null || npx next dev"]
