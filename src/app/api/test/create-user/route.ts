@@ -23,9 +23,9 @@ export async function POST(request: NextRequest) {
           email: testUserEmail,
           name: "Usuario de Pruebas PRO",
           password: hashedPassword,
-          subscription: "pro",
+          subscription: "PRO",
           subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          role: "user",
+          role: "USER",
         }
       });
       console.log("Test PRO user created");
@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
           email: adminUserEmail,
           name: "Administrator",
           password: hashedPassword,
-          subscription: "pro",
+          subscription: "PRO",
           subscriptionEndsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
-          role: "admin",
+          role: "ADMIN",
         }
       });
       console.log("Admin user created");
@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Test users created/verified successfully",
       users: [
-        { email: testUserEmail, role: "user", subscription: "pro" },
-        { email: adminUserEmail, role: "admin", subscription: "pro" }
+        { email: testUserEmail, role: "USER", subscription: "PRO" },
+        { email: adminUserEmail, role: "ADMIN", subscription: "PRO" }
       ]
     });
 
