@@ -2,7 +2,6 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import ScrollToTop from "@/components/ScrollToTop";
 import "../styles/index.css";
-import "../styles/prism-vsc-dark-plus.css";
 import Providers from "./providers";
 
 export default function RootLayout({
@@ -11,14 +10,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning className="!scroll-smooth" lang="en">
+    <html suppressHydrationWarning lang="en">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      </head>
       <body>
         <Providers>
-          <div className="isolate">
+          <div>
             <Header />
-
             {children}
-
             <Footer />
             <ScrollToTop />
           </div>
