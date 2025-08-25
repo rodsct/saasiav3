@@ -60,6 +60,14 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      const prodUrl = process.env.NEXTAUTH_URL || "https://saasiav3-play-nextjs.uclxiv.easypanel.host";
+      // If url is relative, prepend prodUrl
+      if (url.startsWith("/")) return `${prodUrl}${url}`;
+      // Allow prodUrl domain
+      if (new URL(url).origin === prodUrl) return url;
+      return prodUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
