@@ -5,16 +5,25 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { prisma } from "./prismaDB";
 
+// Force production URL in environment
+process.env.NEXTAUTH_URL = process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+process.env.NEXTAUTH_URL_INTERNAL = process.env.NEXTAUTH_URL_INTERNAL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
   
   // Force production URL for callbacks
-  url: process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host",
+  url: "https://proyectonuevo-saasiav3.uclxiv.easypanel.host",
   
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          redirect_uri: `${process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host"}/api/auth/callback/google`
+        }
+      }
     }),
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
