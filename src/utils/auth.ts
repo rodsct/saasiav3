@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async redirect({ url, baseUrl }) {
-      const prodUrl = process.env.NEXTAUTH_URL || "https://saasiav3-play-nextjs.uclxiv.easypanel.host";
+      const prodUrl = process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
       // If url is relative, prepend prodUrl
       if (url.startsWith("/")) return `${prodUrl}${url}`;
       // Allow prodUrl domain
