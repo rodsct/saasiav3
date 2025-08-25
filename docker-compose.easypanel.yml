@@ -30,21 +30,25 @@ services:
       retries: 3
 
   app:
-    build:
-      context: .
-      dockerfile_inline: |
-        FROM node:20-alpine
-        RUN apk add --no-cache libc6-compat curl
-        WORKDIR /app
-        COPY package*.json ./
-        RUN npm install --legacy-peer-deps
-        COPY . .
-        RUN npx prisma generate
-        RUN npm run build
-        EXPOSE 3000
-        HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:3000/api/health || exit 1
-        CMD ["npm", "start"]
+    image: node:20-alpine
     restart: unless-stopped
+    working_dir: /app
+    command: |
+      sh -c "
+      echo 'Installing system dependencies...' &&
+      apk add --no-cache libc6-compat curl git &&
+      echo 'Cloning source code...' &&
+      git clone https://github.com/rodsct/saasiav3.git /tmp/source &&
+      cp -r /tmp/source/* /app/ &&
+      echo 'Installing npm dependencies...' &&
+      npm install --legacy-peer-deps &&
+      echo 'Generating Prisma client...' &&
+      npx prisma generate &&
+      echo 'Building application...' &&
+      npm run build &&
+      echo 'Starting application...' &&
+      npm start
+      "
     expose:
       - "3000"
     volumes:

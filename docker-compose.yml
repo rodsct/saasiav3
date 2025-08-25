@@ -1,73 +1,96 @@
 
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: saasiav3-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: saasiav3
       POSTGRES_USER: saasiav3
-      POSTGRES_PASSWORD: saasiav3_password
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-saasiav3_secure_password_123}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - saasiav3-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U saasiav3 -d saasiav3"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Next.js Application
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: saasiav3-app
+  redis:
+    image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_secure_password_123}
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://saasiav3:saasiav3_password@postgres:5432/saasiav3
-      - NEXTAUTH_URL=https://tu-dominio.com
-      - NEXTAUTH_SECRET=tu-super-secreto-nextauth-cambiar-en-produccion-muy-largo-y-seguro
-      - SECRET=tu-super-secreto-nextauth-cambiar-en-produccion-muy-largo-y-seguro
-      - NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
-      - DEFAULT_N8N_WEBHOOK=https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3
-      - GOOGLE_CLIENT_ID=tu-google-client-id
-      - GOOGLE_CLIENT_SECRET=tu-google-client-secret
-      - GITHUB_CLIENT_ID=tu-github-client-id
-      - GITHUB_CLIENT_SECRET=tu-github-client-secret
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secure_password_123}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  app:
+    image: node:20-alpine
+    restart: unless-stopped
+    working_dir: /app
+    command: |
+      sh -c "
+      echo 'Installing system dependencies...' &&
+      apk add --no-cache libc6-compat curl git &&
+      echo 'Cloning source code...' &&
+      git clone https://github.com/rodsct/saasiav3.git /tmp/source &&
+      cp -r /tmp/source/* /app/ &&
+      echo 'Installing npm dependencies...' &&
+      npm install --legacy-peer-deps &&
+      echo 'Generating Prisma client...' &&
+      npx prisma generate &&
+      echo 'Building application...' &&
+      npm run build &&
+      echo 'Starting application...' &&
+      npm start
+      "
+    expose:
+      - "3000"
+    volumes:
+      - app_uploads:/app/public/uploads
+    environment:
+      DATABASE_URL: postgresql://saasiav3:${POSTGRES_PASSWORD:-saasiav3_secure_password_123}@postgres:5432/saasiav3
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_123}@redis:6379
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-tu_nextauth_secret_muy_largo_32_caracteres_2024}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://tu-proyecto.easypanel.app}
+      NODE_ENV: production
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-proyecto.easypanel.app}
+      SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://tu-proyecto.easypanel.app}
+      SITE_NAME: ${SITE_NAME:-Aranza.io}
+      AUTHOR_NAME: ${AUTHOR_NAME:-Aranza Team}
+      DEFAULT_N8N_WEBHOOK: ${DEFAULT_N8N_WEBHOOK:-https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@tu-proyecto.easypanel.app}
+      PORT: 3000
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST:-}
+      EMAIL_SERVER_PORT: ${EMAIL_SERVER_PORT:-587}
+      EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-}
+      EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - saasiav3-network
-    volumes:
-      - app_uploads:/app/public/uploads
-
-  # Redis for session storage (optional)
-  redis:
-    image: redis:7-alpine
-    container_name: saasiav3-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    networks:
-      - saasiav3-network
-    volumes:
-      - redis_data:/data
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local
   app_uploads:
+    driver: local
 
 networks:
-  saasiav3-network:
-    driver: bridge
+  default:
+    external: false
