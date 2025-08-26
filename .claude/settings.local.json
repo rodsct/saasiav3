@@ -53,7 +53,8 @@
       "Bash(docker:*)",
       "Bash(git commit:*)",
       "Bash(git tag:*)",
-      "WebFetch(domain:proyectonuevo-saasiav3.uclxiv.easypanel.host)"
+      "WebFetch(domain:proyectonuevo-saasiav3.uclxiv.easypanel.host)",
+      "Bash(touch:*)"
     ],
     "deny": [],
     "ask": []
