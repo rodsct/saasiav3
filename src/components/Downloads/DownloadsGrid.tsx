@@ -49,14 +49,18 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
           toast.error("No tienes permisos para ver estas descargas");
           return;
         }
+        if (response.status === 500) {
+          toast.error("Error del servidor - intenta más tarde");
+          return;
+        }
         toast.error("Error cargando descargas");
         return;
       }
 
       const contentType = response.headers.get("content-type");
       if (!contentType?.includes("application/json")) {
-        console.error("Response is not JSON:", contentType);
-        toast.error("Error en formato de respuesta");
+        console.error("Downloads response is not JSON:", contentType, "Status:", response.status);
+        toast.error("Error en formato de respuesta - servidor no disponible");
         return;
       }
       

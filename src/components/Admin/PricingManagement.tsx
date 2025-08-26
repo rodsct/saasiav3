@@ -36,10 +36,24 @@ export default function PricingManagement() {
   const loadStripeProducts = async () => {
     try {
       const response = await fetch("/api/admin/stripe/products");
-      if (response.ok) {
-        const data = await response.json();
-        setStripeProducts(data.products || []);
+      
+      if (!response.ok) {
+        if (response.status === 500) {
+          console.error("Server error loading Stripe products - retrying later");
+          return;
+        }
+        console.error("Error loading Stripe products:", response.status);
+        return;
       }
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        console.error("Stripe products response is not JSON:", contentType, "Status:", response.status);
+        return;
+      }
+      
+      const data = await response.json();
+      setStripeProducts(data.products || []);
     } catch (error) {
       console.error("Error loading Stripe products:", error);
     }

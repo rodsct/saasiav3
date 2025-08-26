@@ -43,13 +43,29 @@ export default function AdminDownloads() {
     try {
       setIsLoading(true);
       const response = await fetch("/api/admin/downloads");
-      const data = await response.json();
       
-      if (response.ok) {
-        setDownloads(data.downloads);
-      } else {
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("No tienes permisos de administrador");
+          return;
+        }
+        if (response.status === 500) {
+          toast.error("Error del servidor - intenta más tarde");
+          return;
+        }
         toast.error("Error loading downloads");
+        return;
       }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        console.error("Admin downloads response is not JSON:", contentType, "Status:", response.status);
+        toast.error("Error en formato de respuesta - servidor no disponible");
+        return;
+      }
+      
+      const data = await response.json();
+      setDownloads(data.downloads || []);
     } catch (error) {
       toast.error("Error loading downloads");
       console.error("Error:", error);
@@ -84,8 +100,6 @@ export default function AdminDownloads() {
         body: formData,
       });
 
-      const data = await response.json();
-
       if (response.ok) {
         toast.success("File uploaded successfully!");
         setUploadData({ title: "", description: "", accessLevel: "REGISTERED", category: "", tags: "" });
@@ -93,7 +107,23 @@ export default function AdminDownloads() {
         form.reset();
         loadDownloads();
       } else {
-        toast.error(data.error || "Upload failed");
+        // Validate JSON response before parsing
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          try {
+            const data = await response.json();
+            toast.error(data.error || "Error uploading file");
+          } catch {
+            toast.error("Error uploading file - respuesta inválida");
+          }
+        } else {
+          console.error("Upload response is not JSON:", contentType, "Status:", response.status);
+          if (response.status === 500) {
+            toast.error("Error del servidor - intenta más tarde");
+          } else {
+            toast.error("Error uploading file");
+          }
+        }
       }
     } catch (error) {
       toast.error("Upload failed");

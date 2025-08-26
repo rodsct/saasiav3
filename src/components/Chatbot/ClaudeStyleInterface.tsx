@@ -61,6 +61,10 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
           console.log("Chatbot not found or no conversations");
           return;
         }
+        if (response.status === 500) {
+          console.error("Server error loading conversations - retrying later");
+          return;
+        }
         console.error("Error loading conversations:", response.status);
         return;
       }

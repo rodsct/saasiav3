@@ -89,8 +89,23 @@ export default function AdminUpload({ onUploadSuccess }: { onUploadSuccess: () =
         });
         onUploadSuccess();
       } else {
-        const error = await response.json();
-        toast.error(error.error || "Error al subir archivo");
+        // Validate JSON response before parsing
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          try {
+            const error = await response.json();
+            toast.error(error.error || "Error al subir archivo");
+          } catch {
+            toast.error("Error al subir archivo - respuesta inválida");
+          }
+        } else {
+          console.error("Upload response is not JSON:", contentType, "Status:", response.status);
+          if (response.status === 500) {
+            toast.error("Error del servidor - intenta más tarde");
+          } else {
+            toast.error("Error al subir archivo");
+          }
+        }
       }
     } catch (error) {
       toast.error("Error al subir archivo");
