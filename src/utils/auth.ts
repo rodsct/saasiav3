@@ -25,12 +25,35 @@ export const authOptions: NextAuthOptions = {
   // Force production URL for callbacks
   url: PRODUCTION_URL,
   
+  // Custom redirect override
+  redirectProxyUrl: PRODUCTION_URL,
+  
   providers: [
-    GoogleProvider({
+    {
+      id: "google",
+      name: "Google",
+      type: "oauth",
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      // Remove custom authorization to let NextAuth handle it with our overridden URLs
-    }),
+      authorization: {
+        url: "https://accounts.google.com/o/oauth2/v2/auth",
+        params: {
+          scope: "openid email profile",
+          response_type: "code",
+          redirect_uri: `${PRODUCTION_URL}/api/auth/callback/google`
+        }
+      },
+      token: "https://oauth2.googleapis.com/token",
+      userinfo: "https://www.googleapis.com/oauth2/v2/userinfo",
+      profile(profile: any) {
+        return {
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        };
+      },
+    },
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
