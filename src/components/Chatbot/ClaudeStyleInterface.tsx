@@ -121,7 +121,8 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
     setMessages(prev => [...prev, tempUserMessage]);
 
     try {
-      const response = await fetch("/api/chatbot/chat", {
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch("/api/chatbot/chat-simple", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -131,25 +132,51 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
         }),
       });
 
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified chat endpoint not available, using fallback");
+        response = await fetch("/api/chatbot/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: userMessage,
+            chatbotId,
+            conversationId: currentConversation?.id,
+          }),
+        });
+      }
+
+      if (!response.ok) {
+        if (response.status === 500) {
+          toast.error("Error del servidor - intenta más tarde");
+        } else {
+          toast.error("Error al enviar mensaje");
+        }
+        setMessages(prev => prev.slice(0, -1));
+        return;
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        console.error("Chat response is not JSON:", contentType, "Status:", response.status);
+        toast.error("Error en respuesta del servidor");
+        setMessages(prev => prev.slice(0, -1));
+        return;
+      }
+
       const data = await response.json();
 
-      if (response.ok) {
-        if (!currentConversation?.id) {
-          await loadConversations();
-        }
-
-        const botMessage: Message = {
-          id: data.messageId,
-          content: data.content,
-          isFromUser: false,
-          createdAt: new Date().toISOString(),
-        };
-
-        setMessages(prev => [...prev, botMessage]);
-      } else {
-        toast.error("Error al enviar mensaje");
-        setMessages(prev => prev.slice(0, -1));
+      if (!currentConversation?.id) {
+        await loadConversations();
       }
+
+      const botMessage: Message = {
+        id: data.messageId,
+        content: data.content,
+        isFromUser: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Error al enviar mensaje");
