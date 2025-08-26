@@ -31,7 +31,7 @@ export default function AdminOverview() {
 
   const loadStats = async () => {
     try {
-      const response = await fetch("/api/admin/stats");
+      const response = await fetch("/api/admin/stats-simple");
       if (response.ok) {
         const data = await response.json();
         setStats(data);

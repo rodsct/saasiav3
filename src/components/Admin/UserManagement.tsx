@@ -28,7 +28,7 @@ export default function UserManagement() {
 
   const loadUsers = async () => {
     try {
-      const response = await fetch("/api/admin/users");
+      const response = await fetch("/api/admin/users-simple");
       
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
@@ -58,12 +58,12 @@ export default function UserManagement() {
 
   const updateUserSubscription = async (userId: string, subscription: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users-update`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ subscription }),
+        body: JSON.stringify({ userId, subscription }),
       });
 
       if (!response.ok) {
@@ -85,12 +85,12 @@ export default function UserManagement() {
 
   const updateUserRole = async (userId: string, role: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users-update`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ role }),
+        body: JSON.stringify({ userId, role }),
       });
 
       if (!response.ok) {
