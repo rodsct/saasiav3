@@ -152,15 +152,28 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
     }
 
     try {
-      const response = await fetch(`/api/admin/downloads/${downloadId}`, {
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch(`/api/admin/downloads-simple/${downloadId}`, {
         method: "DELETE",
       });
+
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified delete endpoint not available, using fallback");
+        response = await fetch(`/api/admin/downloads/${downloadId}`, {
+          method: "DELETE",
+        });
+      }
 
       if (response.ok) {
         toast.success("Archivo eliminado");
         loadDownloads();
       } else {
-        toast.error("Error al eliminar archivo");
+        if (response.status === 500) {
+          toast.error("Error del servidor - intenta más tarde");
+        } else {
+          toast.error("Error al eliminar archivo");
+        }
+        console.error("Delete failed - Status:", response.status);
       }
     } catch (error) {
       toast.error("Error al eliminar archivo");
