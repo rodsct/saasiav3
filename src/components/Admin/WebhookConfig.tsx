@@ -17,13 +17,29 @@ export default function WebhookConfig() {
   const loadModels = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/admin/webhooks");
-      const data = await response.json();
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch("/api/admin/webhooks-simple");
+      
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified webhooks endpoint not available, using fallback");
+        response = await fetch("/api/admin/webhooks");
+      }
       
       if (response.ok) {
-        setModels(data.models);
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          const data = await response.json();
+          setModels(data.models);
+        } else {
+          console.error("Webhooks response is not JSON:", contentType);
+          toast.error("Error en formato de respuesta");
+        }
       } else {
-        toast.error("Error loading webhook configurations");
+        if (response.status === 500) {
+          toast.error("Error del servidor - intenta más tarde");
+        } else {
+          toast.error("Error loading webhook configurations");
+        }
       }
     } catch (error) {
       toast.error("Error loading webhook configurations");
@@ -45,7 +61,8 @@ export default function WebhookConfig() {
 
   const saveWebhook = async (modelId: string) => {
     try {
-      const response = await fetch("/api/admin/webhooks", {
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch("/api/admin/webhooks-simple", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -56,7 +73,19 @@ export default function WebhookConfig() {
         }),
       });
 
-      const data = await response.json();
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified webhooks endpoint not available, using fallback");
+        response = await fetch("/api/admin/webhooks", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            modelId,
+            webhookUrl,
+          }),
+        });
+      }
 
       if (response.ok) {
         toast.success("Webhook updated successfully!");
@@ -64,7 +93,22 @@ export default function WebhookConfig() {
         setWebhookUrl("");
         loadModels();
       } else {
-        toast.error(data.error || "Failed to update webhook");
+        // Validate JSON response before parsing
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          try {
+            const data = await response.json();
+            toast.error(data.error || "Failed to update webhook");
+          } catch {
+            toast.error("Failed to update webhook");
+          }
+        } else {
+          if (response.status === 500) {
+            toast.error("Error del servidor - intenta más tarde");
+          } else {
+            toast.error("Failed to update webhook");
+          }
+        }
       }
     } catch (error) {
       toast.error("Failed to update webhook");

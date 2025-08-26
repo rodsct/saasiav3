@@ -50,7 +50,13 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
 
   const loadConversations = async () => {
     try {
-      const response = await fetch(`/api/chatbot/conversations?chatbotId=${chatbotId}`);
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch(`/api/chatbot/conversations-simple?chatbotId=${chatbotId}`);
+      
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified conversations endpoint not available, using fallback");
+        response = await fetch(`/api/chatbot/conversations?chatbotId=${chatbotId}`);
+      }
       
       if (!response.ok) {
         if (response.status === 401) {
