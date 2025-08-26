@@ -150,15 +150,28 @@ export default function AdminDownloads() {
     if (!confirm("Are you sure you want to delete this file?")) return;
 
     try {
-      const response = await fetch(`/api/admin/downloads/${id}`, {
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch(`/api/admin/downloads-simple/${id}`, {
         method: "DELETE",
       });
+
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified delete endpoint not available, using fallback");
+        response = await fetch(`/api/admin/downloads/${id}`, {
+          method: "DELETE",
+        });
+      }
 
       if (response.ok) {
         toast.success("File deleted successfully!");
         loadDownloads();
       } else {
-        toast.error("Failed to delete file");
+        if (response.status === 500) {
+          toast.error("Server error - try again later");
+        } else {
+          toast.error("Failed to delete file");
+        }
+        console.error("Delete failed - Status:", response.status);
       }
     } catch (error) {
       toast.error("Failed to delete file");
