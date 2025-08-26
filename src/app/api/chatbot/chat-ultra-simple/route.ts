@@ -4,7 +4,8 @@ export async function POST(request: NextRequest) {
   try {
     console.log("Ultra simple chatbot chat API called");
     
-    const { chatbotId, message, conversationId } = await request.json();
+    const requestBody = await request.json();
+    const { chatbotId, message, conversationId, userInfo } = requestBody;
 
     if (!chatbotId || !message) {
       return NextResponse.json(
@@ -14,16 +15,31 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("Processing message:", message.substring(0, 50) + "...");
-
-    // Create simple persistent IDs without database complexity
-    const userAgent = request.headers.get("user-agent") || "unknown";
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "127.0.0.1";
-    const userId = `user-${Buffer.from(userAgent + ip).toString('base64').slice(0, 12)}`;
+    
+    let userId = "anonymous-user";
+    let userEmail = "anonymous@example.com";
+    let userName = "Usuario Anónimo";
+    let userSubscription = "FREE";
+    
+    // If user info is provided from frontend, use it
+    if (userInfo?.id) {
+      userId = userInfo.id;
+      userEmail = userInfo.email || "unknown@example.com";
+      userName = userInfo.name || "Usuario";
+      userSubscription = userInfo.subscription || "FREE";
+      console.log("Using real user info:", userEmail);
+    } else {
+      // Fallback: create persistent ID based on browser fingerprint
+      const userAgent = request.headers.get("user-agent") || "unknown";
+      const ip = request.headers.get("x-forwarded-for") || "127.0.0.1";
+      userId = `user-${Buffer.from(userAgent + ip).toString('base64').slice(0, 12)}`;
+      console.log("Using fallback user ID:", userId);
+    }
     
     // Use existing conversation ID or create new one
     const finalConversationId = conversationId || `conv-${userId}-${Date.now()}`;
     
-    console.log("Using IDs - User:", userId, "Conversation:", finalConversationId);
+    console.log("Using IDs - User:", userId, "Email:", userEmail, "Conversation:", finalConversationId);
 
     // Direct webhook call without database overhead
     const webhookUrl = "https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3";
@@ -35,9 +51,9 @@ export async function POST(request: NextRequest) {
       conversationId: finalConversationId,
       chatbotId,
       userId: userId,
-      userEmail: "user@example.com", // Will be enhanced later
-      userName: "Usuario",
-      userSubscription: "PRO",
+      userEmail: userEmail,
+      userName: userName,
+      userSubscription: userSubscription,
       timestamp: new Date().toISOString(),
       messageHistory: [] // Empty for now to avoid database issues
     };

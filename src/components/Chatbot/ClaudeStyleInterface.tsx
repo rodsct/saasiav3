@@ -23,10 +23,11 @@ interface ChatbotProps {
   chatbotId: string;
 }
 
-export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
+export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: ChatbotProps) {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+  const [currentChatbotId, setCurrentChatbotId] = useState(initialChatbotId);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -46,16 +47,16 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
     if (user?.id) {
       loadConversations();
     }
-  }, [user, chatbotId]);
+  }, [user, currentChatbotId]);
 
   const loadConversations = async () => {
     try {
       // Try simplified endpoint first, fallback to original
-      let response = await fetch(`/api/chatbot/conversations-simple?chatbotId=${chatbotId}`);
+      let response = await fetch(`/api/chatbot/conversations-simple?chatbotId=${currentChatbotId}`);
       
       if (!response.ok || response.status === 404) {
         console.log("Simplified conversations endpoint not available, using fallback");
-        response = await fetch(`/api/chatbot/conversations?chatbotId=${chatbotId}`);
+        response = await fetch(`/api/chatbot/conversations?chatbotId=${currentChatbotId}`);
       }
       
       if (!response.ok) {
@@ -99,6 +100,12 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
   };
 
   const createNewChat = async () => {
+    // Generate unique chatbotId for this new conversation
+    const newChatbotId = `chatbot-${user?.id || 'anon'}-${Date.now()}`;
+    
+    console.log("Creating new chat with chatbotId:", newChatbotId);
+    
+    setCurrentChatbotId(newChatbotId);
     setCurrentConversation(null);
     setMessages([]);
     setInput("");
@@ -127,8 +134,14 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMessage,
-          chatbotId,
+          chatbotId: currentChatbotId,
           conversationId: currentConversation?.id,
+          userInfo: user ? {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            subscription: user.subscription
+          } : null,
         }),
       });
 
@@ -139,20 +152,20 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: userMessage,
-            chatbotId,
+            chatbotId: currentChatbotId,
             conversationId: currentConversation?.id,
           }),
         });
       }
 
       if (!response.ok || response.status === 404) {
-        console.log("Direct endpoint not available, trying simplified");
+        console.log("Direct endpoint not available, trying original");
         response = await fetch("/api/chatbot/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: userMessage,
-            chatbotId,
+            chatbotId: currentChatbotId,
             conversationId: currentConversation?.id,
           }),
         });
