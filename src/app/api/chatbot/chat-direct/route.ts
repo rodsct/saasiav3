@@ -21,36 +21,38 @@ export async function POST(request: NextRequest) {
     let realUser = null;
     
     try {
-      // Try to extract user from NextAuth session cookie
-      const sessionCookie = request.cookies.get("next-auth.session-token")?.value || 
-                           request.cookies.get("__Secure-next-auth.session-token")?.value;
+      // Simple approach - create a persistent user ID without database dependency
+      const userAgent = request.headers.get("user-agent") || "unknown";
+      const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
       
-      if (sessionCookie) {
-        console.log("Session cookie found, looking up user");
-        // Find session in database
-        const session = await prisma.session.findFirst({
-          where: { sessionToken: sessionCookie },
-          include: { user: true }
-        });
+      // Create a consistent user ID based on browser fingerprint
+      userId = `user-${Buffer.from(userAgent + ip).toString('base64').slice(0, 12)}`;
+      console.log("Using persistent user ID:", userId);
+      
+      // Try to get user info if available (optional, don't fail if not found)
+      try {
+        const sessionCookie = request.cookies.get("next-auth.session-token")?.value || 
+                             request.cookies.get("__Secure-next-auth.session-token")?.value;
         
-        if (session?.user) {
-          realUser = session.user;
-          userId = session.user.id;
-          console.log("Real user found:", session.user.email);
+        if (sessionCookie) {
+          const session = await prisma.session.findFirst({
+            where: { sessionToken: sessionCookie },
+            include: { user: { select: { id: true, email: true, name: true, subscription: true } } }
+          });
+          
+          if (session?.user) {
+            realUser = session.user;
+            userId = session.user.id; // Use real user ID if found
+            console.log("Real user identified:", session.user.email);
+          }
         }
-      }
-      
-      // If no session found, create persistent anonymous ID
-      if (!realUser) {
-        const userAgent = request.headers.get("user-agent") || "unknown";
-        const ip = request.headers.get("x-forwarded-for") || "unknown";
-        userId = `anon-${Buffer.from(userAgent + ip).toString('base64').slice(0, 8)}`;
-        console.log("Using anonymous user ID:", userId);
+      } catch (sessionError) {
+        console.log("Session lookup failed, continuing with persistent ID");
       }
       
     } catch (error) {
-      console.log("Auth lookup failed, using anonymous user");
-      userId = `anonymous-${Date.now().toString().slice(-8)}`;
+      console.log("User identification failed, using fallback");
+      userId = `fallback-${Date.now().toString().slice(-8)}`;
     }
 
     // Find or create conversation - persist for the same user
@@ -90,6 +92,25 @@ export async function POST(request: NextRequest) {
     
     console.log('Sending to webhook with real IDs');
     
+    // Get message history safely
+    let messageHistory = [];
+    try {
+      messageHistory = await prisma.message.findMany({
+        where: { conversationId: conversation.id },
+        orderBy: { id: "asc" },
+        take: 10,
+        select: {
+          content: true,
+          isFromUser: true,
+          id: true
+        }
+      });
+      console.log("Message history loaded:", messageHistory.length, "messages");
+    } catch (historyError) {
+      console.log("Message history query failed, using empty array");
+      messageHistory = [];
+    }
+    
     // Call n8n webhook with real conversation and user data
     const webhookResponse = await fetch(webhookUrl, {
       method: "POST",
@@ -106,16 +127,7 @@ export async function POST(request: NextRequest) {
         userName: realUser?.name || "Usuario Anónimo",
         userSubscription: realUser?.subscription || "FREE",
         timestamp: new Date().toISOString(),
-        messageHistory: await prisma.message.findMany({
-          where: { conversationId: conversation.id },
-          orderBy: { id: "asc" },
-          take: 10, // Last 10 messages for context
-          select: {
-            content: true,
-            isFromUser: true,
-            createdAt: true
-          }
-        })
+        messageHistory: messageHistory
       }),
     });
 
