@@ -71,10 +71,19 @@ export default function AdminUpload({ onUploadSuccess }: { onUploadSuccess: () =
     uploadFormData.append("tags", formData.tags);
 
     try {
-      const response = await fetch("/api/admin/downloads", {
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch("/api/admin/downloads-simple", {
         method: "POST",
         body: uploadFormData,
       });
+
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified downloads endpoint not available, using fallback");
+        response = await fetch("/api/admin/downloads", {
+          method: "POST",
+          body: uploadFormData,
+        });
+      }
 
       if (response.ok) {
         toast.success("Archivo subido exitosamente");

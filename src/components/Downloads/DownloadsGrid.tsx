@@ -37,8 +37,14 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
 
   const loadDownloads = async () => {
     try {
-      const endpoint = showAdminControls ? "/api/admin/downloads" : "/api/downloads";
-      const response = await fetch(endpoint);
+      let endpoint = showAdminControls ? "/api/admin/downloads" : "/api/downloads";
+      let response = await fetch(endpoint);
+      
+      // If admin endpoint fails, try simplified version
+      if (showAdminControls && (!response.ok || response.status === 500)) {
+        console.log("Admin downloads endpoint failed, trying simplified version");
+        response = await fetch("/api/admin/downloads-simple");
+      }
       
       if (!response.ok) {
         if (response.status === 401) {

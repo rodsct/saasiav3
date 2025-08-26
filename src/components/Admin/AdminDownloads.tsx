@@ -42,7 +42,13 @@ export default function AdminDownloads() {
   const loadDownloads = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/admin/downloads");
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch("/api/admin/downloads-simple");
+      
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified downloads endpoint not available, using fallback");
+        response = await fetch("/api/admin/downloads");
+      }
       
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
