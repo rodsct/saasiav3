@@ -7,8 +7,17 @@ import { prisma } from "./prismaDB";
 
 // Force production URL in environment - Override any .env values
 const PRODUCTION_URL = "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+
+// Aggressively override ALL URL environment variables
 process.env.NEXTAUTH_URL = PRODUCTION_URL;
 process.env.NEXTAUTH_URL_INTERNAL = PRODUCTION_URL;
+process.env.NEXT_PUBLIC_SITE_URL = PRODUCTION_URL;
+process.env.SITE_URL = PRODUCTION_URL;
+
+// Log for debugging
+console.log("🔧 Forcing production URLs:");
+console.log("  NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+console.log("  NEXTAUTH_URL_INTERNAL:", process.env.NEXTAUTH_URL_INTERNAL);
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
@@ -20,13 +29,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      authorization: {
-        url: "https://accounts.google.com/oauth/authorize",
-        params: {
-          scope: "openid email profile",
-          redirect_uri: `${PRODUCTION_URL}/api/auth/callback/google`
-        }
-      }
+      // Remove custom authorization to let NextAuth handle it with our overridden URLs
     }),
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
