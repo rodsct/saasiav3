@@ -86,14 +86,46 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
 
   const handleDownload = async (downloadId: string, fileName: string) => {
     try {
-      const response = await fetch(`/api/downloads/${downloadId}`);
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch(`/api/downloads-simple/${downloadId}`);
+      
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified download endpoint not available, using fallback");
+        response = await fetch(`/api/downloads/${downloadId}`);
+      }
       
       if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Necesitas iniciar sesión para descargar");
+          return;
+        }
         if (response.status === 403) {
           toast.error("Necesitas una suscripción premium para descargar este archivo");
           return;
         }
-        throw new Error("Error al descargar");
+        if (response.status === 404) {
+          toast.error("Archivo no encontrado");
+          return;
+        }
+        if (response.status === 500) {
+          toast.error("Error del servidor - intenta más tarde");
+          return;
+        }
+        
+        // Check if response is JSON error message
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          try {
+            const errorData = await response.json();
+            toast.error(errorData.error || "Error al descargar archivo");
+          } catch {
+            toast.error("Error al descargar archivo");
+          }
+        } else {
+          console.error("Download response error - Status:", response.status, "Content-Type:", response.headers.get("content-type"));
+          toast.error("Error al descargar archivo");
+        }
+        return;
       }
 
       const blob = await response.blob();
