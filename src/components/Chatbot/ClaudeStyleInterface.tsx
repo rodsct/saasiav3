@@ -31,7 +31,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -48,6 +48,16 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       loadConversations();
     }
   }, [user, currentChatbotId]);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setSidebarOpen(window.innerWidth >= 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const loadConversations = async () => {
     try {
@@ -237,10 +247,18 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-120px)] bg-[#2f2f2f] text-white rounded-lg overflow-hidden"
-         style={{ height: 'calc(100vh - 120px)' }}>
+    <div className="flex min-h-[calc(100vh-80px)] bg-[#2f2f2f] text-white overflow-hidden relative"
+         style={{ height: 'calc(100vh - 80px)' }}>
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-80' : 'w-16'} bg-[#1e1e1e] border-r border-[#3f3f3f] transition-all duration-300 flex flex-col`}>
+      <div className={`${sidebarOpen ? 'w-80 max-w-[80vw]' : 'w-16'} bg-[#1e1e1e] border-r border-[#3f3f3f] transition-all duration-300 flex flex-col ${sidebarOpen ? 'fixed md:relative inset-y-0 left-0 z-40 md:z-auto' : ''}`}>
         {/* Header */}
         <div className="p-4 border-b border-[#3f3f3f]">
           <div className="flex items-center justify-between">
@@ -324,7 +342,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full md:w-auto">
         {/* Welcome Message */}
         {messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
@@ -344,7 +362,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
               </div>
               
               {/* Quick Actions */}
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <button
                   onClick={() => setInput("¿Qué servicios de IA ofrecen?")}
                   className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
@@ -379,9 +397,9 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
         ) : (
           /* Messages Area */
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto py-8">
+            <div className="max-w-4xl mx-auto py-4 md:py-8">
               {messages.map((message) => (
-                <div key={message.id} className="mb-8 px-6">
+                <div key={message.id} className="mb-6 md:mb-8 px-4 md:px-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
                       {message.isFromUser ? (
@@ -457,7 +475,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
         {/* Input Area */}
         <div className="border-t border-[#3f3f3f] bg-[#2f2f2f]">
-          <div className="max-w-4xl mx-auto p-6">
+          <div className="max-w-4xl mx-auto p-4 md:p-6">
             <div className="relative">
               <div className="bg-[#3f3f3f] rounded-2xl border border-[#4f4f4f] overflow-hidden">
                 <textarea

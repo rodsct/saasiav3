@@ -43,8 +43,6 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <ClaudeStyleInterface chatbotId={DEFAULT_CHATBOT_ID} />
-    </div>
+    <ClaudeStyleInterface chatbotId={DEFAULT_CHATBOT_ID} />
   );
 }

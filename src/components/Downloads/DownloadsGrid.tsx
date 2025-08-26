@@ -278,9 +278,9 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
   return (
     <div className="space-y-8">
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 items-center">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
         {/* Search */}
-        <div className="flex-1 min-w-64">
+        <div className="flex-1 min-w-full sm:min-w-64">
           <div className="relative">
             <svg className="absolute left-3 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -334,12 +334,12 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
                 !canAccess ? 'opacity-60' : ''
               }`}
             >
-              <div className="flex items-start gap-4">
+              <div className="flex flex-col sm:flex-row items-start gap-4">
                 {getFileIcon(download.mimeType)}
                 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-medium text-white truncate pr-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
+                    <h3 className="text-lg font-medium text-white">
                       {download.title}
                     </h3>
                     <div className="flex items-center gap-2 flex-shrink-0">
@@ -386,7 +386,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
                     </div>
                   )}
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <button
                       onClick={() => handleDownload(download.id, download.fileName)}
                       disabled={!canAccess}
