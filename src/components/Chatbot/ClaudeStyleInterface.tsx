@@ -276,56 +276,56 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
             </button>
           </div>
 
-        {/* Conversations List */}
-        {sidebarOpen && (
-          <div className="flex-1 overflow-y-auto">
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-                Recientes
-              </h3>
-              <div className="space-y-1">
-                {conversations.map((conversation) => (
-                  <button
-                    key={conversation.id}
-                    onClick={() => selectConversation(conversation)}
-                    className={`w-full text-left p-3 rounded-lg transition-colors hover:bg-[#3f3f3f] ${
-                      currentConversation?.id === conversation.id ? 'bg-[#3f3f3f]' : ''
-                    }`}
-                  >
-                    <div className="text-sm text-white truncate">
-                      {conversation.messages?.[0]?.content.slice(0, 40) || "Nueva conversación"}...
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {new Date(conversation.createdAt).toLocaleDateString()}
-                    </div>
-                  </button>
-                ))}
+          {/* Conversations List */}
+          {sidebarOpen && (
+            <div className="flex-1 overflow-y-auto">
+              <div className="px-4 py-2">
+                <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
+                  Recientes
+                </h3>
+                <div className="space-y-1">
+                  {conversations.map((conversation) => (
+                    <button
+                      key={conversation.id}
+                      onClick={() => selectConversation(conversation)}
+                      className={`w-full text-left p-3 rounded-lg transition-colors hover:bg-[#3f3f3f] ${
+                        currentConversation?.id === conversation.id ? 'bg-[#3f3f3f]' : ''
+                      }`}
+                    >
+                      <div className="text-sm text-white truncate">
+                        {conversation.messages?.[0]?.content.slice(0, 40) || "Nueva conversación"}...
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {new Date(conversation.createdAt).toLocaleDateString()}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* User Info */}
-        {sidebarOpen && user && (
-          <div className="p-4 border-t border-[#3f3f3f]">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-[#ff6b35] rounded-full flex items-center justify-center">
-                <span className="text-white font-medium text-sm">
-                  {user.name?.[0] || 'U'}
-                </span>
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-white">
-                  {user.name || 'Usuario'}
+          {/* User Info */}
+          {sidebarOpen && user && (
+            <div className="p-4 border-t border-[#3f3f3f]">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-[#ff6b35] rounded-full flex items-center justify-center">
+                  <span className="text-white font-medium text-sm">
+                    {user.name?.[0] || 'U'}
+                  </span>
                 </div>
-                <div className="text-xs text-gray-400">
-                  Plan Pro
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-white">
+                    {user.name || 'Usuario'}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    Plan Pro
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col">
@@ -367,116 +367,117 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
               </div>
             </div>
           ) : (
-          /* Messages Area */
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto py-8">
-              {messages.map((message) => (
-                <div key={message.id} className="mb-8 px-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-                      {message.isFromUser ? (
-                        <div className="w-8 h-8 bg-[#ff6b35] rounded-lg flex items-center justify-center">
-                          <span className="text-white font-medium text-sm">
-                            {user?.name?.[0] || 'U'}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center">
-                          <span className="text-white font-medium text-sm">A</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="text-gray-100">
+            /* Messages Area */
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-4xl mx-auto py-8">
+                {messages.map((message) => (
+                  <div key={message.id} className="mb-8 px-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
                         {message.isFromUser ? (
-                          <p className="whitespace-pre-wrap">{message.content}</p>
+                          <div className="w-8 h-8 bg-[#ff6b35] rounded-lg flex items-center justify-center">
+                            <span className="text-white font-medium text-sm">
+                              {user?.name?.[0] || 'U'}
+                            </span>
+                          </div>
                         ) : (
-                          <ReactMarkdown
-                            components={{
-                              p: ({ children }) => <p className="mb-4 last:mb-0 leading-relaxed">{children}</p>,
-                              code: ({ children }) => (
-                                <code className="bg-[#1e1e1e] px-1.5 py-1 rounded text-sm font-mono text-green-400">
-                                  {children}
-                                </code>
-                              ),
-                              pre: ({ children }) => (
-                                <pre className="bg-[#1e1e1e] p-4 rounded-lg overflow-x-auto my-4 border border-[#3f3f3f]">
-                                  <code className="text-green-400 font-mono text-sm">{children}</code>
-                                </pre>
-                              ),
-                              ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-1">{children}</ul>,
-                              ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-1">{children}</ol>,
-                              blockquote: ({ children }) => (
-                                <blockquote className="border-l-4 border-[#ff6b35] pl-4 italic my-4 text-gray-300">
-                                  {children}
-                                </blockquote>
-                              ),
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
+                          <div className="w-8 h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center">
+                            <span className="text-white font-medium text-sm">A</span>
+                          </div>
                         )}
                       </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              {isLoading && (
-                <div className="mb-8 px-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-medium text-sm">A</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="text-gray-100">
+                          {message.isFromUser ? (
+                            <p className="whitespace-pre-wrap">{message.content}</p>
+                          ) : (
+                            <ReactMarkdown
+                              components={{
+                                p: ({ children }) => <p className="mb-4 last:mb-0 leading-relaxed">{children}</p>,
+                                code: ({ children }) => (
+                                  <code className="bg-[#1e1e1e] px-1.5 py-1 rounded text-sm font-mono text-green-400">
+                                    {children}
+                                  </code>
+                                ),
+                                pre: ({ children }) => (
+                                  <pre className="bg-[#1e1e1e] p-4 rounded-lg overflow-x-auto my-4 border border-[#3f3f3f]">
+                                    <code className="text-green-400 font-mono text-sm">{children}</code>
+                                  </pre>
+                                ),
+                                ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-1">{children}</ul>,
+                                ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-1">{children}</ol>,
+                                blockquote: ({ children }) => (
+                                  <blockquote className="border-l-4 border-[#ff6b35] pl-4 italic my-4 text-gray-300">
+                                    {children}
+                                  </blockquote>
+                                ),
+                              }}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
-        )}
-
-        {/* Input Area */}
-        <div className="border-t border-[#3f3f3f] bg-[#2f2f2f]">
-          <div className="max-w-4xl mx-auto p-6">
-            <div className="relative">
-              <div className="bg-[#3f3f3f] rounded-2xl border border-[#4f4f4f] overflow-hidden">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => {
-                    setInput(e.target.value);
-                    adjustTextareaHeight();
-                  }}
-                  onKeyDown={handleKeyPress}
-                  placeholder="¿Cómo puedo ayudarte hoy?"
-                  rows={1}
-                  className="w-full resize-none bg-transparent px-4 py-4 pr-16 text-white placeholder-gray-400 focus:outline-none"
-                  style={{ 
-                    minHeight: '56px',
-                    maxHeight: '200px',
-                  }}
-                />
+                ))}
                 
-                {/* Send Button */}
-                <button
-                  onClick={sendMessage}
-                  disabled={!input.trim() || isLoading}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-lg bg-[#ff6b35] hover:bg-[#e55a2b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                </button>
+                {isLoading && (
+                  <div className="mb-8 px-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-8 h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-medium text-sm">A</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="border-t border-[#3f3f3f] bg-[#2f2f2f]">
+            <div className="max-w-4xl mx-auto p-6">
+              <div className="relative">
+                <div className="bg-[#3f3f3f] rounded-2xl border border-[#4f4f4f] overflow-hidden">
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                      adjustTextareaHeight();
+                    }}
+                    onKeyDown={handleKeyPress}
+                    placeholder="¿Cómo puedo ayudarte hoy?"
+                    rows={1}
+                    className="w-full resize-none bg-transparent px-4 py-4 pr-16 text-white placeholder-gray-400 focus:outline-none"
+                    style={{ 
+                      minHeight: '56px',
+                      maxHeight: '200px',
+                    }}
+                  />
+                  
+                  {/* Send Button */}
+                  <button
+                    onClick={sendMessage}
+                    disabled={!input.trim() || isLoading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-lg bg-[#ff6b35] hover:bg-[#e55a2b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
