@@ -5,15 +5,16 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { prisma } from "./prismaDB";
 
-// Force production URL in environment
-process.env.NEXTAUTH_URL = process.env.NEXTAUTH_URL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
-process.env.NEXTAUTH_URL_INTERNAL = process.env.NEXTAUTH_URL_INTERNAL || "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+// Force production URL in environment - Override any .env values
+const PRODUCTION_URL = "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+process.env.NEXTAUTH_URL = PRODUCTION_URL;
+process.env.NEXTAUTH_URL_INTERNAL = PRODUCTION_URL;
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
   
   // Force production URL for callbacks
-  url: "https://proyectonuevo-saasiav3.uclxiv.easypanel.host",
+  url: PRODUCTION_URL,
   
   providers: [
     GoogleProvider({
@@ -23,7 +24,7 @@ export const authOptions: NextAuthOptions = {
         url: "https://accounts.google.com/oauth/authorize",
         params: {
           scope: "openid email profile",
-          redirect_uri: "https://proyectonuevo-saasiav3.uclxiv.easypanel.host/api/auth/callback/google"
+          redirect_uri: `${PRODUCTION_URL}/api/auth/callback/google`
         }
       }
     }),
@@ -79,28 +80,27 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async redirect({ url, baseUrl }) {
-      const prodUrl = "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
-      console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl, "prodUrl:", prodUrl);
+      console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl, "prodUrl:", PRODUCTION_URL);
       
       // Force production URL for all redirects
       if (url.startsWith("/")) {
-        const finalUrl = `${prodUrl}${url}`;
+        const finalUrl = `${PRODUCTION_URL}${url}`;
         console.log("🔀 Redirecting to:", finalUrl);
         return finalUrl;
       }
       
       // If it's a localhost URL, replace with production URL
       if (url.includes("localhost")) {
-        const finalUrl = url.replace(/http:\/\/localhost:\d+/, prodUrl);
+        const finalUrl = url.replace(/http:\/\/localhost:\d+/, PRODUCTION_URL);
         console.log("🔀 Replacing localhost with:", finalUrl);
         return finalUrl;
       }
       
-      // Allow prodUrl domain
+      // Allow production URL domain
       if (url.includes("proyectonuevo-saasiav3.uclxiv.easypanel.host")) return url;
       
-      console.log("🔀 Default redirect to prodUrl:", prodUrl);
-      return prodUrl;
+      console.log("🔀 Default redirect to production URL:", PRODUCTION_URL);
+      return PRODUCTION_URL;
     },
     async jwt({ token, user }) {
       if (user) {
