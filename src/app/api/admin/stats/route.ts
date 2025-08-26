@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         email: true,
         subscription: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
       take: 10,
     });
     console.log("Recent users count:", recentUsers.length);

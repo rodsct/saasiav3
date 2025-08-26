@@ -25,9 +25,8 @@ export async function GET(request: NextRequest) {
         subscription: true,
         subscriptionEndsAt: true,
         role: true,
-        createdAt: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
     });
 
     console.log("Found users:", users.length);

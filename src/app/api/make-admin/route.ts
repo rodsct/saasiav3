@@ -72,9 +72,9 @@ export async function GET() {
         name: true,
         role: true,
         subscription: true,
-        createdAt: true
+        subscriptionEndsAt: true
       },
-      orderBy: { createdAt: "desc" }
+      orderBy: { id: "desc" }
     });
 
     console.log(`📊 Found ${users.length} users`);
