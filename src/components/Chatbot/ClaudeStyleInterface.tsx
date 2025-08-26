@@ -51,18 +51,36 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
   const loadConversations = async () => {
     try {
       const response = await fetch(`/api/chatbot/conversations?chatbotId=${chatbotId}`);
-      const data = await response.json();
       
-      if (response.ok) {
-        setConversations(data.conversations || []);
-        if (data.conversations?.length > 0) {
-          const latest = data.conversations[0];
-          setCurrentConversation(latest);
-          setMessages(latest.messages || []);
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log("Unauthorized access to conversations");
+          return;
         }
+        if (response.status === 404) {
+          console.log("Chatbot not found or no conversations");
+          return;
+        }
+        console.error("Error loading conversations:", response.status);
+        return;
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        console.error("Response is not JSON:", contentType);
+        return;
+      }
+
+      const data = await response.json();
+      setConversations(data.conversations || []);
+      if (data.conversations?.length > 0) {
+        const latest = data.conversations[0];
+        setCurrentConversation(latest);
+        setMessages(latest.messages || []);
       }
     } catch (error) {
       console.error("Error loading conversations:", error);
+      toast.error("Error loading conversations");
     }
   };
 

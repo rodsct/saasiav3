@@ -7,9 +7,9 @@ const Features = () => {
     <section className="pb-8 pt-20 bg-[#2f2f2f] lg:pb-[70px] lg:pt-[120px]">
       <div className="container">
         <SectionTitle
-          subtitle="Características"
-          title="Potencia de Aranza.io"
-          paragraph="Descubre las características que hacen de Aranza.io la plataforma de IA más completa para tu negocio."
+          subtitle="Servicios"
+          title="Soluciones Integrales de IA y Automatización"
+          paragraph="Transformamos tu empresa con tecnología de vanguardia. Desde asistentes virtuales hasta automatización completa de procesos, ofrecemos soluciones personalizadas que impulsan el crecimiento y la eficiencia."
         />
 
         <div className="-mx-4 mt-12 flex flex-wrap lg:mt-20">

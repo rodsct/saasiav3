@@ -11,23 +11,35 @@ export async function PATCH(
   if (adminCheck instanceof NextResponse) return adminCheck;
 
   try {
-    const { subscription } = await request.json();
+    const body = await request.json();
+    const { subscription, role } = body;
     const userId = params.id;
 
-    // Calculate subscription end date if upgrading to PRO
-    let subscriptionEndsAt = null;
-    if (subscription === "PRO") {
-      const endDate = new Date();
-      endDate.setMonth(endDate.getMonth() + 1);
-      subscriptionEndsAt = endDate;
+    // Prepare update data
+    const updateData: any = {};
+    
+    // Handle subscription update
+    if (subscription !== undefined) {
+      updateData.subscription = subscription;
+      
+      // Calculate subscription end date if upgrading to PRO
+      if (subscription === "PRO") {
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
+        updateData.subscriptionEndsAt = endDate;
+      } else if (subscription === "FREE") {
+        updateData.subscriptionEndsAt = null;
+      }
+    }
+    
+    // Handle role update
+    if (role !== undefined) {
+      updateData.role = role;
     }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: {
-        subscription,
-        subscriptionEndsAt,
-      },
+      data: updateData,
     });
 
     return NextResponse.json({ user: updatedUser });

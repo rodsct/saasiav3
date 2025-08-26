@@ -39,13 +39,29 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
     try {
       const endpoint = showAdminControls ? "/api/admin/downloads" : "/api/downloads";
       const response = await fetch(endpoint);
-      const data = await response.json();
       
-      if (response.ok) {
-        setDownloads(data.downloads);
-      } else {
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Necesitas iniciar sesión para ver las descargas");
+          return;
+        }
+        if (response.status === 403) {
+          toast.error("No tienes permisos para ver estas descargas");
+          return;
+        }
         toast.error("Error cargando descargas");
+        return;
       }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        console.error("Response is not JSON:", contentType);
+        toast.error("Error en formato de respuesta");
+        return;
+      }
+      
+      const data = await response.json();
+      setDownloads(data.downloads || []);
     } catch (error) {
       console.error("Error loading downloads:", error);
       toast.error("Error cargando descargas");

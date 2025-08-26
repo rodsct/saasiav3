@@ -29,12 +29,28 @@ export default function UserManagement() {
   const loadUsers = async () => {
     try {
       const response = await fetch("/api/admin/users");
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users || []);
+      
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("No tienes permisos de administrador");
+          return;
+        }
+        toast.error("Error cargando usuarios");
+        return;
       }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        console.error("Response is not JSON:", contentType);
+        toast.error("Error en formato de respuesta");
+        return;
+      }
+      
+      const data = await response.json();
+      setUsers(data.users || []);
     } catch (error) {
       console.error("Error loading users:", error);
+      toast.error("Error cargando usuarios");
     } finally {
       setIsLoading(false);
     }
@@ -50,15 +66,47 @@ export default function UserManagement() {
         body: JSON.stringify({ subscription }),
       });
 
-      if (response.ok) {
-        toast.success("Suscripción actualizada");
-        loadUsers();
-      } else {
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("No tienes permisos de administrador");
+          return;
+        }
         toast.error("Error al actualizar suscripción");
+        return;
       }
+
+      toast.success("Suscripción actualizada");
+      loadUsers();
     } catch (error) {
       console.error("Error updating subscription:", error);
       toast.error("Error al actualizar suscripción");
+    }
+  };
+
+  const updateUserRole = async (userId: string, role: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("No tienes permisos de administrador");
+          return;
+        }
+        toast.error("Error al actualizar rol");
+        return;
+      }
+
+      toast.success("Rol actualizado");
+      loadUsers();
+    } catch (error) {
+      console.error("Error updating role:", error);
+      toast.error("Error al actualizar rol");
     }
   };
 
@@ -171,6 +219,9 @@ export default function UserManagement() {
                   Usuario
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Rol
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Suscripción
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -206,6 +257,15 @@ export default function UserManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      user.role === "ADMIN" 
+                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                    }`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       user.subscription === "PRO" 
                         ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                         : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
@@ -225,29 +285,50 @@ export default function UserManagement() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     ID: {user.id.slice(-8)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                    <select
-                      value={user.subscription}
-                      onChange={(e) => updateUserSubscription(user.id, e.target.value)}
-                      className="text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1"
-                    >
-                      <option value="FREE">FREE</option>
-                      <option value="PRO">PRO</option>
-                    </select>
-                    
-                    <button
-                      onClick={() => extendSubscription(user.id, 1)}
-                      className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-                    >
-                      +1 mes
-                    </button>
-                    
-                    <button
-                      onClick={() => deleteUser(user.id)}
-                      className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                    >
-                      Eliminar
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex flex-col space-y-2">
+                      {/* Role Control */}
+                      <div className="flex items-center space-x-2">
+                        <label className="text-xs text-gray-600 dark:text-gray-400 w-10">Rol:</label>
+                        <select
+                          value={user.role}
+                          onChange={(e) => updateUserRole(user.id, e.target.value)}
+                          className="text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1"
+                        >
+                          <option value="USER">USER</option>
+                          <option value="ADMIN">ADMIN</option>
+                        </select>
+                      </div>
+                      
+                      {/* Subscription Control */}
+                      <div className="flex items-center space-x-2">
+                        <label className="text-xs text-gray-600 dark:text-gray-400 w-10">Sub:</label>
+                        <select
+                          value={user.subscription}
+                          onChange={(e) => updateUserSubscription(user.id, e.target.value)}
+                          className="text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1"
+                        >
+                          <option value="FREE">FREE</option>
+                          <option value="PRO">PRO</option>
+                        </select>
+                        
+                        <button
+                          onClick={() => extendSubscription(user.id, 1)}
+                          className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                          title="Extender 1 mes"
+                        >
+                          +1m
+                        </button>
+                      </div>
+                      
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => deleteUser(user.id)}
+                        className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors w-full"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

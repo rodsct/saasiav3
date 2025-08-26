@@ -14,8 +14,8 @@ import { getAllPosts } from "@/utils/markdown";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Aranza.io - Agencia de Inteligencia Artificial",
-  description: "Agencia de Inteligencia Artificial con Aranza, nuestro asistente virtual. Plataforma completa con chatbot IA, descargas seguras y componentes premium para potenciar tu negocio.",
+  title: "Aranza.io - Consultora de Inteligencia Artificial y Automatizaciones",
+  description: "Consultora especializada en Inteligencia Artificial y Automatizaciones. Transformamos tu negocio con soluciones IA personalizadas, automatización de procesos y asistentes virtuales inteligentes.",
 };
 
 export default function Home() {
