@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export async function GET(request: NextRequest) {
+  return NextResponse.json({
+    message: "Webhook test endpoint - use POST method to test",
+    webhook_url: "https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3",
+    usage: "POST with JSON body: { message: 'test' }"
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log("Testing n8n webhook directly");
