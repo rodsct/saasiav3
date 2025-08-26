@@ -31,10 +31,22 @@ export default function AdminOverview() {
 
   const loadStats = async () => {
     try {
-      const response = await fetch("/api/admin/stats-simple");
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch("/api/admin/stats-simple");
+      
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified stats endpoint not available, using fallback");
+        response = await fetch("/api/admin/stats");
+      }
+      
       if (response.ok) {
-        const data = await response.json();
-        setStats(data);
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          const data = await response.json();
+          setStats(data);
+        } else {
+          console.error("Stats response is not JSON:", contentType);
+        }
       }
     } catch (error) {
       console.error("Error loading admin stats:", error);

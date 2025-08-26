@@ -28,11 +28,21 @@ export default function UserManagement() {
 
   const loadUsers = async () => {
     try {
-      const response = await fetch("/api/admin/users-simple");
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch("/api/admin/users-simple");
+      
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified endpoint not available, using fallback");
+        response = await fetch("/api/admin/users");
+      }
       
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           toast.error("No tienes permisos de administrador");
+          return;
+        }
+        if (response.status === 500) {
+          toast.error("Error del servidor - intenta más tarde");
           return;
         }
         toast.error("Error cargando usuarios");
@@ -42,12 +52,13 @@ export default function UserManagement() {
       const contentType = response.headers.get("content-type");
       if (!contentType?.includes("application/json")) {
         console.error("Response is not JSON:", contentType);
-        toast.error("Error en formato de respuesta");
+        console.error("Response status:", response.status);
+        toast.error("Error en formato de respuesta - servidor no disponible");
         return;
       }
       
       const data = await response.json();
-      setUsers(data.users || []);
+      setUsers(data.users || data || []);
     } catch (error) {
       console.error("Error loading users:", error);
       toast.error("Error cargando usuarios");
@@ -58,13 +69,25 @@ export default function UserManagement() {
 
   const updateUserSubscription = async (userId: string, subscription: string) => {
     try {
-      const response = await fetch(`/api/admin/users-update`, {
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch(`/api/admin/users-update`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId, subscription }),
       });
+
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified update endpoint not available, using fallback");
+        response = await fetch(`/api/admin/users/${userId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ subscription }),
+        });
+      }
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
@@ -85,13 +108,25 @@ export default function UserManagement() {
 
   const updateUserRole = async (userId: string, role: string) => {
     try {
-      const response = await fetch(`/api/admin/users-update`, {
+      // Try simplified endpoint first, fallback to original
+      let response = await fetch(`/api/admin/users-update`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId, role }),
       });
+
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified update endpoint not available, using fallback");
+        response = await fetch(`/api/admin/users/${userId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ role }),
+        });
+      }
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
