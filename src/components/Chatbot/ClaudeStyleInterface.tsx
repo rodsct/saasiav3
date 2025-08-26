@@ -199,6 +199,11 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
     }
   };
 
+  const startNewConversation = () => {
+    setCurrentConversation(null);
+    setMessages([]);
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();

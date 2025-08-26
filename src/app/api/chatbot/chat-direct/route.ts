@@ -16,12 +16,81 @@ export async function POST(request: NextRequest) {
 
     console.log("Processing message:", message.substring(0, 50) + "...");
 
-    // Direct webhook call without complex auth checks
+    // Get real user ID from NextAuth session cookie
+    let userId = "anonymous-user";
+    let realUser = null;
+    
+    try {
+      // Try to extract user from NextAuth session cookie
+      const sessionCookie = request.cookies.get("next-auth.session-token")?.value || 
+                           request.cookies.get("__Secure-next-auth.session-token")?.value;
+      
+      if (sessionCookie) {
+        console.log("Session cookie found, looking up user");
+        // Find session in database
+        const session = await prisma.session.findFirst({
+          where: { sessionToken: sessionCookie },
+          include: { user: true }
+        });
+        
+        if (session?.user) {
+          realUser = session.user;
+          userId = session.user.id;
+          console.log("Real user found:", session.user.email);
+        }
+      }
+      
+      // If no session found, create persistent anonymous ID
+      if (!realUser) {
+        const userAgent = request.headers.get("user-agent") || "unknown";
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        userId = `anon-${Buffer.from(userAgent + ip).toString('base64').slice(0, 8)}`;
+        console.log("Using anonymous user ID:", userId);
+      }
+      
+    } catch (error) {
+      console.log("Auth lookup failed, using anonymous user");
+      userId = `anonymous-${Date.now().toString().slice(-8)}`;
+    }
+
+    // Find or create conversation - persist for the same user
+    let conversation;
+    if (conversationId) {
+      // Try to find existing conversation
+      conversation = await prisma.conversation.findFirst({
+        where: { 
+          id: conversationId
+        }
+      });
+    }
+
+    if (!conversation) {
+      console.log("Creating new conversation for user:", userId);
+      conversation = await prisma.conversation.create({
+        data: {
+          chatbotId,
+          userId: userId, // Use the identified user ID
+        }
+      });
+    }
+
+    // Save user message to maintain history
+    const userMessage = await prisma.message.create({
+      data: {
+        conversationId: conversation.id,
+        content: message,
+        isFromUser: true,
+      }
+    });
+
+    console.log("User message saved, conversation ID:", conversation.id);
+
+    // Direct webhook call
     const webhookUrl = "https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3";
     
-    console.log('Sending directly to webhook:', webhookUrl);
+    console.log('Sending to webhook with real IDs');
     
-    // Call n8n webhook directly
+    // Call n8n webhook with real conversation and user data
     const webhookResponse = await fetch(webhookUrl, {
       method: "POST",
       headers: {
@@ -30,10 +99,23 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         message,
-        conversationId: conversationId || `direct-${Date.now()}`,
+        conversationId: conversation.id,
         chatbotId,
-        userId: "direct-user",
-        timestamp: new Date().toISOString()
+        userId: userId,
+        userEmail: realUser?.email || "anonymous",
+        userName: realUser?.name || "Usuario Anónimo",
+        userSubscription: realUser?.subscription || "FREE",
+        timestamp: new Date().toISOString(),
+        messageHistory: await prisma.message.findMany({
+          where: { conversationId: conversation.id },
+          orderBy: { id: "asc" },
+          take: 10, // Last 10 messages for context
+          select: {
+            content: true,
+            isFromUser: true,
+            createdAt: true
+          }
+        })
       }),
     });
 
@@ -43,23 +125,43 @@ export async function POST(request: NextRequest) {
       const errorText = await webhookResponse.text();
       console.error('Webhook error response:', errorText);
       
+      // Save error message to conversation
+      const botMessage = await prisma.message.create({
+        data: {
+          conversationId: conversation.id,
+          content: "Lo siento, hubo un problema procesando tu mensaje. El servicio de IA está temporalmente no disponible.",
+          isFromUser: false,
+        }
+      });
+      
       return NextResponse.json({
         success: true,
-        conversationId: conversationId || `direct-${Date.now()}`,
-        messageId: `error-${Date.now()}`,
-        content: "Lo siento, hubo un problema procesando tu mensaje. El servicio de IA está temporalmente no disponible.",
+        conversationId: conversation.id,
+        messageId: botMessage.id,
+        content: botMessage.content,
       });
     }
 
     const n8nResponse = await webhookResponse.json();
     console.log('n8n response:', n8nResponse);
 
-    // Return bot response directly
+    // Save bot response to database for persistence
+    const botMessage = await prisma.message.create({
+      data: {
+        conversationId: conversation.id,
+        content: n8nResponse.output || n8nResponse.message || n8nResponse.text || "Respuesta procesada correctamente",
+        isFromUser: false,
+      }
+    });
+
+    console.log("Bot message saved with ID:", botMessage.id);
+
+    // Return bot response with real IDs
     return NextResponse.json({
       success: true,
-      conversationId: conversationId || `direct-${Date.now()}`,
-      messageId: `msg-${Date.now()}`,
-      content: n8nResponse.output || n8nResponse.message || n8nResponse.text || "Respuesta procesada correctamente",
+      conversationId: conversation.id,
+      messageId: botMessage.id,
+      content: botMessage.content,
     });
 
   } catch (error) {
