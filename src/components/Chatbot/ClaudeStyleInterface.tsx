@@ -80,7 +80,11 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
       }
     } catch (error) {
       console.error("Error loading conversations:", error);
-      toast.error("Error loading conversations");
+      if (error.message?.includes("500")) {
+        toast.error("Server error loading conversations. Check if chatbot exists in database.");
+      } else {
+        toast.error(`Error loading conversations: ${error.message || 'Unknown error'}`);
+      }
     }
   };
 
