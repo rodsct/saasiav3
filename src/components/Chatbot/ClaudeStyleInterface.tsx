@@ -121,8 +121,8 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
     setMessages(prev => [...prev, tempUserMessage]);
 
     try {
-      // Try simplified endpoint first, fallback to original
-      let response = await fetch("/api/chatbot/chat-simple", {
+      // Try direct endpoint (no auth dependencies), then simplified, then original
+      let response = await fetch("/api/chatbot/chat-direct", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -133,7 +133,20 @@ export default function ClaudeStyleInterface({ chatbotId }: ChatbotProps) {
       });
 
       if (!response.ok || response.status === 404) {
-        console.log("Simplified chat endpoint not available, using fallback");
+        console.log("Direct chat endpoint not available, trying simplified");
+        response = await fetch("/api/chatbot/chat-simple", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: userMessage,
+            chatbotId,
+            conversationId: currentConversation?.id,
+          }),
+        });
+      }
+
+      if (!response.ok || response.status === 404) {
+        console.log("Simplified chat endpoint not available, using original");
         response = await fetch("/api/chatbot/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
