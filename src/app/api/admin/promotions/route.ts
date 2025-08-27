@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTempPromotions, addTempPromotion } from "@/utils/tempPromotions";
+import { loadPromotionsFromFile, addPromotion } from "@/utils/persistentPromotions";
 
 export async function GET(request: NextRequest) {
   // Simple auth check using headers (same pattern as other admin endpoints)
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json({ promotions: getTempPromotions() });
+    return NextResponse.json({ promotions: loadPromotionsFromFile() });
 
   } catch (error) {
     console.error("Get promotions error:", error);
@@ -44,17 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if code already exists
-    const existingPromotions = getTempPromotions();
-    const existingPromo = existingPromotions.find(p => p.code === code.toUpperCase());
-    if (existingPromo) {
-      return NextResponse.json(
-        { error: "El código de promoción ya existe" },
-        { status: 400 }
-      );
-    }
-
-    // Create new promotion in memory
+    // Create new promotion
     const newPromotion = {
       id: code.toUpperCase(),
       code: code.toUpperCase(),
@@ -68,8 +58,16 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
-    addTempPromotion(newPromotion);
+    const success = addPromotion(newPromotion);
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: "El código de promoción ya existe" },
+        { status: 400 }
+      );
+    }
 
+    console.log("Promotion created and saved to file:", newPromotion.code);
     return NextResponse.json({ promotion: newPromotion });
 
   } catch (error) {

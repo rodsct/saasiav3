@@ -37,3 +37,6 @@ next-env.d.ts
 
 
 .env
+
+# data directory for persistent storage
+/data

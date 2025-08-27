@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { findTempPromotion } from "@/utils/tempPromotions";
+import { findActivePromotion, loadPromotionsFromFile } from "@/utils/persistentPromotions";
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,9 +44,15 @@ export async function POST(request: NextRequest) {
     let discountType = "PERCENTAGE";
     
     if (promoCode) {
-      const promotion = findTempPromotion(promoCode);
+      console.log("Looking for promo code:", promoCode);
+      const allPromotions = loadPromotionsFromFile();
+      console.log("Available promotions:", allPromotions.map(p => p.code));
+      
+      const promotion = findActivePromotion(promoCode);
+      console.log("Found promotion:", promotion);
       
       if (!promotion) {
+        console.log("Promotion not found or inactive");
         return NextResponse.json(
           { error: "Código de promoción inválido" },
           { status: 400 }
