@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getTempWhatsAppConfig, setTempWhatsAppConfig } from "@/utils/tempWhatsAppConfig";
 
-// Simplified WhatsApp config using only environment variables
+// Simplified WhatsApp config using shared in-memory storage
 // This avoids any database-related issues during migration
 
 export async function GET(request: NextRequest) {
@@ -12,16 +13,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Return environment-based config
-    const config = {
-      whatsappNumber: process.env.WHATSAPP_NUMBER || "+5215512345678",
-      whatsappMessage: process.env.WHATSAPP_MESSAGE || "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.",
-      isWhatsappEnabled: process.env.WHATSAPP_ENABLED === 'true' || true, // Default enabled for testing
-    };
-
+    const config = getTempWhatsAppConfig();
+    
     return NextResponse.json({ 
       success: true, 
-      config 
+      config
     });
 
   } catch (error) {
@@ -59,20 +55,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For now, just return the config as if it was saved
-    // In production, you would update environment variables or use database after migration
-    const config = {
-      whatsappNumber: whatsappNumber || process.env.WHATSAPP_NUMBER || "+5215512345678",
-      whatsappMessage: whatsappMessage || process.env.WHATSAPP_MESSAGE || "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.",
-      isWhatsappEnabled: isWhatsappEnabled !== undefined ? isWhatsappEnabled : (process.env.WHATSAPP_ENABLED === 'true' || true),
-    };
-
-    console.log("WhatsApp config temporarily updated:", config);
+    // Update the shared in-memory configuration
+    const updatedConfig = setTempWhatsAppConfig({
+      whatsappNumber,
+      whatsappMessage,
+      isWhatsappEnabled,
+    });
 
     return NextResponse.json({ 
       success: true, 
-      config,
-      message: "Configuration updated temporarily. For persistence, run: npx prisma migrate dev"
+      config: updatedConfig,
+      message: "Configuration updated temporarily in memory. For persistence, run: npx prisma migrate dev"
     });
 
   } catch (error) {

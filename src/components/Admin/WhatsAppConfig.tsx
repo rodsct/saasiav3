@@ -83,7 +83,12 @@ export default function WhatsAppConfig() {
       if (response.ok) {
         setConfig(data.config);
         setMigrationNeeded(false);
-        toast.success("Configuración de WhatsApp actualizada");
+        
+        if (data.message) {
+          toast.success("Configuración actualizada temporalmente");
+        } else {
+          toast.success("Configuración de WhatsApp actualizada");
+        }
       } else {
         if (data.requiresMigration) {
           setMigrationNeeded(true);
@@ -275,6 +280,21 @@ export default function WhatsAppConfig() {
               </p>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Temporary Storage Notice */}
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+        <h4 className="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mb-2">
+          ⚠️ Configuración Temporal
+        </h4>
+        <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-2">
+          Los cambios se guardan temporalmente en memoria y se perderán al reiniciar el servidor.
+        </p>
+        <div className="bg-yellow-100 dark:bg-yellow-800/30 rounded p-2">
+          <code className="text-xs text-yellow-900 dark:text-yellow-200">
+            Para persistencia: npx prisma migrate dev
+          </code>
         </div>
       </div>
 

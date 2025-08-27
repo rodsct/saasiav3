@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getTempWhatsAppConfig } from "@/utils/tempWhatsAppConfig";
 
-// Simplified WhatsApp QR endpoint using only environment variables
+// Simplified WhatsApp QR endpoint using shared in-memory configuration
 // This avoids any database-related issues during migration
 
 export async function GET(request: NextRequest) {
   try {
-    // Get configuration from environment variables
-    const whatsappNumber = process.env.WHATSAPP_NUMBER || "+5215512345678";
-    const whatsappMessage = process.env.WHATSAPP_MESSAGE || "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.";
-    const isWhatsappEnabled = process.env.WHATSAPP_ENABLED === 'true' || true; // Default enabled for testing
+    // Get configuration from shared in-memory storage
+    const config = getTempWhatsAppConfig();
+    const { whatsappNumber, whatsappMessage, isWhatsappEnabled } = config;
     
     if (!isWhatsappEnabled || !whatsappNumber) {
       return NextResponse.json({ 
