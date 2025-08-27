@@ -16,6 +16,10 @@ interface Promotion {
 
 const PROMOTIONS_FILE_PATH = path.join(process.cwd(), 'src', 'stripe', 'promotionsData.ts');
 
+// In-memory cache to ensure consistency during server session
+let promotionsCache: Promotion[] | null = null;
+let lastFileModified: number = 0;
+
 // Default promotions
 const DEFAULT_PROMOTIONS: Promotion[] = [
   {
@@ -64,32 +68,54 @@ function ensureDataDirectory() {
   }
 }
 
-// Load promotions from file
+// Load promotions from file with caching
 export function loadPromotionsFromFile(): Promotion[] {
   try {
+    // Check if we have cached data and file hasn't changed
+    if (promotionsCache && fs.existsSync(PROMOTIONS_FILE_PATH)) {
+      const stats = fs.statSync(PROMOTIONS_FILE_PATH);
+      if (stats.mtimeMs === lastFileModified) {
+        console.log('Using cached promotions:', promotionsCache.length);
+        return promotionsCache;
+      }
+    }
+
     if (!fs.existsSync(PROMOTIONS_FILE_PATH)) {
       // Create file with default promotions
       savePromotionsToFile(DEFAULT_PROMOTIONS);
+      promotionsCache = [...DEFAULT_PROMOTIONS];
       return DEFAULT_PROMOTIONS;
     }
     
+    const stats = fs.statSync(PROMOTIONS_FILE_PATH);
     const fileContent = fs.readFileSync(PROMOTIONS_FILE_PATH, 'utf8');
     
-    // Parse TypeScript file content to extract promotions array
+    // Extract the JSON array from the TypeScript file
     const arrayMatch = fileContent.match(/export const promotionsData: Promotion\[\] = (\[[\s\S]*?\]);/);
     if (arrayMatch) {
-      // Convert the string to a valid JSON array by removing TypeScript types and formatting
-      const arrayString = arrayMatch[1]
-        .replace(/(\w+):/g, '"$1":')  // Quote property names
-        .replace(/"/g, '"')           // Normalize quotes
-        .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
-      
-      return JSON.parse(arrayString) as Promotion[];
+      try {
+        // Use eval to parse the JavaScript array (safe since it's our own file)
+        const promotions = eval('(' + arrayMatch[1] + ')') as Promotion[];
+        console.log('Loaded', promotions.length, 'promotions from file');
+        
+        // Update cache
+        promotionsCache = promotions;
+        lastFileModified = stats.mtimeMs;
+        
+        return promotions;
+      } catch (parseError) {
+        console.error('Error parsing promotions array:', parseError);
+        promotionsCache = [...DEFAULT_PROMOTIONS];
+        return DEFAULT_PROMOTIONS;
+      }
     }
     
+    console.log('No promotions array found, using defaults');
+    promotionsCache = [...DEFAULT_PROMOTIONS];
     return DEFAULT_PROMOTIONS;
   } catch (error) {
     console.error('Error loading promotions from file:', error);
+    promotionsCache = [...DEFAULT_PROMOTIONS];
     return DEFAULT_PROMOTIONS;
   }
 }
@@ -114,7 +140,13 @@ export function savePromotionsToFile(promotions: Promotion[]): void {
 export const promotionsData: Promotion[] = ${JSON.stringify(promotions, null, 2)};`;
 
     fs.writeFileSync(PROMOTIONS_FILE_PATH, fileContent, 'utf8');
-    console.log('Promotions saved to TypeScript file successfully');
+    
+    // Update cache and timestamp
+    promotionsCache = [...promotions];
+    const stats = fs.statSync(PROMOTIONS_FILE_PATH);
+    lastFileModified = stats.mtimeMs;
+    
+    console.log('Promotions saved to TypeScript file successfully:', promotions.length, 'promotions');
   } catch (error) {
     console.error('Error saving promotions to file:', error);
   }
@@ -168,14 +200,20 @@ export function updatePromotion(id: string, updates: Partial<Promotion>): boolea
 // Delete promotion
 export function deletePromotion(id: string): boolean {
   try {
+    console.log('Attempting to delete promotion with ID:', id);
     const promotions = loadPromotionsFromFile();
+    console.log('Current promotions before delete:', promotions.map(p => ({ id: p.id, code: p.code })));
+    
     const filteredPromotions = promotions.filter(p => p.id !== id);
+    console.log('Filtered promotions after delete:', filteredPromotions.map(p => ({ id: p.id, code: p.code })));
     
     if (filteredPromotions.length === promotions.length) {
+      console.log('Promotion not found with ID:', id);
       return false; // Promotion not found
     }
     
     savePromotionsToFile(filteredPromotions);
+    console.log('Promotion deleted successfully, saved', filteredPromotions.length, 'promotions');
     return true;
   } catch (error) {
     console.error('Error deleting promotion:', error);
