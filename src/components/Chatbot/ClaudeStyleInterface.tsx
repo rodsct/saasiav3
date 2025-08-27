@@ -29,7 +29,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   const { t } = useTranslation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
-  const [currentChatbotId, setCurrentChatbotId] = useState(initialChatbotId);
+  const [currentChatbotId, setCurrentChatbotId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +47,12 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
   useEffect(() => {
     if (user?.id) {
+      initializeChatbot();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.id && currentChatbotId) {
       loadConversations();
     }
   }, [user, currentChatbotId]);
@@ -61,7 +67,29 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  const initializeChatbot = async () => {
+    try {
+      const response = await fetch('/api/chatbot/user-chatbot');
+      
+      if (!response.ok) {
+        console.error("Error getting user chatbot:", response.status);
+        return;
+      }
+      
+      const data = await response.json();
+      setCurrentChatbotId(data.chatbot.id);
+      
+    } catch (error) {
+      console.error("Error initializing chatbot:", error);
+    }
+  };
+
   const loadConversations = async () => {
+    if (!currentChatbotId) {
+      console.log("No chatbot ID available for loading conversations");
+      return;
+    }
+
     try {
       // Try simplified endpoint first, fallback to original
       let response = await fetch(`/api/chatbot/conversations-simple?chatbotId=${currentChatbotId}`);
@@ -112,15 +140,14 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   };
 
   const createNewChat = async () => {
-    // Generate unique chatbotId for this new conversation
-    const newChatbotId = `chatbot-${user?.id || 'anon'}-${Date.now()}`;
+    console.log("Creating new conversation for chatbot:", currentChatbotId);
     
-    console.log("Creating new chat with chatbotId:", newChatbotId);
-    
-    setCurrentChatbotId(newChatbotId);
+    // Clear current conversation and messages to start fresh
     setCurrentConversation(null);
     setMessages([]);
     setInput("");
+    
+    // The new conversation will be created when the first message is sent
   };
 
   const sendMessage = async () => {
@@ -203,7 +230,14 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
       const data = await response.json();
 
-      if (!currentConversation?.id) {
+      // If this was the first message (no current conversation), update conversation state
+      if (!currentConversation?.id && data.conversationId) {
+        setCurrentConversation({
+          id: data.conversationId,
+          messages: [],
+          createdAt: new Date().toISOString(),
+        });
+        // Reload conversations to get updated list
         await loadConversations();
       }
 
