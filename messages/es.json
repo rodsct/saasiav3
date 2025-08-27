@@ -1,0 +1,62 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "about": "Acerca",
+    "blog": "Blog", 
+    "pricing": "Precios",
+    "chatbot": "Chatbot",
+    "downloads": "Descargas",
+    "signin": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "signout": "Cerrar Sesión"
+  },
+  "hero": {
+    "title": "Consultora de Inteligencia Artificial y Automatizaciones",
+    "subtitle": "Transformamos tu negocio con soluciones de IA personalizadas, chatbots inteligentes y automatizaciones que optimizan tus procesos y aumentan tu productividad.",
+    "cta_primary": "Comenzar Ahora",
+    "cta_secondary": "Ver Demos"
+  },
+  "chatbot": {
+    "chats": "Chats",
+    "new_chat": "Nuevo Chat",
+    "recent": "Recientes",
+    "new_conversation": "Nueva conversación",
+    "welcome": "¡Hola! ¿En qué puedo ayudarte hoy?",
+    "welcome_question": "¿En qué puedo ayudarte hoy?",
+    "placeholder": "Escribe tu mensaje aquí...",
+    "user": "Usuario",
+    "pro_plan": "Plan Pro",
+    "errors": {
+      "server_error": "Error del servidor. Intenta de nuevo.",
+      "send_message": "Error al enviar mensaje. Intenta de nuevo.",
+      "server_response": "Error en la respuesta del servidor"
+    },
+    "quick_actions": {
+      "services": "Nuestros Servicios",
+      "services_desc": "Conoce todo lo que podemos hacer por ti",
+      "services_question": "¿Cuáles son los servicios que ofrecen?",
+      "consulting": "Consultoría",
+      "consulting_desc": "Información sobre nuestras consultorías",
+      "consulting_question": "¿Cómo funciona su servicio de consultoría?",
+      "about": "Sobre Nosotros",
+      "about_desc": "Conoce más sobre nuestro equipo",
+      "about_question": "¿Quiénes son y qué experiencia tienen?",
+      "contact": "Contacto",
+      "contact_desc": "Formas de ponerse en contacto",
+      "contact_question": "¿Cómo puedo contactarlos para más información?"
+    }
+  },
+  "downloads": {
+    "title": "Centro de Descargas",
+    "subtitle": "Accede a todos tus recursos descargables",
+    "search_placeholder": "Buscar archivos...",
+    "no_files": "No hay archivos disponibles",
+    "download": "Descargar",
+    "view": "Ver",
+    "upload": "Subir Archivo",
+    "file_details": "Detalles del Archivo",
+    "visibility": "Visibilidad",
+    "public": "Público", 
+    "private": "Privado"
+  }
+}

@@ -131,7 +131,10 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
       const data = await response.json();
       setConversations(data.conversations || []);
-      if (data.conversations?.length > 0) {
+      
+      // Only load the latest conversation if we don't have a current conversation
+      // This prevents overriding when user explicitly started a new chat
+      if (data.conversations?.length > 0 && !currentConversation && messages.length === 0) {
         const latest = data.conversations[0];
         setCurrentConversation(latest);
         setMessages(latest.messages || []);
@@ -146,15 +149,34 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
     }
   };
 
-  const createNewChat = async () => {
-    console.log("Creating new conversation for chatbot:", currentChatbotId);
+  const reloadConversationsList = async () => {
+    if (!currentChatbotId) return;
+
+    try {
+      let response = await fetch(`/api/chatbot/conversations-simple?chatbotId=${currentChatbotId}`);
+      
+      if (!response.ok || response.status === 404) {
+        response = await fetch(`/api/chatbot/conversations?chatbotId=${currentChatbotId}`);
+      }
+      
+      if (response.ok) {
+        const data = await response.json();
+        setConversations(data.conversations || []);
+      }
+    } catch (error) {
+      console.error("Error reloading conversations list:", error);
+    }
+  };
+
+  const createNewChat = () => {
+    console.log("Starting new conversation for chatbot:", currentChatbotId);
     
     // Clear current conversation and messages to start fresh
     setCurrentConversation(null);
     setMessages([]);
     setInput("");
     
-    // The new conversation will be created when the first message is sent
+    console.log("New chat started - conversation cleared");
   };
 
   const sendMessage = async () => {
@@ -244,8 +266,8 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
           messages: [],
           createdAt: new Date().toISOString(),
         });
-        // Reload conversations to get updated list
-        await loadConversations();
+        // Reload conversations list to show new conversation in Recientes
+        await reloadConversationsList();
       }
 
       const botMessage: Message = {

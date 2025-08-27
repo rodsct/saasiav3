@@ -1,0 +1,62 @@
+{
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "blog": "Blog",
+    "pricing": "Pricing", 
+    "chatbot": "Chatbot",
+    "downloads": "Downloads",
+    "signin": "Sign In",
+    "signup": "Sign Up",
+    "signout": "Sign Out"
+  },
+  "hero": {
+    "title": "Artificial Intelligence and Automation Consulting",
+    "subtitle": "We transform your business with personalized AI solutions, intelligent chatbots and automations that optimize your processes and increase your productivity.",
+    "cta_primary": "Get Started",
+    "cta_secondary": "View Demos"
+  },
+  "chatbot": {
+    "chats": "Chats",
+    "new_chat": "New Chat", 
+    "recent": "Recent",
+    "new_conversation": "New conversation",
+    "welcome": "Hello! How can I help you today?",
+    "welcome_question": "How can I help you today?",
+    "placeholder": "Type your message here...",
+    "user": "User",
+    "pro_plan": "Pro Plan",
+    "errors": {
+      "server_error": "Server error. Please try again.",
+      "send_message": "Error sending message. Please try again.",
+      "server_response": "Server response error"
+    },
+    "quick_actions": {
+      "services": "Our Services",
+      "services_desc": "Learn everything we can do for you",
+      "services_question": "What services do you offer?",
+      "consulting": "Consulting",
+      "consulting_desc": "Information about our consulting services",
+      "consulting_question": "How does your consulting service work?",
+      "about": "About Us",
+      "about_desc": "Learn more about our team", 
+      "about_question": "Who are you and what experience do you have?",
+      "contact": "Contact",
+      "contact_desc": "Ways to get in touch",
+      "contact_question": "How can I contact you for more information?"
+    }
+  },
+  "downloads": {
+    "title": "Downloads Center",
+    "subtitle": "Access all your downloadable resources",
+    "search_placeholder": "Search files...",
+    "no_files": "No files available",
+    "download": "Download",
+    "view": "View",
+    "upload": "Upload File",
+    "file_details": "File Details",
+    "visibility": "Visibility",
+    "public": "Public",
+    "private": "Private"
+  }
+}
