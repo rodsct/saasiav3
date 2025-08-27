@@ -109,13 +109,64 @@ const Header = () => {
                 </button>
                 <nav
                   id="navbarCollapse"
-                  className={`navbar absolute right-0 z-30 w-[250px] rounded border-[.5px] border-body-color/50 bg-white px-6 py-4 duration-300 dark:border-body-color/20 dark:bg-dark-2 lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 lg:dark:bg-transparent ${
+                  className={`navbar absolute right-0 z-30 w-[320px] rounded-xl border border-[#00d4ff]/20 bg-[#0a0a0a]/95 backdrop-blur-xl shadow-2xl shadow-[#00d4ff]/10 px-6 py-6 duration-300 lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 lg:shadow-none ${
                     navbarOpen
                       ? "visibility top-full opacity-100"
                       : "invisible top-[120%] opacity-0"
                   }`}
                 >
                   <ul className="block lg:ml-8 lg:flex lg:gap-x-8 xl:ml-14 xl:gap-x-12">
+                    {/* Mobile Authentication Section */}
+                    <div className="lg:hidden border-b border-[#00d4ff]/20 pb-4 mb-4">
+                      {user ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-[#1a1a2e]/50">
+                            <div className="w-10 h-10 bg-gradient-to-br from-[#00d4ff] to-[#0099cc] rounded-full flex items-center justify-center">
+                              <span className="text-white font-bold text-sm">{user.name?.charAt(0)?.toUpperCase()}</span>
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">{user.name}</p>
+                              <p className="text-[#00d4ff]/70 text-sm">{user.email}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              logout();
+                              setNavbarOpen(false);
+                            }}
+                            className="w-full rounded-lg bg-red-500/20 border border-red-500/30 px-4 py-3 text-base font-medium text-red-400 hover:bg-red-500/30 transition-all duration-300 flex items-center justify-center space-x-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>{t('navigation.signout')}</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <Link
+                            href="/signin"
+                            onClick={() => setNavbarOpen(false)}
+                            className="w-full rounded-lg border border-[#00d4ff]/30 px-4 py-3 text-base font-medium text-white hover:bg-[#00d4ff]/10 transition-all duration-300 flex items-center justify-center space-x-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>{t('navigation.signin')}</span>
+                          </Link>
+                          <Link
+                            href="/signup"
+                            onClick={() => setNavbarOpen(false)}
+                            className="w-full rounded-lg px-4 py-3 text-base font-medium text-white bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] transition-all duration-300 shadow-lg shadow-[#00d4ff]/20 flex items-center justify-center space-x-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                            <span>{t('navigation.signup')}</span>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
                     {menuData.map((menuItem, index) =>
                       menuItem.path ? (
                         <li key={index} className="group relative">
@@ -124,18 +175,19 @@ const Header = () => {
                               onClick={navbarToggleHandler}
                               scroll={false}
                               href={menuItem.path}
-                              className={`ud-menu-scroll flex py-2 text-base text-white hover:text-[#00d4ff] lg:inline-flex lg:px-0 lg:py-6 transition-colors ${
-                                pathUrl === menuItem?.path && "text-[#00d4ff]"
+                              className={`ud-menu-scroll flex py-3 px-4 text-base text-white hover:text-[#00d4ff] lg:inline-flex lg:px-0 lg:py-6 transition-all duration-300 rounded-lg lg:rounded-none hover:bg-[#00d4ff]/10 lg:hover:bg-transparent ${
+                                pathUrl === menuItem?.path && "text-[#00d4ff] bg-[#00d4ff]/10 lg:bg-transparent"
                               }`}
                             >
                               {t(menuItem.title)}
                             </Link>
                           ) : (
                             <Link
+                              onClick={navbarToggleHandler}
                               scroll={false}
                               href={menuItem.path}
-                              className={`ud-menu-scroll flex py-2 text-base lg:inline-flex lg:px-0 lg:py-6 text-white hover:text-[#00d4ff] transition-colors ${
-                                pathUrl === menuItem?.path && "text-[#00d4ff]"
+                              className={`ud-menu-scroll flex py-3 px-4 text-base lg:inline-flex lg:px-0 lg:py-6 text-white hover:text-[#00d4ff] transition-all duration-300 rounded-lg lg:rounded-none hover:bg-[#00d4ff]/10 lg:hover:bg-transparent ${
+                                pathUrl === menuItem?.path && "text-[#00d4ff] bg-[#00d4ff]/10 lg:bg-transparent"
                               }`}
                             >
                               {t(menuItem.title)}
@@ -147,13 +199,13 @@ const Header = () => {
                           {pathUrl !== "/" ? (
                             <button
                               onClick={() => handleSubmenu(index)}
-                              className={`ud-menu-scroll flex items-center justify-between py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6`}
+                              className={`ud-menu-scroll flex items-center justify-between py-3 px-4 text-base text-white hover:text-[#00d4ff] lg:inline-flex lg:px-0 lg:py-6 transition-all duration-300 rounded-lg lg:rounded-none hover:bg-[#00d4ff]/10 lg:hover:bg-transparent w-full`}
                             >
                               {t(menuItem.title)}
 
                               <span className="pl-1">
                                 <svg
-                                  className={`duration-300 lg:group-hover:rotate-180`}
+                                  className={`duration-300 ${openIndex === index ? 'rotate-180' : ''} lg:group-hover:rotate-180`}
                                   width="16"
                                   height="17"
                                   viewBox="0 0 16 17"
@@ -170,17 +222,17 @@ const Header = () => {
                           ) : (
                             <button
                               onClick={() => handleSubmenu(index)}
-                              className={`ud-menu-scroll flex items-center justify-between py-2 text-base lg:inline-flex lg:px-0 lg:py-6 ${
+                              className={`ud-menu-scroll flex items-center justify-between py-3 px-4 text-base lg:inline-flex lg:px-0 lg:py-6 transition-all duration-300 rounded-lg lg:rounded-none hover:bg-[#00d4ff]/10 lg:hover:bg-transparent w-full ${
                                 sticky
-                                  ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
-                                  : "text-white"
+                                  ? "text-white hover:text-[#00d4ff]"
+                                  : "text-white hover:text-[#00d4ff]"
                               }`}
                             >
                               {t(menuItem.title)}
 
                               <span className="pl-1">
                                 <svg
-                                  className={`duration-300 lg:group-hover:rotate-180`}
+                                  className={`duration-300 ${openIndex === index ? 'rotate-180' : ''} lg:group-hover:rotate-180`}
                                   width="16"
                                   height="17"
                                   viewBox="0 0 16 17"
@@ -197,18 +249,19 @@ const Header = () => {
                           )}
 
                           <div
-                            className={`submenu relative left-0 top-full w-[250px] rounded-sm bg-white p-4 transition-[top] duration-300 group-hover:opacity-100 dark:bg-dark-2 lg:invisible lg:absolute lg:top-[110%] lg:block lg:opacity-0 lg:shadow-lg lg:group-hover:visible lg:group-hover:top-full ${
-                              openIndex === index ? "!-left-[25px]" : "hidden"
+                            className={`submenu relative left-0 top-full w-[280px] rounded-lg bg-[#1a1a2e]/90 backdrop-blur-sm border border-[#00d4ff]/20 p-4 transition-all duration-300 group-hover:opacity-100 lg:invisible lg:absolute lg:top-[110%] lg:block lg:opacity-0 lg:shadow-lg lg:group-hover:visible lg:group-hover:top-full ${
+                              openIndex === index ? "!-left-[25px] opacity-100" : "hidden lg:block"
                             }`}
                           >
                             {menuItem?.submenu?.map((submenuItem: any, i) => (
                               <Link
                                 href={submenuItem.path}
                                 key={i}
-                                className={`block rounded px-4 py-[10px] text-sm ${
+                                onClick={() => setNavbarOpen(false)}
+                                className={`block rounded-lg px-4 py-3 text-sm transition-all duration-300 ${
                                   pathUrl === submenuItem.path
-                                    ? "text-primary"
-                                    : "text-body-color hover:text-primary dark:text-dark-6 dark:hover:text-primary"
+                                    ? "text-[#00d4ff] bg-[#00d4ff]/10"
+                                    : "text-white hover:text-[#00d4ff] hover:bg-[#00d4ff]/5"
                                 }`}
                               >
                                 {submenuItem.title}
@@ -221,54 +274,48 @@ const Header = () => {
                   </ul>
                 </nav>
               </div>
-              <div className="hidden items-center justify-end pr-16 sm:flex lg:pr-0">
-                {/* theme toggler */}
-                <button
-                  aria-label="theme toggler"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="flex h-8 w-8 items-center justify-center text-body-color duration-300 dark:text-white"
-                >
-                  <span>
-                    <svg
-                      viewBox="0 0 16 16"
-                      className="hidden h-[22px] w-[22px] fill-current dark:block"
-                    >
-                      <path d="M4.50663 3.2267L3.30663 2.03337L2.36663 2.97337L3.55996 4.1667L4.50663 3.2267ZM2.66663 7.00003H0.666626V8.33337H2.66663V7.00003ZM8.66663 0.366699H7.33329V2.33337H8.66663V0.366699V0.366699ZM13.6333 2.97337L12.6933 2.03337L11.5 3.2267L12.44 4.1667L13.6333 2.97337ZM11.4933 12.1067L12.6866 13.3067L13.6266 12.3667L12.4266 11.1734L11.4933 12.1067ZM13.3333 7.00003V8.33337H15.3333V7.00003H13.3333ZM7.99996 3.6667C5.79329 3.6667 3.99996 5.46003 3.99996 7.6667C3.99996 9.87337 5.79329 11.6667 7.99996 11.6667C10.2066 11.6667 12 9.87337 12 7.6667C12 5.46003 10.2066 3.6667 7.99996 3.6667ZM7.33329 14.9667H8.66663V13H7.33329V14.9667ZM2.36663 12.36L3.30663 13.3L4.49996 12.1L3.55996 11.16L2.36663 12.36Z" />
-                    </svg>
-
-                    <svg
-                      viewBox="0 0 23 23"
-                      className={`h-[30px] w-[30px] fill-current text-dark dark:hidden ${
-                        !sticky && pathUrl === "/" && "text-white"
-                      }`}
-                    >
-                      <g clipPath="url(#clip0_40_125)">
-                        <path d="M16.6111 15.855C17.591 15.1394 18.3151 14.1979 18.7723 13.1623C16.4824 13.4065 14.1342 12.4631 12.6795 10.4711C11.2248 8.47905 11.0409 5.95516 11.9705 3.84818C10.8449 3.9685 9.72768 4.37162 8.74781 5.08719C5.7759 7.25747 5.12529 11.4308 7.29558 14.4028C9.46586 17.3747 13.6392 18.0253 16.6111 15.855Z" />
-                      </g>
-                    </svg>
-                  </span>
-                </button>
+              <div className="flex items-center justify-end pr-4 lg:pr-0">
 
                 {/* Language Selector */}
                 <div className="relative">
-                  <select 
-                    value={locale}
-                    onChange={(e) => changeLocale(e.target.value as 'es' | 'en')}
-                    className="bg-[#1a1a2e]/80 text-white text-sm px-3 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm"
+                  <button 
+                    onClick={() => changeLocale(locale === 'es' ? 'en' : 'es')}
+                    className="bg-[#1a1a2e]/80 text-white text-sm px-3 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm hover:bg-[#2a2a3e]/80 transition-colors flex items-center space-x-2"
                   >
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="en">🇺🇸 EN</option>
-                  </select>
+                    {locale === 'es' ? (
+                      <>
+                        <div className="w-4 h-3 bg-red-500 relative rounded-sm">
+                          <div className="absolute left-0 top-0 w-full h-1 bg-red-500"></div>
+                          <div className="absolute left-0 top-1 w-full h-1 bg-yellow-400"></div>
+                          <div className="absolute left-0 top-2 w-full h-1 bg-red-500"></div>
+                        </div>
+                        <span>ES</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-4 h-3 bg-blue-600 relative rounded-sm">
+                          <div className="absolute left-0 top-0 w-full h-0.5 bg-red-500"></div>
+                          <div className="absolute left-0 top-0.5 w-full h-0.5 bg-white"></div>
+                          <div className="absolute left-0 top-1 w-full h-0.5 bg-red-500"></div>
+                          <div className="absolute left-0 top-1.5 w-full h-0.5 bg-white"></div>
+                          <div className="absolute left-0 top-2 w-full h-0.5 bg-red-500"></div>
+                          <div className="absolute left-0 top-2.5 w-full h-0.5 bg-white"></div>
+                          <div className="absolute left-0 top-0 w-2 h-1.5 bg-blue-600"></div>
+                        </div>
+                        <span>EN</span>
+                      </>
+                    )}
+                  </button>
                 </div>
 
                 {user ? (
                   <>
-                    <p className="px-7 py-3 text-base font-medium text-white">
+                    <p className="hidden lg:block px-7 py-3 text-base font-medium text-white">
                       {user.name}
                     </p>
                     <button
                       onClick={() => logout()}
-                      className="rounded-xl bg-[#1a1a2e]/80 border border-[#00d4ff]/30 px-6 py-3 text-base font-medium text-white hover:bg-[#00d4ff]/20 transition-all duration-300"
+                      className="hidden lg:block rounded-xl bg-[#1a1a2e]/80 border border-[#00d4ff]/30 px-6 py-3 text-base font-medium text-white hover:bg-[#00d4ff]/20 transition-all duration-300"
                     >
                       {t('navigation.signout')}
                     </button>
@@ -277,13 +324,13 @@ const Header = () => {
                   <>
                     <Link
                       href="/signin"
-                      className="px-7 py-3 text-base font-medium text-white hover:text-[#00d4ff] transition-colors"
+                      className="hidden lg:block px-7 py-3 text-base font-medium text-white hover:text-[#00d4ff] transition-colors"
                     >
                       {t('navigation.signin')}
                     </Link>
                     <Link
                       href="/signup"
-                      className="rounded-xl px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] transition-all duration-300 shadow-lg shadow-[#00d4ff]/20"
+                      className="hidden lg:block rounded-xl px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] transition-all duration-300 shadow-lg shadow-[#00d4ff]/20"
                     >
                       {t('navigation.signup')}
                     </Link>
