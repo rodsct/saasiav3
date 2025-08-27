@@ -35,6 +35,46 @@ export async function POST(request: NextRequest) {
       apiVersion: "2023-10-16",
     });
 
+    console.log("Creating Stripe session for price:", priceId);
+
+    try {
+      // First verify if the price exists in Stripe
+      await stripe.prices.retrieve(priceId);
+      console.log("Price found in Stripe:", priceId);
+    } catch (priceError: any) {
+      console.error("Price not found in Stripe:", priceError.message);
+      
+      // If price doesn't exist, create it
+      if (priceError.code === 'resource_missing') {
+        console.log("Creating new price in Stripe...");
+        
+        // First create or get product
+        let product;
+        try {
+          product = await stripe.products.retrieve('prod_saasiav3_pro');
+        } catch {
+          product = await stripe.products.create({
+            id: 'prod_saasiav3_pro',
+            name: 'SaaS IA v3 - PRO Subscription',
+            description: 'Acceso completo a la plataforma con IA avanzada',
+          });
+        }
+        
+        // Create the price
+        await stripe.prices.create({
+          id: priceId,
+          unit_amount: 4900, // $49.00
+          currency: 'usd',
+          recurring: { interval: 'month' },
+          product: product.id,
+        });
+        
+        console.log("Price created successfully in Stripe");
+      } else {
+        throw priceError;
+      }
+    }
+
     // Create Stripe checkout session
     const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     
