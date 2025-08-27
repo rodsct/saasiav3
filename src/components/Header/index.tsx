@@ -72,12 +72,12 @@ const Header = () => {
               </Link>
             </div>
             <div className="flex w-full items-center justify-between px-4">
-              <div>
+              <div className="flex items-center space-x-2">
                 <button
                   onClick={navbarToggleHandler}
                   id="navbarToggler"
                   aria-label="Mobile Menu"
-                  className="absolute right-20 top-1/2 block -translate-y-1/2 rounded-lg px-3 py-[6px] ring-primary focus:ring-2 lg:hidden"
+                  className="lg:hidden block rounded-lg px-3 py-[6px] ring-primary focus:ring-2"
                 >
                   <span
                     className={`relative my-1.5 block h-0.5 w-[30px] transition-all duration-300 ${
@@ -107,6 +107,38 @@ const Header = () => {
                     }`}
                   />
                 </button>
+                
+                {/* Mobile Language Selector - Now after menu button */}
+                <div className="lg:hidden relative">
+                  <button 
+                    onClick={() => changeLocale(locale === 'es' ? 'en' : 'es')}
+                    className="bg-[#1a1a2e]/80 text-white text-xs px-2 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm hover:bg-[#2a2a3e]/80 transition-colors flex items-center space-x-1"
+                  >
+                    {locale === 'es' ? (
+                      <>
+                        <div className="w-3 h-2 bg-red-500 relative rounded-sm">
+                          <div className="absolute left-0 top-0 w-full h-0.5 bg-red-500"></div>
+                          <div className="absolute left-0 top-0.5 w-full h-0.5 bg-yellow-400"></div>
+                          <div className="absolute left-0 top-1 w-full h-0.5 bg-red-500"></div>
+                        </div>
+                        <span className="text-xs">ES</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-3 h-2 bg-blue-600 relative rounded-sm">
+                          <div className="absolute left-0 top-0 w-full h-0.25 bg-red-500"></div>
+                          <div className="absolute left-0 top-0.25 w-full h-0.25 bg-white"></div>
+                          <div className="absolute left-0 top-0.5 w-full h-0.25 bg-red-500"></div>
+                          <div className="absolute left-0 top-0.75 w-full h-0.25 bg-white"></div>
+                          <div className="absolute left-0 top-1 w-full h-0.25 bg-red-500"></div>
+                          <div className="absolute left-0 top-1.25 w-full h-0.25 bg-white"></div>
+                          <div className="absolute left-0 top-0 w-1.5 h-1 bg-blue-600"></div>
+                        </div>
+                        <span className="text-xs">EN</span>
+                      </>
+                    )}
+                  </button>
+                </div>
                 <nav
                   id="navbarCollapse"
                   className={`navbar absolute right-0 z-30 w-[320px] rounded-xl border border-[#00d4ff]/20 bg-[#0a0a0a]/95 backdrop-blur-xl shadow-2xl shadow-[#00d4ff]/10 px-6 py-6 duration-300 lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 lg:shadow-none ${
@@ -300,38 +332,6 @@ const Header = () => {
               </div>
               <div className="flex items-center justify-end space-x-3 pr-4 lg:pr-0">
 
-                {/* Language Selector */}
-                <div className="relative lg:order-1">
-                  <button 
-                    onClick={() => changeLocale(locale === 'es' ? 'en' : 'es')}
-                    className="bg-[#1a1a2e]/80 text-white text-xs lg:text-sm px-2 lg:px-3 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm hover:bg-[#2a2a3e]/80 transition-colors flex items-center space-x-1 lg:space-x-2"
-                  >
-                    {locale === 'es' ? (
-                      <>
-                        <div className="w-3 h-2 lg:w-4 lg:h-3 bg-red-500 relative rounded-sm">
-                          <div className="absolute left-0 top-0 w-full h-0.5 lg:h-1 bg-red-500"></div>
-                          <div className="absolute left-0 top-0.5 lg:top-1 w-full h-0.5 lg:h-1 bg-yellow-400"></div>
-                          <div className="absolute left-0 top-1 lg:top-2 w-full h-0.5 lg:h-1 bg-red-500"></div>
-                        </div>
-                        <span className="text-xs lg:text-sm">ES</span>
-                      </>
-                    ) : (
-                      <>
-                        <div className="w-3 h-2 lg:w-4 lg:h-3 bg-blue-600 relative rounded-sm">
-                          <div className="absolute left-0 top-0 w-full h-0.25 lg:h-0.5 bg-red-500"></div>
-                          <div className="absolute left-0 top-0.25 lg:top-0.5 w-full h-0.25 lg:h-0.5 bg-white"></div>
-                          <div className="absolute left-0 top-0.5 lg:top-1 w-full h-0.25 lg:h-0.5 bg-red-500"></div>
-                          <div className="absolute left-0 top-0.75 lg:top-1.5 w-full h-0.25 lg:h-0.5 bg-white"></div>
-                          <div className="absolute left-0 top-1 lg:top-2 w-full h-0.25 lg:h-0.5 bg-red-500"></div>
-                          <div className="absolute left-0 top-1.25 lg:top-2.5 w-full h-0.25 lg:h-0.5 bg-white"></div>
-                          <div className="absolute left-0 top-0 w-1.5 lg:w-2 h-1 lg:h-1.5 bg-blue-600"></div>
-                        </div>
-                        <span className="text-xs lg:text-sm">EN</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
                 {user ? (
                   <>
                     {/* Admin Access - Desktop */}
@@ -352,6 +352,37 @@ const Header = () => {
                     >
                       {t('navigation.signout')}
                     </button>
+                    {/* Language Selector - Desktop - Now after logout button */}
+                    <div className="hidden lg:block relative">
+                      <button 
+                        onClick={() => changeLocale(locale === 'es' ? 'en' : 'es')}
+                        className="bg-[#1a1a2e]/80 text-white text-sm px-3 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm hover:bg-[#2a2a3e]/80 transition-colors flex items-center space-x-2"
+                      >
+                        {locale === 'es' ? (
+                          <>
+                            <div className="w-4 h-3 bg-red-500 relative rounded-sm">
+                              <div className="absolute left-0 top-0 w-full h-1 bg-red-500"></div>
+                              <div className="absolute left-0 top-1 w-full h-1 bg-yellow-400"></div>
+                              <div className="absolute left-0 top-2 w-full h-1 bg-red-500"></div>
+                            </div>
+                            <span>ES</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-4 h-3 bg-blue-600 relative rounded-sm">
+                              <div className="absolute left-0 top-0 w-full h-0.5 bg-red-500"></div>
+                              <div className="absolute left-0 top-0.5 w-full h-0.5 bg-white"></div>
+                              <div className="absolute left-0 top-1 w-full h-0.5 bg-red-500"></div>
+                              <div className="absolute left-0 top-1.5 w-full h-0.5 bg-white"></div>
+                              <div className="absolute left-0 top-2 w-full h-0.5 bg-red-500"></div>
+                              <div className="absolute left-0 top-2.5 w-full h-0.5 bg-white"></div>
+                              <div className="absolute left-0 top-0 w-2 h-1.5 bg-blue-600"></div>
+                            </div>
+                            <span>EN</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>
@@ -367,6 +398,37 @@ const Header = () => {
                     >
                       {t('navigation.signup')}
                     </Link>
+                    {/* Language Selector - Desktop when not logged in */}
+                    <div className="hidden lg:block relative">
+                      <button 
+                        onClick={() => changeLocale(locale === 'es' ? 'en' : 'es')}
+                        className="bg-[#1a1a2e]/80 text-white text-sm px-3 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm hover:bg-[#2a2a3e]/80 transition-colors flex items-center space-x-2"
+                      >
+                        {locale === 'es' ? (
+                          <>
+                            <div className="w-4 h-3 bg-red-500 relative rounded-sm">
+                              <div className="absolute left-0 top-0 w-full h-1 bg-red-500"></div>
+                              <div className="absolute left-0 top-1 w-full h-1 bg-yellow-400"></div>
+                              <div className="absolute left-0 top-2 w-full h-1 bg-red-500"></div>
+                            </div>
+                            <span>ES</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-4 h-3 bg-blue-600 relative rounded-sm">
+                              <div className="absolute left-0 top-0 w-full h-0.5 bg-red-500"></div>
+                              <div className="absolute left-0 top-0.5 w-full h-0.5 bg-white"></div>
+                              <div className="absolute left-0 top-1 w-full h-0.5 bg-red-500"></div>
+                              <div className="absolute left-0 top-1.5 w-full h-0.5 bg-white"></div>
+                              <div className="absolute left-0 top-2 w-full h-0.5 bg-red-500"></div>
+                              <div className="absolute left-0 top-2.5 w-full h-0.5 bg-white"></div>
+                              <div className="absolute left-0 top-0 w-2 h-1.5 bg-blue-600"></div>
+                            </div>
+                            <span>EN</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
