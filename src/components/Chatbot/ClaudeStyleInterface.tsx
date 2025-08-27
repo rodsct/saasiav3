@@ -68,15 +68,22 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   }, []);
 
   const initializeChatbot = async () => {
+    if (!user?.id) {
+      console.log("No user ID available for chatbot initialization");
+      return;
+    }
+
     try {
-      const response = await fetch('/api/chatbot/user-chatbot');
+      const response = await fetch(`/api/chatbot/user-chatbot?userId=${user.id}`);
       
       if (!response.ok) {
-        console.error("Error getting user chatbot:", response.status);
+        const errorData = await response.json();
+        console.error("Error getting user chatbot:", response.status, errorData);
         return;
       }
       
       const data = await response.json();
+      console.log("Chatbot initialized:", data.chatbot.id);
       setCurrentChatbotId(data.chatbot.id);
       
     } catch (error) {

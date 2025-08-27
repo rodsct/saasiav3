@@ -1,34 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
-import { getAuthenticatedUser } from "@/utils/jwtAuth";
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser(request);
+    console.log("User chatbot endpoint called");
     
-    if (!user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
+
+    console.log("Looking for chatbot for user:", userId);
 
     // Find existing chatbot for user or create one
     let chatbot = await prisma.chatbot.findFirst({
       where: { 
-        userId: user.id,
+        userId: userId,
         isActive: true
       }
     });
 
+    console.log("Found existing chatbot:", !!chatbot);
+
     if (!chatbot) {
+      console.log("Creating new chatbot for user:", userId);
+      
+      // Get user info for chatbot name
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+      
       // Create default chatbot for user
       chatbot = await prisma.chatbot.create({
         data: {
-          name: `${user.name || 'Usuario'} - Asistente Personal`,
+          name: `${user?.name || 'Usuario'} - Asistente Personal`,
           description: "Asistente personal de Aranza.io",
           model: "MODEL_A",
-          userId: user.id,
+          userId: userId,
           isActive: true,
         }
       });
+      console.log("Created chatbot:", chatbot.id);
     }
 
     return NextResponse.json({ chatbot });
@@ -36,7 +50,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Get user chatbot error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error?.message },
       { status: 500 }
     );
   }
