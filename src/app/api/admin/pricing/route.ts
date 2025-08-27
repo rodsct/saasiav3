@@ -32,43 +32,69 @@ export async function POST(request: NextRequest) {
           apiVersion: "2023-10-16",
         });
 
-        console.log("Creating/updating price in Stripe:", pricingData.id, "Amount:", pricingData.unit_amount);
+        console.log("Creating/updating price in Stripe:", newPriceId, "Amount:", pricingData.unit_amount);
 
         // Create or get product
         let product;
         try {
           product = await stripe.products.retrieve('prod_saasiav3_pro');
+          console.log("Product found:", product.id);
         } catch {
+          console.log("Creating new product...");
           product = await stripe.products.create({
             id: 'prod_saasiav3_pro',
             name: 'SaaS IA v3 - PRO Subscription',
             description: 'Acceso completo a la plataforma con IA avanzada',
           });
+          console.log("Product created:", product.id);
         }
 
-        // Create new price in Stripe (Stripe doesn't allow updating prices, only creating new ones)
+        // Deactivate old prices first
         try {
-          await stripe.prices.create({
-            id: newPriceId,
+          const existingPrices = await stripe.prices.list({
+            product: product.id,
+            active: true
+          });
+          
+          for (const price of existingPrices.data) {
+            console.log("Deactivating old price:", price.id);
+            await stripe.prices.update(price.id, { active: false });
+          }
+        } catch (error) {
+          console.log("Error deactivating old prices:", error);
+        }
+
+        // Create new price in Stripe
+        let finalPriceId = newPriceId;
+        try {
+          const newPrice = await stripe.prices.create({
             unit_amount: pricingData.unit_amount,
             currency: 'usd',
             recurring: { interval: 'month' },
             product: product.id,
+            nickname: pricingData.nickname,
+            active: true
           });
           
-          console.log("Price created in Stripe with ID:", newPriceId);
+          finalPriceId = newPrice.id;
+          pricingData.id = finalPriceId;
+          
+          console.log("New price created in Stripe with ID:", finalPriceId);
           
         } catch (stripeError: any) {
-          if (stripeError.code === 'resource_already_exists') {
-            console.log("Price already exists in Stripe:", newPriceId);
-          } else {
-            console.error("Stripe price creation error:", stripeError);
-            // Continue anyway - the local file will be updated
-          }
+          console.error("Stripe price creation error:", stripeError);
+          return NextResponse.json(
+            { error: `Error creating price in Stripe: ${stripeError.message}` },
+            { status: 500 }
+          );
         }
 
-      } catch (stripeError) {
+      } catch (stripeError: any) {
         console.error("Stripe integration error:", stripeError);
+        return NextResponse.json(
+          { error: `Stripe error: ${stripeError.message}` },
+          { status: 500 }
+        );
       }
     }
 

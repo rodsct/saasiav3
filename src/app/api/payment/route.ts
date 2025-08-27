@@ -37,24 +37,36 @@ export async function POST(request: NextRequest) {
 
     console.log("Creating Stripe session for price:", priceId);
 
-    // Use the existing Stripe price ID instead of creating new ones
-    let finalPriceId = "price_1RzoxvIXvj4hGUgkm0F1JN6p"; // Your real Stripe price
+    // Get current pricing from local file
+    let finalPriceId = priceId;
     
-    // If it's a custom price from admin, try to use it, but fallback to the real one
-    if (priceId !== "price_pro_monthly_49") {
-      finalPriceId = priceId;
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const pricingPath = path.join(process.cwd(), "src", "stripe", "pricingData.ts");
+      const pricingContent = fs.readFileSync(pricingPath, 'utf8');
       
-      // Try to verify if custom price exists, if not use the real one
-      try {
-        await stripe.prices.retrieve(finalPriceId);
-        console.log("Custom price found in Stripe:", finalPriceId);
-      } catch (priceError: any) {
-        console.log("Custom price not found, using default:", "price_1RzoxvIXvj4hGUgkm0F1JN6p");
-        finalPriceId = "price_1RzoxvIXvj4hGUgkm0F1JN6p";
+      // Extract price ID from the file
+      const idMatch = pricingContent.match(/id:\s*"([^"]+)"/);
+      if (idMatch) {
+        finalPriceId = idMatch[1];
+        console.log("Using current price ID from file:", finalPriceId);
       }
+    } catch (fileError) {
+      console.log("Could not read pricing file, using provided price ID");
     }
-
-    console.log("Using final price ID:", finalPriceId);
+    
+    // Verify the price exists in Stripe
+    try {
+      const priceDetails = await stripe.prices.retrieve(finalPriceId);
+      console.log("Price verified in Stripe:", finalPriceId, "Amount:", priceDetails.unit_amount);
+    } catch (priceError: any) {
+      console.error("Price not found in Stripe:", finalPriceId);
+      return NextResponse.json(
+        { error: `Price ${finalPriceId} not found in Stripe. Please update pricing in admin panel.` },
+        { status: 400 }
+      );
+    }
 
     // Create Stripe checkout session
     const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
