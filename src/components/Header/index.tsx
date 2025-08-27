@@ -77,7 +77,7 @@ const Header = () => {
                   onClick={navbarToggleHandler}
                   id="navbarToggler"
                   aria-label="Mobile Menu"
-                  className="absolute right-4 top-1/2 block -translate-y-1/2 rounded-lg px-3 py-[6px] ring-primary focus:ring-2 lg:hidden"
+                  className="absolute right-20 top-1/2 block -translate-y-1/2 rounded-lg px-3 py-[6px] ring-primary focus:ring-2 lg:hidden"
                 >
                   <span
                     className={`relative my-1.5 block h-0.5 w-[30px] transition-all duration-300 ${
@@ -124,23 +124,47 @@ const Header = () => {
                             <div className="w-10 h-10 bg-gradient-to-br from-[#00d4ff] to-[#0099cc] rounded-full flex items-center justify-center">
                               <span className="text-white font-bold text-sm">{user.name?.charAt(0)?.toUpperCase()}</span>
                             </div>
-                            <div>
-                              <p className="text-white font-medium">{user.name}</p>
-                              <p className="text-[#00d4ff]/70 text-sm">{user.email}</p>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-white font-medium">{user.name}</p>
+                                  <p className="text-[#00d4ff]/70 text-sm">{user.email}</p>
+                                </div>
+                                {user.role === 'ADMIN' && (
+                                  <span className="text-xs font-medium text-purple-400 bg-purple-500/20 px-2 py-1 rounded-full border border-purple-500/30">
+                                    ADMIN
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => {
-                              logout();
-                              setNavbarOpen(false);
-                            }}
-                            className="w-full rounded-lg bg-red-500/20 border border-red-500/30 px-4 py-3 text-base font-medium text-red-400 hover:bg-red-500/30 transition-all duration-300 flex items-center justify-center space-x-2"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                            <span>{t('navigation.signout')}</span>
-                          </button>
+                          <div className="space-y-2">
+                            {user.role === 'ADMIN' && (
+                              <Link
+                                href="/admin"
+                                onClick={() => setNavbarOpen(false)}
+                                className="w-full rounded-lg bg-gradient-to-r from-purple-600/20 to-purple-700/20 border border-purple-500/30 px-4 py-3 text-base font-medium text-purple-300 hover:bg-purple-500/30 transition-all duration-300 flex items-center justify-center space-x-2"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>Panel Admin</span>
+                              </Link>
+                            )}
+                            <button
+                              onClick={() => {
+                                logout();
+                                setNavbarOpen(false);
+                              }}
+                              className="w-full rounded-lg bg-red-500/20 border border-red-500/30 px-4 py-3 text-base font-medium text-red-400 hover:bg-red-500/30 transition-all duration-300 flex items-center justify-center space-x-2"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                              </svg>
+                              <span>{t('navigation.signout')}</span>
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div className="space-y-3">
@@ -274,35 +298,35 @@ const Header = () => {
                   </ul>
                 </nav>
               </div>
-              <div className="flex items-center justify-end pr-4 lg:pr-0">
+              <div className="flex items-center justify-end space-x-3 pr-4 lg:pr-0">
 
                 {/* Language Selector */}
-                <div className="relative">
+                <div className="relative lg:order-1">
                   <button 
                     onClick={() => changeLocale(locale === 'es' ? 'en' : 'es')}
-                    className="bg-[#1a1a2e]/80 text-white text-sm px-3 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm hover:bg-[#2a2a3e]/80 transition-colors flex items-center space-x-2"
+                    className="bg-[#1a1a2e]/80 text-white text-xs lg:text-sm px-2 lg:px-3 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm hover:bg-[#2a2a3e]/80 transition-colors flex items-center space-x-1 lg:space-x-2"
                   >
                     {locale === 'es' ? (
                       <>
-                        <div className="w-4 h-3 bg-red-500 relative rounded-sm">
-                          <div className="absolute left-0 top-0 w-full h-1 bg-red-500"></div>
-                          <div className="absolute left-0 top-1 w-full h-1 bg-yellow-400"></div>
-                          <div className="absolute left-0 top-2 w-full h-1 bg-red-500"></div>
+                        <div className="w-3 h-2 lg:w-4 lg:h-3 bg-red-500 relative rounded-sm">
+                          <div className="absolute left-0 top-0 w-full h-0.5 lg:h-1 bg-red-500"></div>
+                          <div className="absolute left-0 top-0.5 lg:top-1 w-full h-0.5 lg:h-1 bg-yellow-400"></div>
+                          <div className="absolute left-0 top-1 lg:top-2 w-full h-0.5 lg:h-1 bg-red-500"></div>
                         </div>
-                        <span>ES</span>
+                        <span className="text-xs lg:text-sm">ES</span>
                       </>
                     ) : (
                       <>
-                        <div className="w-4 h-3 bg-blue-600 relative rounded-sm">
-                          <div className="absolute left-0 top-0 w-full h-0.5 bg-red-500"></div>
-                          <div className="absolute left-0 top-0.5 w-full h-0.5 bg-white"></div>
-                          <div className="absolute left-0 top-1 w-full h-0.5 bg-red-500"></div>
-                          <div className="absolute left-0 top-1.5 w-full h-0.5 bg-white"></div>
-                          <div className="absolute left-0 top-2 w-full h-0.5 bg-red-500"></div>
-                          <div className="absolute left-0 top-2.5 w-full h-0.5 bg-white"></div>
-                          <div className="absolute left-0 top-0 w-2 h-1.5 bg-blue-600"></div>
+                        <div className="w-3 h-2 lg:w-4 lg:h-3 bg-blue-600 relative rounded-sm">
+                          <div className="absolute left-0 top-0 w-full h-0.25 lg:h-0.5 bg-red-500"></div>
+                          <div className="absolute left-0 top-0.25 lg:top-0.5 w-full h-0.25 lg:h-0.5 bg-white"></div>
+                          <div className="absolute left-0 top-0.5 lg:top-1 w-full h-0.25 lg:h-0.5 bg-red-500"></div>
+                          <div className="absolute left-0 top-0.75 lg:top-1.5 w-full h-0.25 lg:h-0.5 bg-white"></div>
+                          <div className="absolute left-0 top-1 lg:top-2 w-full h-0.25 lg:h-0.5 bg-red-500"></div>
+                          <div className="absolute left-0 top-1.25 lg:top-2.5 w-full h-0.25 lg:h-0.5 bg-white"></div>
+                          <div className="absolute left-0 top-0 w-1.5 lg:w-2 h-1 lg:h-1.5 bg-blue-600"></div>
                         </div>
-                        <span>EN</span>
+                        <span className="text-xs lg:text-sm">EN</span>
                       </>
                     )}
                   </button>
@@ -310,6 +334,15 @@ const Header = () => {
 
                 {user ? (
                   <>
+                    {/* Admin Access - Desktop */}
+                    {user.role === 'ADMIN' && (
+                      <Link
+                        href="/admin"
+                        className="hidden lg:block px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 rounded-lg transition-all duration-300 shadow-lg shadow-purple-500/20 border border-purple-500/30"
+                      >
+                        Admin
+                      </Link>
+                    )}
                     <p className="hidden lg:block px-7 py-3 text-base font-medium text-white">
                       {user.name}
                     </p>
