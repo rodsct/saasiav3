@@ -31,10 +31,10 @@ export default function SimpleLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
             <span className="text-white text-2xl font-bold">A</span>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -58,7 +58,7 @@ export default function SimpleLogin() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="mt-1 block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="tu@email.com"
             />
           </div>
@@ -75,7 +75,7 @@ export default function SimpleLogin() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="mt-1 block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="Tu contraseña"
             />
           </div>
@@ -84,7 +84,7 @@ export default function SimpleLogin() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {isLoading ? (
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@ export default function SimpleLogin() {
             <div className="w-full border-t border-gray-300 dark:border-gray-600" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gradient-to-br from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-500 dark:text-gray-400">
+            <span className="px-2 bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-500 dark:text-gray-400">
               O continúa con
             </span>
           </div>
@@ -125,28 +125,6 @@ export default function SimpleLogin() {
           </button>
         </div>
 
-        {/* Test Credentials */}
-        <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-            🧪 Credenciales de Prueba
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div>
-              <strong className="text-orange-600 dark:text-orange-400">Usuario PRO:</strong>
-              <br />
-              <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">test@aranza.io</code>
-              <br />
-              <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">test123</code>
-            </div>
-            <div>
-              <strong className="text-blue-600 dark:text-blue-400">Admin:</strong>
-              <br />
-              <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">admin@aranza.io</code>
-              <br />
-              <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">test123</code>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

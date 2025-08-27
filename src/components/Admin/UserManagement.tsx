@@ -197,7 +197,7 @@ export default function UserManagement() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -215,7 +215,7 @@ export default function UserManagement() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="Buscar por nombre o email..."
             />
           </div>
@@ -227,7 +227,7 @@ export default function UserManagement() {
             <select
               value={filterSubscription}
               onChange={(e) => setFilterSubscription(e.target.value)}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="ALL">Todas</option>
               <option value="FREE">Gratis</option>
@@ -275,7 +275,7 @@ export default function UserManagement() {
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                         <span className="text-white font-medium text-sm">
                           {user.name?.[0] || 'U'}
                         </span>

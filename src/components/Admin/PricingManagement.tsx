@@ -142,7 +142,7 @@ export default function PricingManagement() {
                 type="number"
                 value={pricing.unit_amount / 100}
                 onChange={(e) => handlePriceChange("unit_amount", parseInt(e.target.value) * 100)}
-                className="pl-8 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                className="pl-8 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 step="0.01"
                 min="0"
               />
@@ -157,7 +157,7 @@ export default function PricingManagement() {
               type="text"
               value={pricing.id}
               onChange={(e) => handlePriceChange("id", e.target.value)}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function PricingManagement() {
             type="text"
             value={pricing.nickname}
             onChange={(e) => handlePriceChange("nickname", e.target.value)}
-            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
         </div>
       </div>
@@ -183,7 +183,7 @@ export default function PricingManagement() {
           </h3>
           <button
             onClick={addOffer}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm transition-colors"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm transition-colors"
           >
             + Agregar Característica
           </button>
@@ -196,7 +196,7 @@ export default function PricingManagement() {
                 type="text"
                 value={offer}
                 onChange={(e) => handleOfferChange(index, e.target.value)}
-                className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 placeholder="Característica del plan..."
               />
               <button
@@ -247,7 +247,7 @@ export default function PricingManagement() {
         <button
           onClick={savePricing}
           disabled={isLoading}
-          className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white px-6 py-3 rounded-md font-medium transition-colors"
+          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-6 py-3 rounded-md font-medium transition-colors"
         >
           {isLoading ? "Guardando..." : "Guardar Cambios"}
         </button>

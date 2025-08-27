@@ -54,7 +54,7 @@ const PricingBox = ({ product }: { product: Price }) => {
         data-wow-delay=".1s"
       >
         {product.nickname === "PRO" && (
-          <p className="absolute right-[-50px] top-[60px] inline-block -rotate-90 rounded-bl-md rounded-tl-md bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-2 text-base font-medium text-white">
+          <p className="absolute right-[-50px] top-[60px] inline-block -rotate-90 rounded-bl-md rounded-tl-md bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-2 text-base font-medium text-white">
             {t('pricing.recommended')}
           </p>
         )}
@@ -94,7 +94,7 @@ const PricingBox = ({ product }: { product: Price }) => {
           <button
             onClick={handleSubscription}
             disabled={isLoading}
-            className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-7 py-4 text-center text-base font-semibold text-white transition duration-300 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-7 py-4 text-center text-base font-semibold text-white transition duration-300 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">

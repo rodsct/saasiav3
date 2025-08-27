@@ -187,7 +187,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
     const styles = {
       PUBLIC: "bg-green-900/20 text-green-400 border-green-800",
       REGISTERED: "bg-blue-900/20 text-blue-400 border-blue-800", 
-      PRO: "bg-orange-900/20 text-orange-400 border-orange-800"
+      PRO: "bg-blue-900/20 text-blue-400 border-blue-800"
     };
 
     const labels = {
@@ -272,7 +272,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ff6b35]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3b82f6]"></div>
       </div>
     );
   }
@@ -292,7 +292,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
               placeholder={t('downloads.search_placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 w-full border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] text-sm"
+              className="pl-9 pr-4 py-2 w-full border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] text-sm"
             />
           </div>
         </div>
@@ -301,7 +301,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-3 py-2 border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] text-sm"
+          className="px-3 py-2 border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] text-sm"
         >
           <option value="">{t('downloads.all_categories')}</option>
           {categories.map(category => (
@@ -314,7 +314,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as any)}
-            className="px-3 py-2 border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] text-sm"
+            className="px-3 py-2 border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] text-sm"
           >
             <option value="ALL">{t('downloads.all_levels')}</option>
             <option value="PUBLIC">{t('downloads.access_levels.public')}</option>
@@ -375,7 +375,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
                       {download.tags.slice(0, 4).map((tag, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 text-xs bg-[#ff6b35]/20 text-[#ff6b35] rounded"
+                          className="px-2 py-1 text-xs bg-[#3b82f6]/20 text-[#3b82f6] rounded"
                         >
                           {tag}
                         </span>
@@ -394,7 +394,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
                       disabled={!canAccess}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
                         canAccess
-                          ? 'bg-[#ff6b35] hover:bg-[#e55a2b] text-white'
+                          ? 'bg-[#3b82f6] hover:bg-[#2563eb] text-white'
                           : 'bg-[#2f2f2f] text-gray-400 cursor-not-allowed'
                       }`}
                     >

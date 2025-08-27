@@ -58,7 +58,7 @@ export default function AdminOverview() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -97,13 +97,13 @@ export default function AdminOverview() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-200 text-sm">Ingresos Total</p>
+              <p className="text-blue-200 text-sm">Ingresos Total</p>
               <p className="text-3xl font-bold">${stats.totalRevenue.toFixed(2)}</p>
             </div>
-            <div className="text-orange-200">💰</div>
+            <div className="text-blue-200">💰</div>
           </div>
         </div>
       </div>
