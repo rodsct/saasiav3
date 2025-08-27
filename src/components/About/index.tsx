@@ -1,7 +1,10 @@
+import { useTranslation } from "@/hooks/useTranslation";
 import Image from "next/image";
 import Link from "next/link";
 
 const About = () => {
+  const { t } = useTranslation();
+  
   return (
     <section
       id="about"
@@ -13,24 +16,19 @@ const About = () => {
             <div className="w-full px-4 lg:w-1/2">
               <div className="mb-12 max-w-[540px] lg:mb-0">
                 <h2 className="mb-5 text-3xl font-bold leading-tight text-white sm:text-[40px] sm:leading-[1.2]">
-                  Sobre Aranza.io - Agencia de Inteligencia Artificial
+                  {t('about.title')}
                 </h2>
                 <p className="mb-10 text-base leading-relaxed text-gray-400">
-                  Aranza.io es una agencia de inteligencia artificial fundada por
-                  Rodrigo Gtz, enfocada en brindar soluciones innovadoras de IA
-                  para empresas y emprendedores. Nuestro asistente virtual Aranza
-                  está diseñado para transformar la manera en que interactúas con la tecnología.
+                  {t('about.description')}
                   <br /> <br />
-                  Con años de experiencia en el desarrollo de soluciones de IA,
-                  ofrecemos una plataforma completa que integra chatbots inteligentes,
-                  gestión de archivos y herramientas premium para impulsar tu negocio.
+                  {t('about.description2')}
                 </p>
 
                 <Link
                   href="#"
                   className="inline-flex items-center justify-center rounded-md bg-[#ff6b35] px-7 py-3 text-center text-base font-medium text-white duration-300 hover:bg-[#e55a2b]"
                 >
-                  Conocer Más
+                  {t('about.cta_button')}
                 </Link>
               </div>
             </div>
@@ -63,13 +61,13 @@ const About = () => {
                   <div className="relative z-10 mb-4 flex items-center justify-center overflow-hidden bg-[#ff6b35] px-6 py-12 sm:mb-8 sm:h-[160px] sm:p-5 lg:mb-4 xl:mb-8">
                     <div>
                       <span className="block text-5xl font-extrabold text-white">
-                        3+
+                        {t('about.stats.years')}
                       </span>
                       <span className="block text-base font-semibold text-white">
-                        Años de
+                        {t('about.stats.years_label')}
                       </span>
                       <span className="block text-base font-medium text-white text-opacity-70">
-                        experiencia en IA
+                        {t('about.stats.years_desc')}
                       </span>
                     </div>
                     <div>

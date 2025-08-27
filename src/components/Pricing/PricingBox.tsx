@@ -1,9 +1,11 @@
+import { useTranslation } from "@/hooks/useTranslation";
 import axios from "axios";
 import React, { useState } from "react";
 import OfferList from "./OfferList";
 import { Price } from "@/types/price";
 
 const PricingBox = ({ product }: { product: Price }) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,16 +31,16 @@ const PricingBox = ({ product }: { product: Price }) => {
       if (typeof data === 'string' && data.startsWith('http')) {
         window.location.assign(data);
       } else {
-        setError("Error en el procesamiento del pago");
+        setError(t('pricing.errors.payment_error'));
       }
     } catch (error: any) {
       console.error("Payment error:", error);
       if (error.response?.status === 401) {
-        setError("Por favor inicia sesión para continuar");
+        setError(t('pricing.errors.login_required'));
       } else if (error.response?.data?.error) {
         setError(error.response.data.error);
       } else {
-        setError("Error al procesar el pago. Inténtalo de nuevo.");
+        setError(t('pricing.errors.payment_process_error'));
       }
     } finally {
       setIsLoading(false);
@@ -53,7 +55,7 @@ const PricingBox = ({ product }: { product: Price }) => {
       >
         {product.nickname === "PRO" && (
           <p className="absolute right-[-50px] top-[60px] inline-block -rotate-90 rounded-bl-md rounded-tl-md bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-2 text-base font-medium text-white">
-            Recomendado
+            {t('pricing.recommended')}
           </p>
         )}
         <span className="mb-5 block text-xl font-medium text-dark dark:text-white">
@@ -68,13 +70,13 @@ const PricingBox = ({ product }: { product: Price }) => {
           </span>
           <span className="text-base font-normal text-body-color dark:text-dark-6">
             {" "}
-            Per Month
+            {t('pricing.per_month')}
           </span>
         </h2>
 
         <div className="mb-[50px]">
           <h3 className="mb-5 text-lg font-medium text-dark dark:text-white">
-            Features
+            {t('pricing.features')}
           </h3>
           <div className="mb-10">
             {product?.offers.map((offer, i) => (
@@ -100,10 +102,10 @@ const PricingBox = ({ product }: { product: Price }) => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Procesando...
+                {t('pricing.processing')}
               </span>
             ) : (
-              "Activar Suscripción PRO"
+              t('pricing.activate_subscription')
             )}
           </button>
         </div>

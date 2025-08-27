@@ -1,6 +1,6 @@
 import { Feature } from "@/types/feature";
 
-const featuresData: Feature[] = [
+export const getFeaturesData = (t: (key: string) => string): Feature[] => [
   {
     id: 1,
     icon: (
@@ -20,9 +20,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "Asistentes Virtuales IA",
-    paragraph: "Desarrollamos chatbots inteligentes y asistentes virtuales personalizados que mejoran la atención al cliente 24/7 y automatizan consultas frecuentes.",
-    btn: "Ver Más",
+    title: t('features.items.virtual_assistants.title'),
+    paragraph: t('features.items.virtual_assistants.description'),
+    btn: t('features.items.virtual_assistants.button'),
     btnLink: "/chatbot",
   },
   {
@@ -44,9 +44,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "Automatización de Procesos",
-    paragraph: "Optimizamos y automatizamos procesos empresariales repetitivos, reduciendo costos operativos y aumentando la productividad de tu equipo.",
-    btn: "Ver Más",
+    title: t('features.items.process_automation.title'),
+    paragraph: t('features.items.process_automation.description'),
+    btn: t('features.items.process_automation.button'),
     btnLink: "/contact",
   },
   {
@@ -65,9 +65,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "Análisis de Datos e IA",
-    paragraph: "Implementamos sistemas de análisis predictivo y machine learning para extraer insights valiosos de tus datos y mejorar la toma de decisiones.",
-    btn: "Ver Más",
+    title: t('features.items.data_analysis.title'),
+    paragraph: t('features.items.data_analysis.description'),
+    btn: t('features.items.data_analysis.button'),
     btnLink: "/contact",
   },
   {
@@ -86,9 +86,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "Integración de APIs e IA",
-    paragraph: "Conectamos sistemas existentes con tecnologías de IA avanzadas, creando ecosistemas digitales integrados y eficientes para tu empresa.",
-    btn: "Ver Más",
+    title: t('features.items.api_integration.title'),
+    paragraph: t('features.items.api_integration.description'),
+    btn: t('features.items.api_integration.button'),
     btnLink: "/contact",
   },
   {
@@ -107,9 +107,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "Consultoría y Capacitación",
-    paragraph: "Ofrecemos asesoramiento estratégico en adopción de IA y capacitamos a tu equipo para maximizar el potencial de las nuevas tecnologías implementadas.",
-    btn: "Ver Más",
+    title: t('features.items.consulting.title'),
+    paragraph: t('features.items.consulting.description'),
+    btn: t('features.items.consulting.button'),
     btnLink: "/contact",
   },
   {
@@ -131,10 +131,12 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "Soporte y Mantenimiento",
-    paragraph: "Garantizamos el funcionamiento óptimo de tus soluciones de IA con soporte técnico continuo, actualizaciones y optimizaciones constantes.",
-    btn: "Ver Más",
+    title: t('features.items.support.title'),
+    paragraph: t('features.items.support.description'),
+    btn: t('features.items.support.button'),
     btnLink: "/contact",
   },
 ];
+
+const featuresData: Feature[] = [];
 export default featuresData;

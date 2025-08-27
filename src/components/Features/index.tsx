@@ -1,15 +1,19 @@
+import { useTranslation } from "@/hooks/useTranslation";
 import SectionTitle from "../Common/SectionTitle";
 import SingleFeature from "./SingleFeature";
-import featuresData from "./featuresData";
+import { getFeaturesData } from "./featuresData";
 
 const Features = () => {
+  const { t } = useTranslation();
+  const featuresData = getFeaturesData(t);
+  
   return (
     <section className="pb-8 pt-20 bg-[#2f2f2f] lg:pb-[70px] lg:pt-[120px]">
       <div className="container">
         <SectionTitle
-          subtitle="Servicios"
-          title="Soluciones Integrales de IA y Automatización"
-          paragraph="Transformamos tu empresa con tecnología de vanguardia. Desde asistentes virtuales hasta automatización completa de procesos, ofrecemos soluciones personalizadas que impulsan el crecimiento y la eficiencia."
+          subtitle={t('features.subtitle')}
+          title={t('features.title')}
+          paragraph={t('features.paragraph')}
         />
 
         <div className="-mx-4 mt-12 flex flex-wrap lg:mt-20">

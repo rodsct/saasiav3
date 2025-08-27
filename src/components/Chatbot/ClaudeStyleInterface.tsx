@@ -249,7 +249,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] bg-[#2f2f2f] text-white overflow-hidden relative"
+    <div className="flex min-h-[calc(100vh-80px)] bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] text-white overflow-hidden relative"
          style={{ height: 'calc(100vh - 80px)' }}>
       {/* Mobile Overlay */}
       {sidebarOpen && (
@@ -260,9 +260,9 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       )}
       
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-80 max-w-[85vw] sm:max-w-[70vw] lg:max-w-none' : 'w-0 lg:w-16'} bg-[#1e1e1e] border-r border-[#3f3f3f] transition-all duration-300 flex flex-col ${sidebarOpen ? 'fixed lg:relative inset-y-0 left-0 z-40' : 'overflow-hidden'}`}>
+      <div className={`${sidebarOpen ? 'w-80 max-w-[85vw] sm:max-w-[70vw] lg:max-w-none' : 'w-0 lg:w-16'} bg-[#0a0a0a]/95 border-r border-[#00d4ff]/20 backdrop-blur-xl transition-all duration-300 flex flex-col ${sidebarOpen ? 'fixed lg:relative inset-y-0 left-0 z-40' : 'overflow-hidden'}`}>
         {/* Header */}
-        <div className="p-3 lg:p-4 border-b border-[#3f3f3f] flex-shrink-0">
+        <div className="p-3 lg:p-4 border-b border-[#00d4ff]/20 flex-shrink-0">
           <div className="flex items-center justify-between">
             {sidebarOpen && (
               <h1 className="text-base lg:text-lg font-semibold text-white truncate">{t('chatbot.chats')}</h1>
@@ -283,7 +283,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
           {/* New Chat Button */}
           <button
             onClick={createNewChat}
-            className={`w-full flex items-center justify-center space-x-2 py-2 lg:py-3 px-2 lg:px-4 bg-[#ff6b35] hover:bg-[#e55a2b] rounded-lg transition-colors ${!sidebarOpen ? 'px-2' : ''}`}
+            className={`w-full flex items-center justify-center space-x-2 py-2 lg:py-3 px-2 lg:px-4 bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] rounded-lg transition-all duration-300 shadow-lg shadow-[#00d4ff]/20 ${!sidebarOpen ? 'px-2' : ''}`}
           >
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -304,8 +304,8 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                   <button
                     key={conversation.id}
                     onClick={() => selectConversation(conversation)}
-                    className={`w-full text-left p-2 lg:p-3 rounded-lg transition-colors hover:bg-[#3f3f3f] ${
-                      currentConversation?.id === conversation.id ? 'bg-[#3f3f3f]' : ''
+                    className={`w-full text-left p-2 lg:p-3 rounded-lg transition-all duration-300 hover:bg-[#00d4ff]/20 border border-transparent hover:border-[#00d4ff]/30 ${
+                      currentConversation?.id === conversation.id ? 'bg-[#00d4ff]/20 border-[#00d4ff]/30' : ''
                     }`}
                   >
                     <div className="text-xs lg:text-sm text-white truncate">
@@ -323,9 +323,9 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
         {/* User Info */}
         {sidebarOpen && user && (
-          <div className="p-3 lg:p-4 border-t border-[#3f3f3f] flex-shrink-0">
+          <div className="p-3 lg:p-4 border-t border-[#00d4ff]/20 flex-shrink-0">
             <div className="flex items-center space-x-2 lg:space-x-3">
-              <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#ff6b35] rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-[#00d4ff] to-[#0099cc] rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-medium text-xs lg:text-sm">
                   {user.name?.[0] || 'U'}
                 </span>
@@ -405,14 +405,14 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                   <div className="flex items-start space-x-3 lg:space-x-4">
                     <div className="w-6 h-6 lg:w-8 lg:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
                       {message.isFromUser ? (
-                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#ff6b35] rounded-lg flex items-center justify-center">
+                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-[#00d4ff] to-[#0099cc] rounded-lg flex items-center justify-center">
                           <span className="text-white font-medium text-xs lg:text-sm">
                             {user?.name?.[0] || 'U'}
                           </span>
                         </div>
                       ) : (
-                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center">
-                          <span className="text-white font-medium text-xs lg:text-sm">A</span>
+                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#1a1a2e] border border-[#00d4ff]/30 rounded-lg flex items-center justify-center">
+                          <span className="text-[#00d4ff] font-medium text-xs lg:text-sm">A</span>
                         </div>
                       )}
                     </div>
@@ -456,8 +456,8 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
               {isLoading && (
                 <div className="mb-6 lg:mb-8 px-3 lg:px-6">
                   <div className="flex items-start space-x-3 lg:space-x-4">
-                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-medium text-xs lg:text-sm">A</span>
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#1a1a2e] border border-[#00d4ff]/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-[#00d4ff] font-medium text-xs lg:text-sm">A</span>
                     </div>
                     <div className="flex-1">
                       <div className="flex space-x-1">

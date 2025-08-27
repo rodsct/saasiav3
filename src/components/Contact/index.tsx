@@ -1,4 +1,8 @@
+import { useTranslation } from "@/hooks/useTranslation";
+
 const Contact = () => {
+  const { t } = useTranslation();
+  
   return (
     <section id="contact" className="relative py-20 md:py-[120px]">
       <div className="absolute left-0 top-0 -z-[1] h-full w-full bg-[#2f2f2f]"></div>
@@ -9,10 +13,10 @@ const Contact = () => {
             <div className="ud-contact-content-wrapper">
               <div className="ud-contact-title mb-12 lg:mb-[150px]">
                 <span className="mb-6 block text-base font-medium text-[#ff6b35]">
-                  CONTACTANOS
+                  {t('contact.section_title')}
                 </span>
                 <h2 className="max-w-[260px] text-[35px] font-semibold leading-[1.14] text-white">
-                  Hablemos sobre tu proyecto.
+                  {t('contact.title')}
                 </h2>
               </div>
               <div className="mb-12 flex flex-wrap justify-between lg:mb-0">
@@ -30,10 +34,10 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="mb-[18px] text-lg font-semibold text-white">
-                      Nuestra Ubicación
+                      {t('contact.location.title')}
                     </h3>
                     <p className="text-base text-gray-400">
-                      México, Trabajamos Globalmente
+                      {t('contact.location.address')}
                     </p>
                   </div>
                 </div>
@@ -50,13 +54,13 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="mb-[18px] text-lg font-semibold text-white">
-                      ¿Cómo Podemos Ayudarte?
+                      {t('contact.help.title')}
                     </h3>
                     <p className="text-base text-gray-400">
-                      info@aranza.io
+                      {t('contact.help.email1')}
                     </p>
                     <p className="mt-1 text-base text-gray-400">
-                      contacto@aranza.io
+                      {t('contact.help.email2')}
                     </p>
                   </div>
                 </div>
@@ -70,7 +74,7 @@ const Contact = () => {
               "
             >
               <h3 className="mb-8 text-2xl font-semibold text-white md:text-[28px] md:leading-[1.42]">
-                Envíanos un Mensaje
+                {t('contact.form.title')}
               </h3>
               <form>
                 <div className="mb-[22px]">
@@ -78,12 +82,12 @@ const Contact = () => {
                     htmlFor="fullName"
                     className="mb-4 block text-sm text-gray-400"
                   >
-                    Nombre Completo*
+                    {t('contact.form.name_label')}
                   </label>
                   <input
                     type="text"
                     name="fullName"
-                    placeholder="Juan Pérez"
+                    placeholder={t('contact.form.name_placeholder')}
                     className="w-full border-0 border-b border-[#5f5f5f] bg-transparent pb-3 text-white placeholder:text-gray-400 focus:border-[#ff6b35] focus:outline-none"
                   />
                 </div>
@@ -92,12 +96,12 @@ const Contact = () => {
                     htmlFor="email"
                     className="mb-4 block text-sm text-gray-400"
                   >
-                    Correo Electrónico*
+                    {t('contact.form.email_label')}
                   </label>
                   <input
                     type="email"
                     name="email"
-                    placeholder="ejemplo@tucorreo.com"
+                    placeholder={t('contact.form.email_placeholder')}
                     className="w-full border-0 border-b border-[#5f5f5f] bg-transparent pb-3 text-white placeholder:text-gray-400 focus:border-[#ff6b35] focus:outline-none"
                   />
                 </div>
@@ -106,12 +110,12 @@ const Contact = () => {
                     htmlFor="phone"
                     className="mb-4 block text-sm text-gray-400"
                   >
-                    Teléfono*
+                    {t('contact.form.phone_label')}
                   </label>
                   <input
                     type="text"
                     name="phone"
-                    placeholder="+52 55 1234 5678"
+                    placeholder={t('contact.form.phone_placeholder')}
                     className="w-full border-0 border-b border-[#5f5f5f] bg-transparent pb-3 text-white placeholder:text-gray-400 focus:border-[#ff6b35] focus:outline-none"
                   />
                 </div>
@@ -120,12 +124,12 @@ const Contact = () => {
                     htmlFor="message"
                     className="mb-4 block text-sm text-gray-400"
                   >
-                    Mensaje*
+                    {t('contact.form.message_label')}
                   </label>
                   <textarea
                     name="message"
                     rows={1}
-                    placeholder="escribe tu mensaje aquí"
+                    placeholder={t('contact.form.message_placeholder')}
                     className="w-full resize-none border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
                   ></textarea>
                 </div>
@@ -134,7 +138,7 @@ const Contact = () => {
                     type="submit"
                     className="inline-flex items-center justify-center rounded-md bg-[#ff6b35] px-10 py-3 text-base font-medium text-white transition duration-300 ease-in-out hover:bg-[#e55a2b]"
                   >
-                    Enviar
+                    {t('contact.form.submit_button')}
                   </button>
                 </div>
               </form>

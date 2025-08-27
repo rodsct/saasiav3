@@ -1,9 +1,12 @@
 "use client";
+import { useTranslation } from "@/hooks/useTranslation";
 import SectionTitle from "../Common/SectionTitle";
 import PricingBox from "./PricingBox";
 import { pricingData } from "@/stripe/pricingData";
 
 const Pricing = () => {
+  const { t } = useTranslation();
+  
   return (
     <section
       id="pricing"
@@ -12,9 +15,9 @@ const Pricing = () => {
       <div className="container">
         <div className="mb-[60px]">
           <SectionTitle
-            subtitle="Planes de Suscripción"
-            title="Nuestros Planes"
-            paragraph="Elige el plan que mejor se adapte a tus necesidades y comienza a transformar tu negocio con Aranza.io"
+            subtitle={t('pricing.subtitle')}
+            title={t('pricing.title')}
+            paragraph={t('pricing.paragraph')}
             center
           />
         </div>

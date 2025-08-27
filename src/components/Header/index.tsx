@@ -4,6 +4,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import menuData from "./menuData";
@@ -11,6 +12,7 @@ import menuData from "./menuData";
 const Header = () => {
   const { user, logout } = useAuth();
   const { t, locale, changeLocale } = useTranslation();
+  const { theme, setTheme } = useTheme();
 
   const pathUrl = usePathname();
   // Navbar toggle
@@ -46,10 +48,10 @@ const Header = () => {
   return (
     <>
       <header
-        className={`ud-header left-0 top-0 z-40 flex w-full items-center ${
+        className={`left-0 top-0 z-40 flex w-full items-center transition-all duration-300 ${
           sticky
-            ? "shadow-nav fixed z-[999] border-b border-[#3f3f3f] bg-[#1e1e1e]/95 backdrop-blur-[5px]"
-            : "absolute bg-[#1e1e1e]/90 border-b border-[#3f3f3f]/50"
+            ? "fixed z-[999] bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-[#00d4ff]/20 shadow-lg shadow-[#00d4ff]/10"
+            : "absolute bg-gradient-to-r from-[#0a0a0a]/80 via-[#1a1a2e]/60 to-transparent backdrop-blur-sm"
         }`}
       >
         <div className="container">
@@ -62,10 +64,10 @@ const Header = () => {
                 } `}
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-[#ff6b35] rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#00d4ff] to-[#0099cc] rounded-lg flex items-center justify-center shadow-lg shadow-[#00d4ff]/20">
                     <span className="text-white font-bold text-lg">A</span>
                   </div>
-                  <span className="text-xl font-bold text-white">Aranza.io</span>
+                  <span className="text-xl font-bold bg-gradient-to-r from-[#00d4ff] to-[#ffffff] bg-clip-text text-transparent">Aranza.io</span>
                 </div>
               </Link>
             </div>
@@ -122,8 +124,8 @@ const Header = () => {
                               onClick={navbarToggleHandler}
                               scroll={false}
                               href={menuItem.path}
-                              className={`ud-menu-scroll flex py-2 text-base text-white hover:text-[#ff6b35] lg:inline-flex lg:px-0 lg:py-6 transition-colors ${
-                                pathUrl === menuItem?.path && "text-[#ff6b35]"
+                              className={`ud-menu-scroll flex py-2 text-base text-white hover:text-[#00d4ff] lg:inline-flex lg:px-0 lg:py-6 transition-colors ${
+                                pathUrl === menuItem?.path && "text-[#00d4ff]"
                               }`}
                             >
                               {t(menuItem.title)}
@@ -132,8 +134,8 @@ const Header = () => {
                             <Link
                               scroll={false}
                               href={menuItem.path}
-                              className={`ud-menu-scroll flex py-2 text-base lg:inline-flex lg:px-0 lg:py-6 text-white hover:text-[#ff6b35] transition-colors ${
-                                pathUrl === menuItem?.path && "text-[#ff6b35]"
+                              className={`ud-menu-scroll flex py-2 text-base lg:inline-flex lg:px-0 lg:py-6 text-white hover:text-[#00d4ff] transition-colors ${
+                                pathUrl === menuItem?.path && "text-[#00d4ff]"
                               }`}
                             >
                               {t(menuItem.title)}
@@ -252,7 +254,7 @@ const Header = () => {
                   <select 
                     value={locale}
                     onChange={(e) => changeLocale(e.target.value as 'es' | 'en')}
-                    className="bg-[#3f3f3f] text-white text-sm px-3 py-2 rounded-lg border border-[#4f4f4f] focus:outline-none focus:ring-2 focus:ring-[#ff6b35]"
+                    className="bg-[#1a1a2e]/80 text-white text-sm px-3 py-2 rounded-lg border border-[#00d4ff]/30 focus:outline-none focus:ring-2 focus:ring-[#00d4ff] backdrop-blur-sm"
                   >
                     <option value="es">🇪🇸 ES</option>
                     <option value="en">🇺🇸 EN</option>
@@ -266,7 +268,7 @@ const Header = () => {
                     </p>
                     <button
                       onClick={() => logout()}
-                      className="rounded-xl bg-[#3f3f3f] px-6 py-3 text-base font-medium text-white hover:bg-[#4f4f4f] transition-colors duration-300"
+                      className="rounded-xl bg-[#1a1a2e]/80 border border-[#00d4ff]/30 px-6 py-3 text-base font-medium text-white hover:bg-[#00d4ff]/20 transition-all duration-300"
                     >
                       {t('navigation.signout')}
                     </button>
@@ -275,13 +277,13 @@ const Header = () => {
                   <>
                     <Link
                       href="/signin"
-                      className="px-7 py-3 text-base font-medium text-white hover:text-[#ff6b35] transition-colors"
+                      className="px-7 py-3 text-base font-medium text-white hover:text-[#00d4ff] transition-colors"
                     >
                       {t('navigation.signin')}
                     </Link>
                     <Link
                       href="/signup"
-                      className="rounded-xl px-6 py-3 text-base font-medium text-white bg-[#ff6b35] hover:bg-[#e55a2b] transition-colors duration-300"
+                      className="rounded-xl px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] transition-all duration-300 shadow-lg shadow-[#00d4ff]/20"
                     >
                       {t('navigation.signup')}
                     </Link>

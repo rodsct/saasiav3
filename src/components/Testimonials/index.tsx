@@ -1,3 +1,4 @@
+import { useTranslation } from "@/hooks/useTranslation";
 import { Testimonial } from "@/types/testimonial";
 import SectionTitle from "../Common/SectionTitle";
 import SingleTestimonial from "./SingleTestimonial";
@@ -33,13 +34,15 @@ const testimonialData: Testimonial[] = [
 ];
 
 const Testimonials = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="bg-gray-1 py-20 dark:bg-dark-2 md:py-[120px]">
       <div className="container px-4">
         <SectionTitle
-          subtitle="Testimonials"
-          title="What our Client Say"
-          paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+          subtitle={t('testimonials.subtitle')}
+          title={t('testimonials.title')}
+          paragraph={t('testimonials.paragraph')}
           width="640px"
           center
         />

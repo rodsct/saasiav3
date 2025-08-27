@@ -1,7 +1,10 @@
+import { useTranslation } from "@/hooks/useTranslation";
 import Image from "next/image";
 import Link from "next/link";
 
 const Footer = () => {
+  const { t } = useTranslation();
+  
   return (
     <footer
       className="wow fadeInUp relative z-10 bg-[#1e1e1e] pt-20 lg:pt-[100px]"
@@ -21,8 +24,7 @@ const Footer = () => {
                 />
               </Link>
               <p className="mb-8 max-w-[270px] text-base text-gray-7">
-                Agencia de Inteligencia Artificial especializada en crear
-                experiencias digitales innovadoras con nuestro asistente Aranza.
+                {t('footer.description')}
               </p>
               <div className="-mx-3 flex items-center">
                 <Link
@@ -97,7 +99,7 @@ const Footer = () => {
           <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-2/12 xl:w-2/12">
             <div className="mb-10 w-full">
               <h4 className="mb-9 text-lg font-semibold text-white">
-                About Us
+                {t('footer.about_us')}
               </h4>
               <ul>
                 <li>
@@ -291,14 +293,14 @@ const Footer = () => {
             <div className="w-full px-4 md:w-1/3 lg:w-1/2">
               <div className="my-1 flex justify-center md:justify-end">
                 <p className="text-base text-gray-7">
-                  Designed and Developed by{" "}
+                  {t('footer.copyright')}{" "}
                   <Link
                     href="https://tailgrids.com"
                     rel="nofollow noopner noreferrer"
                     target="_blank"
                     className="text-gray-1 hover:underline"
                   >
-                    TailGrids and Next.js Templates
+                    {t('footer.tailgrids_link')}
                   </Link>
                 </p>
               </div>
