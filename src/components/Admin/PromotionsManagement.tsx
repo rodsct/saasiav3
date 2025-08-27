@@ -11,10 +11,12 @@ interface Promotion {
   discountValue: number;
   isActive: boolean;
   usageLimit?: number;
-  usageCount: number;
+  usedCount: number;
   expiresAt?: string;
   createdAt: string;
 }
+
+const DEFAULT_PROMOTION_IDS = ["WELCOME20", "SAVE30", "FIRST50"];
 
 export default function PromotionsManagement() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -312,7 +314,7 @@ export default function PromotionsManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 dark:text-white">
-                      {promotion.usageCount} / {promotion.usageLimit || "∞"}
+                      {promotion.usedCount} / {promotion.usageLimit || "∞"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -325,22 +327,32 @@ export default function PromotionsManagement() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                    <button
-                      onClick={() => togglePromotion(promotion.id, promotion.isActive)}
-                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                        promotion.isActive
-                          ? "bg-red-100 text-red-700 hover:bg-red-200"
-                          : "bg-green-100 text-green-700 hover:bg-green-200"
-                      }`}
-                    >
-                      {promotion.isActive ? "Desactivar" : "Activar"}
-                    </button>
-                    <button
-                      onClick={() => deletePromotion(promotion.id)}
-                      className="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                    >
-                      Eliminar
-                    </button>
+                    {DEFAULT_PROMOTION_IDS.includes(promotion.id) ? (
+                      <div className="flex items-center space-x-2">
+                        <span className="px-3 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                          Promoción por defecto
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => togglePromotion(promotion.id, promotion.isActive)}
+                          className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                            promotion.isActive
+                              ? "bg-red-100 text-red-700 hover:bg-red-200"
+                              : "bg-green-100 text-green-700 hover:bg-green-200"
+                          }`}
+                        >
+                          {promotion.isActive ? "Desactivar" : "Activar"}
+                        </button>
+                        <button
+                          onClick={() => deletePromotion(promotion.id)}
+                          className="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                        >
+                          Eliminar
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

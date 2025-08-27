@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updatePromotion, deletePromotion } from "@/utils/persistentPromotions";
+import { updatePromotion, deleteCustomPromotion } from "@/utils/envPromotions";
 
 export async function PATCH(
   request: NextRequest,
@@ -56,7 +56,7 @@ export async function DELETE(
 
     console.log("Deleting promotion:", promotionId);
 
-    const success = deletePromotion(promotionId);
+    const success = deleteCustomPromotion(promotionId);
     
     if (!success) {
       return NextResponse.json(

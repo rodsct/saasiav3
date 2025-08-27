@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { loadPromotionsFromFile, addPromotion } from "@/utils/persistentPromotions";
+import { getAllPromotions, addCustomPromotion } from "@/utils/envPromotions";
 
 export async function GET(request: NextRequest) {
   // Simple auth check using headers (same pattern as other admin endpoints)
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json({ promotions: loadPromotionsFromFile() });
+    return NextResponse.json({ promotions: getAllPromotions() });
 
   } catch (error) {
     console.error("Get promotions error:", error);
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
-    const success = addPromotion(newPromotion);
+    const success = addCustomPromotion(newPromotion);
     
     if (!success) {
       return NextResponse.json(
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Promotion created and saved to file:", newPromotion.code);
+    console.log("Custom promotion created and saved to env:", newPromotion.code);
     return NextResponse.json({ promotion: newPromotion });
 
   } catch (error) {

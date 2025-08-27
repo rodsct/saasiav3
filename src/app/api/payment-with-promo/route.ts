@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { findActivePromotion, loadPromotionsFromFile } from "@/utils/persistentPromotions";
+import { findActivePromotion, getAllPromotions } from "@/utils/envPromotions";
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     
     if (promoCode) {
       console.log("Looking for promo code:", promoCode);
-      const allPromotions = loadPromotionsFromFile();
+      const allPromotions = getAllPromotions();
       console.log("Available promotions:", allPromotions.map(p => p.code));
       
       const promotion = findActivePromotion(promoCode);
