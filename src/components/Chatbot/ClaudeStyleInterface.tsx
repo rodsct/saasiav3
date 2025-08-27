@@ -103,6 +103,8 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       return;
     }
 
+    console.log("Loading conversations for chatbot:", currentChatbotId);
+
     try {
       // Try simplified endpoint first, fallback to original
       let response = await fetch(`/api/chatbot/conversations-simple?chatbotId=${currentChatbotId}`);
@@ -136,11 +138,13 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       }
 
       const data = await response.json();
+      console.log("Conversations data received:", data);
       setConversations(data.conversations || []);
       
       // Only load the latest conversation if we don't have a current conversation
       // This prevents overriding when user explicitly started a new chat
       if (data.conversations?.length > 0 && !currentConversation && messages.length === 0) {
+        console.log("Loading latest conversation:", data.conversations[0]);
         const latest = data.conversations[0];
         setCurrentConversation(latest);
         setMessages(latest.messages || []);
@@ -275,13 +279,14 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
         };
         setCurrentConversation(newConversation);
         
-        // Generate automatic title for new conversation
-        setTimeout(async () => {
-          const generatedTitle = await generateTitle(data.conversationId);
-          if (generatedTitle) {
-            setCurrentConversation(prev => prev ? { ...prev, title: generatedTitle } : null);
-          }
-        }, 1000);
+        // TODO: Generate automatic title when migration is available
+        // setTimeout(async () => {
+        //   const generatedTitle = await generateTitle(data.conversationId);
+        //   if (generatedTitle) {
+        //     setCurrentConversation(prev => prev ? { ...prev, title: generatedTitle } : null);
+        //     await reloadConversationsList();
+        //   }
+        // }, 1000);
         
         // Reload conversations list to show new conversation in Recientes
         await reloadConversationsList();
@@ -414,7 +419,22 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
   const getConversationDisplayTitle = (conversation: Conversation) => {
     if (conversation.title) return conversation.title;
-    return conversation.messages?.[0]?.content.slice(0, 30) || 'Nueva conversación';
+    
+    // Fallback to first user message
+    const firstUserMessage = conversation.messages?.find(m => m.isFromUser);
+    if (firstUserMessage) {
+      const content = firstUserMessage.content.trim();
+      if (content.includes('?')) {
+        return content.length > 40 ? content.slice(0, 40) + '...' : content;
+      }
+      if (content.length > 40) {
+        const words = content.split(' ');
+        return words.slice(0, 6).join(' ') + '...';
+      }
+      return content;
+    }
+    
+    return 'Nueva conversación';
   };
 
   const groupConversationsByDate = (conversations: Conversation[]) => {
@@ -541,35 +561,12 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                                 onClick={() => selectConversation(conversation)}
                                 className="w-full text-left p-2 lg:p-3"
                               >
-                                {editingConversationId === conversation.id ? (
-                                  <input
-                                    type="text"
-                                    value={editingTitle}
-                                    onChange={(e) => setEditingTitle(e.target.value)}
-                                    onBlur={() => handleTitleEdit(conversation.id)}
-                                    onKeyDown={(e) => {
-                                      e.stopPropagation();
-                                      if (e.key === 'Enter') {
-                                        handleTitleEdit(conversation.id);
-                                      } else if (e.key === 'Escape') {
-                                        setEditingConversationId(null);
-                                        setEditingTitle("");
-                                      }
-                                    }}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="w-full bg-[#1a1a2e] text-white text-xs lg:text-sm px-2 py-1 rounded border border-[#00d4ff]/50 focus:outline-none focus:border-[#00d4ff]"
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <>
-                                    <div className="text-xs lg:text-sm text-white truncate pr-6">
-                                      {getConversationDisplayTitle(conversation)}
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-1">
-                                      {new Date(conversation.updatedAt || conversation.createdAt).toLocaleDateString()}
-                                    </div>
-                                  </>
-                                )}
+                                <div className="text-xs lg:text-sm text-white truncate pr-6">
+                                  {getConversationDisplayTitle(conversation)}
+                                </div>
+                                <div className="text-xs text-gray-400 mt-1">
+                                  {new Date(conversation.updatedAt || conversation.createdAt).toLocaleDateString()}
+                                </div>
                               </button>
                               
                               {/* Action buttons */}
@@ -579,21 +576,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        startEditingTitle(conversation);
-                                      }}
-                                      className="p-1 hover:bg-[#3f3f3f] rounded text-gray-400 hover:text-white transition-colors"
-                                      title="Renombrar"
-                                    >
-                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                      </svg>
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (confirm('¿Estás seguro de que quieres eliminar esta conversación?')) {
-                                          deleteConversation(conversation.id);
-                                        }
+                                        deleteConversation(conversation.id);
                                       }}
                                       className="p-1 hover:bg-red-600/20 rounded text-gray-400 hover:text-red-400 transition-colors"
                                       title="Eliminar"

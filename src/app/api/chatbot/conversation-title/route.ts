@@ -72,10 +72,24 @@ export async function POST(request: NextRequest) {
     const title = generateConversationTitle(firstUserMessage.content);
 
     // Update conversation with generated title
-    const updatedConversation = await prisma.conversation.update({
-      where: { id: conversationId },
-      data: { title }
-    });
+    let updatedConversation;
+    try {
+      updatedConversation = await prisma.conversation.update({
+        where: { id: conversationId },
+        data: { title }
+      });
+    } catch (error) {
+      // If title field doesn't exist yet, skip the update but return the title
+      if (error.message?.includes('title') || error.message?.includes('column')) {
+        console.log("Title field not available yet, migration pending");
+        return NextResponse.json({ 
+          success: true, 
+          title,
+          migrationPending: true
+        });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ 
       success: true, 
@@ -110,13 +124,27 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update conversation title
-    const updatedConversation = await prisma.conversation.update({
-      where: { 
-        id: conversationId,
-        userId: user.id 
-      },
-      data: { title: title.slice(0, 100) } // Limit title length
-    });
+    let updatedConversation;
+    try {
+      updatedConversation = await prisma.conversation.update({
+        where: { 
+          id: conversationId,
+          userId: user.id 
+        },
+        data: { title: title.slice(0, 100) } // Limit title length
+      });
+    } catch (error) {
+      // If title field doesn't exist yet, skip the update
+      if (error.message?.includes('title') || error.message?.includes('column')) {
+        console.log("Title field not available yet, migration pending");
+        return NextResponse.json({ 
+          success: false, 
+          error: "Migration pending - title field not available",
+          migrationPending: true
+        });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ 
       success: true, 
