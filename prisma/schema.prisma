@@ -47,6 +47,7 @@ model User {
   password              String?
   passwordResetToken    String?         @unique
   passwordResetTokenExp DateTime?
+  whatsapp              String?
   role                  UserRole        @default(USER)
   subscription          SubscriptionType @default(FREE)
   subscriptionEndsAt    DateTime?

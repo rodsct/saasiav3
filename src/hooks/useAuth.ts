@@ -9,6 +9,7 @@ interface User {
   subscription: string;
   subscriptionEndsAt?: string;
   role: string;
+  whatsapp?: string;
 }
 
 interface AuthContextType {

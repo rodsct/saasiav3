@@ -27,12 +27,15 @@ export async function GET(request: NextRequest) {
     const totalUsers = await prisma.user.count();
     console.log("Total users:", totalUsers);
 
-    // Get PRO users count
+    // Get PRO users count (excluding admins)
     console.log("Counting PRO users...");
     const proUsers = await prisma.user.count({
-      where: { subscription: "PRO" }
+      where: { 
+        subscription: "PRO",
+        role: { not: "ADMIN" }
+      }
     });
-    console.log("PRO users:", proUsers);
+    console.log("PRO users (excluding admins):", proUsers);
 
     // Get total downloads count (make this optional)
     console.log("Counting downloads...");
@@ -44,9 +47,9 @@ export async function GET(request: NextRequest) {
       console.log("Downloads table might not exist yet:", downloadError);
     }
 
-    // Calculate total revenue (PRO users * $49)
+    // Calculate total revenue (PRO users * $49, excluding admins)
     const totalRevenue = proUsers * 49;
-    console.log("Total revenue:", totalRevenue);
+    console.log("Total revenue (excluding admins):", totalRevenue);
 
     // Get recent users
     console.log("Getting recent users...");

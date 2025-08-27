@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import ClaudeStyleInterface from "@/components/Chatbot/ClaudeStyleInterface";
 import ProSubscriptionRequired from "@/components/Subscription/ProSubscriptionRequired";
+import WhatsAppSetup from "@/components/WhatsApp/WhatsAppSetup";
 
 // Get default chatbot ID - in production this would come from database
 const DEFAULT_CHATBOT_ID = "cmepuxaoj0004kndw8g42uma8";
@@ -43,6 +44,11 @@ export default function ChatbotPage() {
   }
 
   return (
-    <ClaudeStyleInterface chatbotId={DEFAULT_CHATBOT_ID} />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 pt-32 pb-8">
+        <WhatsAppSetup />
+        <ClaudeStyleInterface chatbotId={DEFAULT_CHATBOT_ID} />
+      </div>
+    </div>
   );
 }
