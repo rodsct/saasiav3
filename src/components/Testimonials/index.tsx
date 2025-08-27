@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslation } from "@/hooks/useTranslation";
 import { Testimonial } from "@/types/testimonial";
 import SectionTitle from "../Common/SectionTitle";

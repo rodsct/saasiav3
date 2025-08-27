@@ -54,7 +54,9 @@
       "Bash(git commit:*)",
       "Bash(git tag:*)",
       "WebFetch(domain:proyectonuevo-saasiav3.uclxiv.easypanel.host)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(git checkout:*)",
+      "Bash(sed:*)"
     ],
     "deny": [],
     "ask": []
