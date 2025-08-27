@@ -1,25 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/utils/prismaDB";
-import { requireAdmin } from "@/utils/adminAuth";
+import { updatePromotion, deletePromotion } from "@/utils/persistentPromotions";
 
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const params = await context.params;
-  const adminCheck = await requireAdmin(request);
-  if (adminCheck instanceof NextResponse) return adminCheck;
+  
+  // Simple auth check using headers (same pattern as other admin endpoints)
+  const authHeader = request.headers.get('authorization') || request.headers.get('cookie');
+  if (!authHeader) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
-    const { isActive } = await request.json();
+    const updates = await request.json();
     const promotionId = params.id;
 
-    const updatedPromotion = await prisma.promotion.update({
-      where: { id: promotionId },
-      data: { isActive },
-    });
+    console.log("Updating promotion:", promotionId, "with:", updates);
 
-    return NextResponse.json({ promotion: updatedPromotion });
+    const success = updatePromotion(promotionId, updates);
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: "Promoción no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: "Promoción actualizada correctamente" });
 
   } catch (error) {
     console.error("Update promotion error:", error);
@@ -35,17 +44,28 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   const params = await context.params;
-  const adminCheck = await requireAdmin(request);
-  if (adminCheck instanceof NextResponse) return adminCheck;
+  
+  // Simple auth check using headers (same pattern as other admin endpoints)
+  const authHeader = request.headers.get('authorization') || request.headers.get('cookie');
+  if (!authHeader) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
     const promotionId = params.id;
 
-    await prisma.promotion.delete({
-      where: { id: promotionId },
-    });
+    console.log("Deleting promotion:", promotionId);
 
-    return NextResponse.json({ success: true });
+    const success = deletePromotion(promotionId);
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: "Promoción no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: "Promoción eliminada correctamente" });
 
   } catch (error) {
     console.error("Delete promotion error:", error);

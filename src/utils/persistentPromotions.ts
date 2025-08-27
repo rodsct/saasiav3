@@ -14,7 +14,7 @@ interface Promotion {
   createdAt: string;
 }
 
-const PROMOTIONS_FILE_PATH = path.join(process.cwd(), 'data', 'promotions.json');
+const PROMOTIONS_FILE_PATH = path.join(process.cwd(), 'src', 'stripe', 'promotionsData.ts');
 
 // Default promotions
 const DEFAULT_PROMOTIONS: Promotion[] = [
@@ -67,8 +67,6 @@ function ensureDataDirectory() {
 // Load promotions from file
 export function loadPromotionsFromFile(): Promotion[] {
   try {
-    ensureDataDirectory();
-    
     if (!fs.existsSync(PROMOTIONS_FILE_PATH)) {
       // Create file with default promotions
       savePromotionsToFile(DEFAULT_PROMOTIONS);
@@ -76,7 +74,20 @@ export function loadPromotionsFromFile(): Promotion[] {
     }
     
     const fileContent = fs.readFileSync(PROMOTIONS_FILE_PATH, 'utf8');
-    return JSON.parse(fileContent) as Promotion[];
+    
+    // Parse TypeScript file content to extract promotions array
+    const arrayMatch = fileContent.match(/export const promotionsData: Promotion\[\] = (\[[\s\S]*?\]);/);
+    if (arrayMatch) {
+      // Convert the string to a valid JSON array by removing TypeScript types and formatting
+      const arrayString = arrayMatch[1]
+        .replace(/(\w+):/g, '"$1":')  // Quote property names
+        .replace(/"/g, '"')           // Normalize quotes
+        .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+      
+      return JSON.parse(arrayString) as Promotion[];
+    }
+    
+    return DEFAULT_PROMOTIONS;
   } catch (error) {
     console.error('Error loading promotions from file:', error);
     return DEFAULT_PROMOTIONS;
@@ -86,9 +97,24 @@ export function loadPromotionsFromFile(): Promotion[] {
 // Save promotions to file
 export function savePromotionsToFile(promotions: Promotion[]): void {
   try {
-    ensureDataDirectory();
-    fs.writeFileSync(PROMOTIONS_FILE_PATH, JSON.stringify(promotions, null, 2), 'utf8');
-    console.log('Promotions saved to file successfully');
+    // Create TypeScript file content
+    const fileContent = `interface Promotion {
+  id: string;
+  code: string;
+  description: string;
+  discountType: "PERCENTAGE" | "FIXED_AMOUNT";
+  discountValue: number;
+  isActive: boolean;
+  usageLimit?: number;
+  usedCount: number;
+  expiresAt?: string;
+  createdAt: string;
+}
+
+export const promotionsData: Promotion[] = ${JSON.stringify(promotions, null, 2)};`;
+
+    fs.writeFileSync(PROMOTIONS_FILE_PATH, fileContent, 'utf8');
+    console.log('Promotions saved to TypeScript file successfully');
   } catch (error) {
     console.error('Error saving promotions to file:', error);
   }
