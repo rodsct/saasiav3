@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
@@ -25,6 +26,7 @@ interface ChatbotProps {
 
 export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: ChatbotProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const [currentChatbotId, setCurrentChatbotId] = useState(initialChatbotId);
@@ -183,9 +185,9 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
       if (!response.ok) {
         if (response.status === 500) {
-          toast.error("Error del servidor - intenta más tarde");
+          toast.error(t('chatbot.errors.server_error'));
         } else {
-          toast.error("Error al enviar mensaje");
+          toast.error(t('chatbot.errors.send_message'));
         }
         setMessages(prev => prev.slice(0, -1));
         return;
@@ -194,7 +196,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       const contentType = response.headers.get("content-type");
       if (!contentType?.includes("application/json")) {
         console.error("Chat response is not JSON:", contentType, "Status:", response.status);
-        toast.error("Error en respuesta del servidor");
+        toast.error(t('chatbot.errors.server_response'));
         setMessages(prev => prev.slice(0, -1));
         return;
       }
@@ -215,7 +217,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("Error al enviar mensaje");
+      toast.error(t('chatbot.errors.send_message'));
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
@@ -263,7 +265,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
         <div className="p-4 border-b border-[#3f3f3f]">
           <div className="flex items-center justify-between">
             {sidebarOpen && (
-              <h1 className="text-lg font-semibold text-white">Chats</h1>
+              <h1 className="text-lg font-semibold text-white">{t('chatbot.chats')}</h1>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -286,7 +288,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            {sidebarOpen && <span className="text-sm font-medium">Nuevo chat</span>}
+            {sidebarOpen && <span className="text-sm font-medium">{t('chatbot.new_chat')}</span>}
           </button>
         </div>
 
@@ -295,7 +297,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
           <div className="flex-1 overflow-y-auto">
             <div className="px-4 py-2">
               <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-                Recientes
+{t('chatbot.recent')}
               </h3>
               <div className="space-y-1">
                 {conversations.map((conversation) => (
@@ -307,7 +309,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                     }`}
                   >
                     <div className="text-sm text-white truncate">
-                      {conversation.messages?.[0]?.content.slice(0, 40) || "Nueva conversación"}...
+                      {conversation.messages?.[0]?.content.slice(0, 40) || t('chatbot.new_conversation')}...
                     </div>
                     <div className="text-xs text-gray-400 mt-1">
                       {new Date(conversation.createdAt).toLocaleDateString()}
@@ -330,10 +332,10 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
               </div>
               <div className="flex-1">
                 <div className="text-sm font-medium text-white">
-                  {user.name || 'Usuario'}
+                  {user.name || t('chatbot.user')}
                 </div>
                 <div className="text-xs text-gray-400">
-                  Plan Pro
+                  {t('chatbot.pro_plan')}
                 </div>
               </div>
             </div>
@@ -354,42 +356,42 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                   </svg>
                 </div>
                 <div className="text-3xl font-medium text-white mb-4">
-                  <span className="text-[#ff6b35]">¡</span>Rodrigo ha vuelto<span className="text-[#ff6b35]">!</span>
+{t('chatbot.welcome')}
                 </div>
                 <p className="text-lg text-gray-400">
-                  ¿Cómo puedo ayudarte hoy?
+{t('chatbot.welcome_question')}
                 </p>
               </div>
               
               {/* Quick Actions */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <button
-                  onClick={() => setInput("¿Qué servicios de IA ofrecen?")}
+                  onClick={() => setInput(t('chatbot.quick_actions.services_question'))}
                   className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
                 >
-                  <div className="text-sm font-medium text-white mb-1">Servicios</div>
-                  <div className="text-xs text-gray-400">Conoce nuestros servicios de IA</div>
+                  <div className="text-sm font-medium text-white mb-1">{t('chatbot.quick_actions.services')}</div>
+                  <div className="text-xs text-gray-400">{t('chatbot.quick_actions.services_desc')}</div>
                 </button>
                 <button
-                  onClick={() => setInput("¿Cómo pueden ayudarme con mi negocio?")}
+                  onClick={() => setInput(t('chatbot.quick_actions.consulting_question'))}
                   className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
                 >
-                  <div className="text-sm font-medium text-white mb-1">Consultoría</div>
-                  <div className="text-xs text-gray-400">Soluciones para tu empresa</div>
+                  <div className="text-sm font-medium text-white mb-1">{t('chatbot.quick_actions.consulting')}</div>
+                  <div className="text-xs text-gray-400">{t('chatbot.quick_actions.consulting_desc')}</div>
                 </button>
                 <button
-                  onClick={() => setInput("¿Qué es Aranza.io?")}
+                  onClick={() => setInput(t('chatbot.quick_actions.about_question'))}
                   className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
                 >
-                  <div className="text-sm font-medium text-white mb-1">Sobre Aranza</div>
-                  <div className="text-xs text-gray-400">Conoce nuestra agencia</div>
+                  <div className="text-sm font-medium text-white mb-1">{t('chatbot.quick_actions.about')}</div>
+                  <div className="text-xs text-gray-400">{t('chatbot.quick_actions.about_desc')}</div>
                 </button>
                 <button
-                  onClick={() => setInput("¿Cómo puedo contactarlos?")}
+                  onClick={() => setInput(t('chatbot.quick_actions.contact_question'))}
                   className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
                 >
-                  <div className="text-sm font-medium text-white mb-1">Contacto</div>
-                  <div className="text-xs text-gray-400">Ponte en contacto</div>
+                  <div className="text-sm font-medium text-white mb-1">{t('chatbot.quick_actions.contact')}</div>
+                  <div className="text-xs text-gray-400">{t('chatbot.quick_actions.contact_desc')}</div>
                 </button>
               </div>
             </div>
@@ -486,7 +488,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                     adjustTextareaHeight();
                   }}
                   onKeyDown={handleKeyPress}
-                  placeholder="¿Cómo puedo ayudarte hoy?"
+                  placeholder={t('chatbot.placeholder')}
                   rows={1}
                   className="w-full resize-none bg-transparent px-4 py-4 pr-16 text-white placeholder-gray-400 focus:outline-none"
                   style={{ 

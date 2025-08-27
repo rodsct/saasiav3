@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
 import toast from "react-hot-toast";
 
 interface Download {
@@ -27,6 +28,7 @@ interface DownloadsGridProps {
 
 export default function DownloadsGrid({ showAdminControls = false }: DownloadsGridProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"ALL" | "PUBLIC" | "REGISTERED" | "PREMIUM">("ALL");
@@ -48,25 +50,25 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
       
       if (!response.ok) {
         if (response.status === 401) {
-          toast.error("Necesitas iniciar sesión para ver las descargas");
+          toast.error(t('downloads.errors.login_required'));
           return;
         }
         if (response.status === 403) {
-          toast.error("No tienes permisos para ver estas descargas");
+          toast.error(t('downloads.errors.no_permission'));
           return;
         }
         if (response.status === 500) {
-          toast.error("Error del servidor - intenta más tarde");
+          toast.error(t('downloads.errors.server_error'));
           return;
         }
-        toast.error("Error cargando descargas");
+        toast.error(t('downloads.errors.loading_error'));
         return;
       }
 
       const contentType = response.headers.get("content-type");
       if (!contentType?.includes("application/json")) {
         console.error("Downloads response is not JSON:", contentType, "Status:", response.status);
-        toast.error("Error en formato de respuesta - servidor no disponible");
+        toast.error(t('downloads.errors.server_unavailable'));
         return;
       }
       
@@ -74,7 +76,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
       setDownloads(data.downloads || []);
     } catch (error) {
       console.error("Error loading downloads:", error);
-      toast.error("Error cargando descargas");
+      toast.error(t('downloads.errors.loading_error'));
     } finally {
       setLoading(false);
     }
@@ -96,19 +98,19 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
       
       if (!response.ok) {
         if (response.status === 401) {
-          toast.error("Necesitas iniciar sesión para descargar");
+          toast.error(t('downloads.errors.login_required'));
           return;
         }
         if (response.status === 403) {
-          toast.error("Necesitas una suscripción premium para descargar este archivo");
+          toast.error(t('downloads.errors.premium_required'));
           return;
         }
         if (response.status === 404) {
-          toast.error("Archivo no encontrado");
+          toast.error(t('downloads.errors.file_not_found'));
           return;
         }
         if (response.status === 500) {
-          toast.error("Error del servidor - intenta más tarde");
+          toast.error(t('downloads.errors.server_error'));
           return;
         }
         
@@ -117,13 +119,13 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
         if (contentType?.includes("application/json")) {
           try {
             const errorData = await response.json();
-            toast.error(errorData.error || "Error al descargar archivo");
+            toast.error(errorData.error || t('downloads.errors.download_error'));
           } catch {
-            toast.error("Error al descargar archivo");
+            toast.error(t('downloads.errors.download_error'));
           }
         } else {
           console.error("Download response error - Status:", response.status, "Content-Type:", response.headers.get("content-type"));
-          toast.error("Error al descargar archivo");
+          toast.error(t('downloads.errors.download_error'));
         }
         return;
       }
@@ -138,16 +140,16 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       
-      toast.success("Descarga iniciada");
+      toast.success(t('downloads.success.download_started'));
       loadDownloads(); // Refresh to update download count
     } catch (error) {
-      toast.error("Error al descargar archivo");
+      toast.error(t('downloads.errors.download_error'));
       console.error("Download error:", error);
     }
   };
 
   const handleDelete = async (downloadId: string) => {
-    if (!confirm("¿Estás seguro de que quieres eliminar este archivo?")) {
+    if (!confirm(t('downloads.confirm.delete_file'))) {
       return;
     }
 
@@ -165,18 +167,18 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
       }
 
       if (response.ok) {
-        toast.success("Archivo eliminado");
+        toast.success(t('downloads.success.file_deleted'));
         loadDownloads();
       } else {
         if (response.status === 500) {
-          toast.error("Error del servidor - intenta más tarde");
+          toast.error(t('downloads.errors.server_error'));
         } else {
-          toast.error("Error al eliminar archivo");
+          toast.error(t('downloads.errors.delete_error'));
         }
         console.error("Delete failed - Status:", response.status);
       }
     } catch (error) {
-      toast.error("Error al eliminar archivo");
+      toast.error(t('downloads.errors.delete_error'));
       console.error("Delete error:", error);
     }
   };
@@ -189,9 +191,9 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
     };
 
     const labels = {
-      PUBLIC: "Público",
-      REGISTERED: "Registrado",
-      PRO: "PRO"
+      PUBLIC: t('downloads.access_levels.public'),
+      REGISTERED: t('downloads.access_levels.registered'),
+      PRO: t('downloads.access_levels.pro')
     };
 
     return (
@@ -287,7 +289,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
             </svg>
             <input
               type="text"
-              placeholder="Buscar archivos..."
+              placeholder={t('downloads.search_placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 pr-4 py-2 w-full border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] text-sm"
@@ -301,7 +303,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="px-3 py-2 border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] text-sm"
         >
-          <option value="">Todas las categorías</option>
+          <option value="">{t('downloads.all_categories')}</option>
           {categories.map(category => (
             <option key={category} value={category}>{category}</option>
           ))}
@@ -314,10 +316,10 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
             onChange={(e) => setFilter(e.target.value as any)}
             className="px-3 py-2 border border-[#4f4f4f] rounded-lg bg-[#3f3f3f] text-white focus:ring-2 focus:ring-[#ff6b35] focus:border-[#ff6b35] text-sm"
           >
-            <option value="ALL">Todos los niveles</option>
-            <option value="PUBLIC">Público</option>
-            <option value="REGISTERED">Registrados</option>
-            <option value="PREMIUM">Premium</option>
+            <option value="ALL">{t('downloads.all_levels')}</option>
+            <option value="PUBLIC">{t('downloads.access_levels.public')}</option>
+            <option value="REGISTERED">{t('downloads.access_levels.registered')}</option>
+            <option value="PREMIUM">{t('downloads.access_levels.premium')}</option>
           </select>
         )}
       </div>
@@ -360,7 +362,7 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
 
                   <div className="flex items-center gap-4 text-xs text-gray-400 mb-3">
                     <span>{formatFileSize(download.fileSize)}</span>
-                    <span>{download.downloadCount} descargas</span>
+                    <span>{download.downloadCount} {t('downloads.downloads_count')}</span>
                     {download.category && (
                       <span className="px-2 py-1 bg-[#2f2f2f] rounded text-gray-300">
                         {download.category}
@@ -399,14 +401,14 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      {canAccess ? 'Descargar' : download.accessLevel === 'PREMIUM' ? 'Premium' : 'Requiere registro'}
+                      {canAccess ? t('downloads.download') : download.accessLevel === 'PREMIUM' ? t('downloads.premium_required') : t('downloads.registration_required')}
                     </button>
 
                     {showAdminControls && (
                       <button
                         onClick={() => handleDelete(download.id)}
                         className="p-2 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
-                        title="Eliminar archivo"
+                        title={t('downloads.delete_file')}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -429,10 +431,10 @@ export default function DownloadsGrid({ showAdminControls = false }: DownloadsGr
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-white mb-2">
-            No se encontraron archivos
+            {t('downloads.no_files_title')}
           </h3>
           <p className="text-gray-400">
-            {searchTerm ? "Intenta con otros términos de búsqueda" : "Aún no hay archivos disponibles"}
+            {searchTerm ? t('downloads.try_other_search') : t('downloads.no_files_available')}
           </p>
         </div>
       )}

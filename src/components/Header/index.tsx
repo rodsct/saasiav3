@@ -1,5 +1,6 @@
 "use client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +11,7 @@ import menuData from "./menuData";
 
 const Header = () => {
   const { user, logout } = useAuth();
+  const { t, locale, changeLocale } = useTranslation();
 
   const pathUrl = usePathname();
   // Navbar toggle
@@ -126,7 +128,7 @@ const Header = () => {
                                 pathUrl === menuItem?.path && "text-[#ff6b35]"
                               }`}
                             >
-                              {menuItem.title}
+                              {t(menuItem.title)}
                             </Link>
                           ) : (
                             <Link
@@ -136,7 +138,7 @@ const Header = () => {
                                 pathUrl === menuItem?.path && "text-[#ff6b35]"
                               }`}
                             >
-                              {menuItem.title}
+                              {t(menuItem.title)}
                             </Link>
                           )}
                         </li>
@@ -147,7 +149,7 @@ const Header = () => {
                               onClick={() => handleSubmenu(index)}
                               className={`ud-menu-scroll flex items-center justify-between py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6`}
                             >
-                              {menuItem.title}
+                              {t(menuItem.title)}
 
                               <span className="pl-1">
                                 <svg
@@ -174,7 +176,7 @@ const Header = () => {
                                   : "text-white"
                               }`}
                             >
-                              {menuItem.title}
+                              {t(menuItem.title)}
 
                               <span className="pl-1">
                                 <svg
@@ -247,6 +249,18 @@ const Header = () => {
                   </span>
                 </button>
 
+                {/* Language Selector */}
+                <div className="relative">
+                  <select 
+                    value={locale}
+                    onChange={(e) => changeLocale(e.target.value as 'es' | 'en')}
+                    className="bg-[#3f3f3f] text-white text-sm px-3 py-2 rounded-lg border border-[#4f4f4f] focus:outline-none focus:ring-2 focus:ring-[#ff6b35]"
+                  >
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="en">🇺🇸 EN</option>
+                  </select>
+                </div>
+
                 {user ? (
                   <>
                     <p className="px-7 py-3 text-base font-medium text-white">
@@ -256,7 +270,7 @@ const Header = () => {
                       onClick={() => logout()}
                       className="rounded-xl bg-[#3f3f3f] px-6 py-3 text-base font-medium text-white hover:bg-[#4f4f4f] transition-colors duration-300"
                     >
-                      Sign Out
+                      {t('navigation.signout')}
                     </button>
                   </>
                 ) : (
@@ -265,13 +279,13 @@ const Header = () => {
                       href="/signin"
                       className="px-7 py-3 text-base font-medium text-white hover:text-[#ff6b35] transition-colors"
                     >
-                      Sign In
+                      {t('navigation.signin')}
                     </Link>
                     <Link
                       href="/signup"
                       className="rounded-xl px-6 py-3 text-base font-medium text-white bg-[#ff6b35] hover:bg-[#e55a2b] transition-colors duration-300"
                     >
-                      Sign Up
+                      {t('navigation.signup')}
                     </Link>
                   </>
                 )}

@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Hero = () => {
+  const { t } = useTranslation();
   return (
     <>
       <section
@@ -25,12 +27,10 @@ const Hero = () => {
                 </div>
 
                 <h1 className="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]">
-                  Consultora de <span className="text-[#ff6b35]">Inteligencia Artificial</span> y Automatizaciones
+                  {t('hero.title')}
                 </h1>
                 <p className="mx-auto mb-9 max-w-[600px] text-base font-medium text-gray-300 sm:text-lg sm:leading-[1.44]">
-                  Transformamos tu negocio con soluciones personalizadas de IA y automatización. 
-                  Desde chatbots inteligentes hasta workflows automatizados, te ayudamos a optimizar 
-                  procesos y aumentar la eficiencia operacional.
+                  {t('hero.subtitle')}
                 </p>
                 <ul className="mb-10 flex flex-wrap items-center justify-center gap-5">
                   <li>
@@ -38,7 +38,7 @@ const Hero = () => {
                       href="/chatbot"
                       className="inline-flex items-center justify-center rounded-xl bg-[#ff6b35] px-8 py-4 text-center text-base font-semibold text-white shadow-lg transition duration-300 ease-in-out hover:bg-[#e55a2b] hover:shadow-xl"
                     >
-                      Consulta Gratuita
+                      {t('hero.cta_primary')}
                     </Link>
                   </li>
                   <li>
@@ -56,14 +56,14 @@ const Hero = () => {
                       >
                         <path d="M12 2C13.1 2 14 2.9 14 4V12L16.5 9.5C17.3 8.7 18.7 8.7 19.5 9.5C20.3 10.3 20.3 11.7 19.5 12.5L13.5 18.5C12.7 19.3 11.3 19.3 10.5 18.5L4.5 12.5C3.7 11.7 3.7 10.3 4.5 9.5C5.3 8.7 6.7 8.7 7.5 9.5L10 12V4C10 2.9 10.9 2 12 2ZM3 19C3 18.4 3.4 18 4 18H20C20.6 18 21 18.4 21 19C21 19.6 20.6 20 20 20H4C3.4 20 3 19.6 3 19Z"/>
                       </svg>
-                      Ver Recursos
+                      {t('hero.cta_secondary')}
                     </Link>
                   </li>
                 </ul>
 
                 <div>
                   <p className="mb-4 text-center text-base font-medium text-white/60">
-                    Especializados en las tecnologías más avanzadas de IA
+                    {t('hero.tech_subtitle')}
                   </p>
                   <div
                     className="wow fadeInUp flex items-center justify-center gap-6 text-center"
