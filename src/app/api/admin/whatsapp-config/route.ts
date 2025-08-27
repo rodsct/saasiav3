@@ -10,17 +10,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get or create site config
-    let config = await prisma.siteConfig.findFirst();
+    let config;
     
-    if (!config) {
-      config = await prisma.siteConfig.create({
-        data: {
+    try {
+      // Try to get existing site config
+      config = await prisma.siteConfig.findFirst();
+      
+      if (!config) {
+        config = await prisma.siteConfig.create({
+          data: {
+            whatsappNumber: null,
+            whatsappMessage: "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.",
+            isWhatsappEnabled: false,
+          }
+        });
+      }
+    } catch (dbError: any) {
+      // If SiteConfig table doesn't exist, return default config
+      if (dbError?.code === 'P2021' || dbError?.message?.includes('does not exist')) {
+        console.log("SiteConfig table doesn't exist, returning default config");
+        config = {
           whatsappNumber: null,
           whatsappMessage: "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.",
           isWhatsappEnabled: false,
-        }
-      });
+        };
+      } else {
+        throw dbError;
+      }
     }
 
     return NextResponse.json({ 
@@ -62,26 +78,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get or create site config
-    let config = await prisma.siteConfig.findFirst();
-    
-    if (!config) {
-      config = await prisma.siteConfig.create({
-        data: {
-          whatsappNumber,
-          whatsappMessage: whatsappMessage || "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.",
-          isWhatsappEnabled: isWhatsappEnabled || false,
-        }
-      });
-    } else {
-      config = await prisma.siteConfig.update({
-        where: { id: config.id },
-        data: {
-          whatsappNumber,
-          whatsappMessage: whatsappMessage || config.whatsappMessage,
-          isWhatsappEnabled: isWhatsappEnabled || false,
-        }
-      });
+    let config;
+
+    try {
+      // Try to get existing site config
+      config = await prisma.siteConfig.findFirst();
+      
+      if (!config) {
+        config = await prisma.siteConfig.create({
+          data: {
+            whatsappNumber,
+            whatsappMessage: whatsappMessage || "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.",
+            isWhatsappEnabled: isWhatsappEnabled || false,
+          }
+        });
+      } else {
+        config = await prisma.siteConfig.update({
+          where: { id: config.id },
+          data: {
+            whatsappNumber,
+            whatsappMessage: whatsappMessage || config.whatsappMessage,
+            isWhatsappEnabled: isWhatsappEnabled || false,
+          }
+        });
+      }
+    } catch (dbError: any) {
+      // If SiteConfig table doesn't exist, return error with migration instruction
+      if (dbError?.code === 'P2021' || dbError?.message?.includes('does not exist')) {
+        console.log("SiteConfig table doesn't exist, migration needed");
+        return NextResponse.json(
+          { 
+            error: "Database migration required. Please run: npx prisma migrate dev",
+            requiresMigration: true 
+          },
+          { status: 400 }
+        );
+      } else {
+        throw dbError;
+      }
     }
 
     return NextResponse.json({ 

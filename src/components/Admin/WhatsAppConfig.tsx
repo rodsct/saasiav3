@@ -18,6 +18,7 @@ export default function WhatsAppConfig() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [qrUrl, setQrUrl] = useState<string>("");
+  const [migrationNeeded, setMigrationNeeded] = useState(false);
 
   useEffect(() => {
     fetchConfig();
@@ -81,9 +82,15 @@ export default function WhatsAppConfig() {
 
       if (response.ok) {
         setConfig(data.config);
+        setMigrationNeeded(false);
         toast.success("Configuración de WhatsApp actualizada");
       } else {
-        toast.error(data.error || "Error al actualizar configuración");
+        if (data.requiresMigration) {
+          setMigrationNeeded(true);
+          toast.error("Se necesita ejecutar migración de base de datos");
+        } else {
+          toast.error(data.error || "Error al actualizar configuración");
+        }
       }
     } catch (error) {
       console.error("Error updating config:", error);
@@ -131,6 +138,23 @@ export default function WhatsAppConfig() {
           </p>
         </div>
       </div>
+
+      {/* Migration Notice */}
+      {migrationNeeded && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <h4 className="text-sm font-semibold text-red-900 dark:text-red-200 mb-2">
+            ⚠️ Migración de Base de Datos Requerida
+          </h4>
+          <p className="text-sm text-red-800 dark:text-red-300 mb-3">
+            Para usar la configuración de WhatsApp, es necesario ejecutar las migraciones de la base de datos.
+          </p>
+          <div className="bg-red-100 dark:bg-red-800/30 rounded p-2">
+            <code className="text-xs text-red-900 dark:text-red-200">
+              npx prisma migrate dev
+            </code>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Configuration Form */}
