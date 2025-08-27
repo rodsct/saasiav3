@@ -130,7 +130,7 @@ export default function PromotionsManagement() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d4ff]"></div>
       </div>
     );
   }
@@ -144,7 +144,7 @@ export default function PromotionsManagement() {
         </h3>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm transition-colors"
+          className="bg-[#00d4ff] hover:bg-[#0099cc] text-white px-4 py-2 rounded-md text-sm transition-colors"
         >
           {showCreateForm ? "Cancelar" : "+ Nueva Promoción"}
         </button>
@@ -166,7 +166,7 @@ export default function PromotionsManagement() {
                   type="text"
                   value={formData.code}
                   onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
-                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
                   placeholder="DESCUENTO20"
                   required
                 />
@@ -179,7 +179,7 @@ export default function PromotionsManagement() {
                 <select
                   value={formData.discountType}
                   onChange={(e) => setFormData({...formData, discountType: e.target.value as any})}
-                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
                 >
                   <option value="PERCENTAGE">Porcentaje (%)</option>
                   <option value="FIXED_AMOUNT">Cantidad Fija ($)</option>
@@ -194,7 +194,7 @@ export default function PromotionsManagement() {
                   type="number"
                   value={formData.discountValue}
                   onChange={(e) => setFormData({...formData, discountValue: parseFloat(e.target.value)})}
-                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
                   min="0"
                   step={formData.discountType === "PERCENTAGE" ? "1" : "0.01"}
                   required
@@ -209,7 +209,7 @@ export default function PromotionsManagement() {
                   type="number"
                   value={formData.usageLimit}
                   onChange={(e) => setFormData({...formData, usageLimit: e.target.value})}
-                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
                   min="1"
                   placeholder="Ilimitado"
                 />
@@ -223,7 +223,7 @@ export default function PromotionsManagement() {
                   type="datetime-local"
                   value={formData.expiresAt}
                   onChange={(e) => setFormData({...formData, expiresAt: e.target.value})}
-                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
                 />
               </div>
 
@@ -234,7 +234,7 @@ export default function PromotionsManagement() {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
                   rows={3}
                   placeholder="Descripción de la promoción..."
                   required
@@ -252,7 +252,7 @@ export default function PromotionsManagement() {
               </button>
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm transition-colors"
+                className="bg-[#00d4ff] hover:bg-[#0099cc] text-white px-4 py-2 rounded-md text-sm transition-colors"
               >
                 Crear Promoción
               </button>

@@ -58,7 +58,7 @@ export default function AdminOverview() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d4ff]"></div>
       </div>
     );
   }
@@ -67,13 +67,13 @@ export default function AdminOverview() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-[#00d4ff] to-[#0099cc] rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-200 text-sm">Total Usuarios</p>
+              <p className="text-[#00d4ff]/70 text-sm">Total Usuarios</p>
               <p className="text-3xl font-bold">{stats.totalUsers}</p>
             </div>
-            <div className="text-blue-200">👥</div>
+            <div className="text-[#00d4ff]/70">👥</div>
           </div>
         </div>
 
@@ -97,13 +97,13 @@ export default function AdminOverview() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-[#00d4ff] to-[#0099cc] rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-200 text-sm">Ingresos Total</p>
+              <p className="text-[#00d4ff]/70 text-sm">Ingresos Total</p>
               <p className="text-3xl font-bold">${stats.totalRevenue.toFixed(2)}</p>
             </div>
-            <div className="text-blue-200">💰</div>
+            <div className="text-[#00d4ff]/70">💰</div>
           </div>
         </div>
       </div>
@@ -150,7 +150,7 @@ export default function AdminOverview() {
               <p className="text-sm text-gray-600 dark:text-gray-400">Usuarios Premium Activos</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <p className="text-2xl font-bold text-[#00d4ff] dark:text-[#00d4ff]">
                 {/* Aquí se podría mostrar cuántos tienen WhatsApp configurado */}
                 0
               </p>

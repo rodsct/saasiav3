@@ -1,20 +1,13 @@
-import SignUp from "@/components/Auth/SignUp";
-import Breadcrumb from "@/components/Common/Breadcrumb";
+import SimpleSignUp from "@/components/Auth/SimpleSignUp";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title:
-    "Sign Up | Play SaaS Starter Kit and Boilerplate for Next.js",
+  title: "Crear Cuenta | Aranza.io",
+  description: "Crea tu cuenta en Aranza.io para acceder a nuestros servicios de inteligencia artificial.",
 };
 
 const SignupPage = () => {
-  return (
-    <>
-      <Breadcrumb pageName="Sign Up Page" />
-
-      <SignUp />
-    </>
-  );
+  return <SimpleSignUp />;
 };
 
 export default SignupPage;

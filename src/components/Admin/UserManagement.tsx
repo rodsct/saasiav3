@@ -197,7 +197,7 @@ export default function UserManagement() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d4ff]"></div>
       </div>
     );
   }
@@ -215,7 +215,7 @@ export default function UserManagement() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
               placeholder="Buscar por nombre o email..."
             />
           </div>
@@ -227,7 +227,7 @@ export default function UserManagement() {
             <select
               value={filterSubscription}
               onChange={(e) => setFilterSubscription(e.target.value)}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
             >
               <option value="ALL">Todas</option>
               <option value="FREE">Gratis</option>
@@ -275,7 +275,7 @@ export default function UserManagement() {
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-[#00d4ff] rounded-full flex items-center justify-center">
                         <span className="text-white font-medium text-sm">
                           {user.name?.[0] || 'U'}
                         </span>
@@ -294,7 +294,7 @@ export default function UserManagement() {
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       user.role === "ADMIN" 
                         ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        : "bg-[#00d4ff]/20 text-[#00d4ff] dark:bg-[#00d4ff]/20 dark:text-[#00d4ff]"
                     }`}>
                       {user.role}
                     </span>
@@ -349,7 +349,7 @@ export default function UserManagement() {
                         
                         <button
                           onClick={() => extendSubscription(user.id, 1)}
-                          className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                          className="px-2 py-1 rounded text-xs font-medium bg-[#00d4ff]/20 text-[#00d4ff] hover:bg-[#00d4ff]/30 transition-colors"
                           title="Extender 1 mes"
                         >
                           +1m

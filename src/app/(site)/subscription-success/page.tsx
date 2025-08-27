@@ -95,7 +95,7 @@ function SubscriptionSuccessContent() {
             Plan Activado:
           </h3>
           <div className="flex items-center justify-center space-x-4">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <div className="text-2xl font-bold text-[#00d4ff] dark:text-[#00d4ff]">
               {plan?.toUpperCase()} - ${price}/mes
             </div>
           </div>
@@ -105,7 +105,7 @@ function SubscriptionSuccessContent() {
         <div className="space-y-4">
           <button 
             onClick={() => router.push("/chatbot")}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="w-full bg-gradient-to-r from-[#00d4ff] to-[#0099cc] text-white font-semibold py-4 px-6 rounded-xl hover:from-[#0099cc] hover:to-[#007acc] transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Ir a Aranza AI
           </button>
