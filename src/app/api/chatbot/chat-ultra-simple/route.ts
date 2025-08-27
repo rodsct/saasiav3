@@ -113,6 +113,61 @@ export async function POST(request: NextRequest) {
 
     console.log("Final response content:", responseContent);
 
+    // Save conversation and messages to database if user is authenticated
+    if (userInfo?.id) {
+      try {
+        const { prisma } = await import("@/utils/prismaDB");
+        
+        let dbConversation;
+        
+        if (conversationId) {
+          // Try to find existing conversation
+          dbConversation = await prisma.conversation.findUnique({
+            where: { 
+              id: conversationId,
+              userId: userInfo.id 
+            },
+          });
+        }
+        
+        // Create new conversation if it doesn't exist
+        if (!dbConversation) {
+          dbConversation = await prisma.conversation.create({
+            data: {
+              id: finalConversationId,
+              chatbotId,
+              userId: userInfo.id,
+            },
+          });
+          console.log("Created new conversation:", dbConversation.id);
+        }
+        
+        // Save user message
+        await prisma.message.create({
+          data: {
+            conversationId: dbConversation.id,
+            content: message,
+            isFromUser: true,
+          },
+        });
+        
+        // Save bot response
+        await prisma.message.create({
+          data: {
+            conversationId: dbConversation.id,
+            content: responseContent,
+            isFromUser: false,
+          },
+        });
+        
+        console.log("Messages saved to database for conversation:", dbConversation.id);
+        
+      } catch (dbError) {
+        console.error("Error saving to database:", dbError);
+        // Continue without saving - don't break the chat
+      }
+    }
+
     return NextResponse.json({
       success: true,
       conversationId: finalConversationId,
