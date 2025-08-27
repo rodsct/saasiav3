@@ -1,7 +1,6 @@
 "use client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -43,7 +42,6 @@ const Header = () => {
     }
   };
 
-  const { theme, setTheme } = useTheme();
 
   return (
     <>

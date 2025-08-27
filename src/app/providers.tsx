@@ -11,9 +11,18 @@ export default function Providers({ children }: PropsWithChildren) {
       <ThemeProvider
         attribute="class"
         enableSystem={false}
-        defaultTheme="light"
+        defaultTheme="dark"
+        forcedTheme="dark"
       >
-        <Toaster />
+        <Toaster 
+          toastOptions={{
+            style: {
+              background: '#3f3f3f',
+              color: '#fff',
+              border: '1px solid #4f4f4f'
+            }
+          }}
+        />
 
         {children}
       </ThemeProvider>

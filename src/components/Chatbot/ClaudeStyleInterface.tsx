@@ -53,7 +53,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setSidebarOpen(window.innerWidth >= 768);
+      setSidebarOpen(window.innerWidth >= 1024);
     };
     
     checkScreenSize();
@@ -254,24 +254,24 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
       
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-80 max-w-[80vw]' : 'w-16'} bg-[#1e1e1e] border-r border-[#3f3f3f] transition-all duration-300 flex flex-col ${sidebarOpen ? 'fixed md:relative inset-y-0 left-0 z-40 md:z-auto' : ''}`}>
+      <div className={`${sidebarOpen ? 'w-80 max-w-[85vw] sm:max-w-[70vw] lg:max-w-none' : 'w-0 lg:w-16'} bg-[#1e1e1e] border-r border-[#3f3f3f] transition-all duration-300 flex flex-col ${sidebarOpen ? 'fixed lg:relative inset-y-0 left-0 z-40' : 'overflow-hidden'}`}>
         {/* Header */}
-        <div className="p-4 border-b border-[#3f3f3f]">
+        <div className="p-3 lg:p-4 border-b border-[#3f3f3f] flex-shrink-0">
           <div className="flex items-center justify-between">
             {sidebarOpen && (
-              <h1 className="text-lg font-semibold text-white">{t('chatbot.chats')}</h1>
+              <h1 className="text-base lg:text-lg font-semibold text-white truncate">{t('chatbot.chats')}</h1>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-[#3f3f3f] rounded-lg transition-colors"
+              className="p-1.5 lg:p-2 hover:bg-[#3f3f3f] rounded-lg transition-colors flex-shrink-0"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
@@ -279,37 +279,37 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
         </div>
 
         {/* New Chat Section */}
-        <div className="p-4">
+        <div className="p-3 lg:p-4">
           {/* New Chat Button */}
           <button
             onClick={createNewChat}
-            className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-[#ff6b35] hover:bg-[#e55a2b] rounded-lg transition-colors"
+            className={`w-full flex items-center justify-center space-x-2 py-2 lg:py-3 px-2 lg:px-4 bg-[#ff6b35] hover:bg-[#e55a2b] rounded-lg transition-colors ${!sidebarOpen ? 'px-2' : ''}`}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            {sidebarOpen && <span className="text-sm font-medium">{t('chatbot.new_chat')}</span>}
+            {sidebarOpen && <span className="text-sm font-medium truncate">{t('chatbot.new_chat')}</span>}
           </button>
         </div>
 
         {/* Conversations List */}
         {sidebarOpen && (
           <div className="flex-1 overflow-y-auto">
-            <div className="px-4 py-2">
+            <div className="px-3 lg:px-4 py-2">
               <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-{t('chatbot.recent')}
+                {t('chatbot.recent')}
               </h3>
               <div className="space-y-1">
                 {conversations.map((conversation) => (
                   <button
                     key={conversation.id}
                     onClick={() => selectConversation(conversation)}
-                    className={`w-full text-left p-3 rounded-lg transition-colors hover:bg-[#3f3f3f] ${
+                    className={`w-full text-left p-2 lg:p-3 rounded-lg transition-colors hover:bg-[#3f3f3f] ${
                       currentConversation?.id === conversation.id ? 'bg-[#3f3f3f]' : ''
                     }`}
                   >
-                    <div className="text-sm text-white truncate">
-                      {conversation.messages?.[0]?.content.slice(0, 40) || t('chatbot.new_conversation')}...
+                    <div className="text-xs lg:text-sm text-white truncate">
+                      {conversation.messages?.[0]?.content.slice(0, 30) || t('chatbot.new_conversation')}...
                     </div>
                     <div className="text-xs text-gray-400 mt-1">
                       {new Date(conversation.createdAt).toLocaleDateString()}
@@ -323,15 +323,15 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
         {/* User Info */}
         {sidebarOpen && user && (
-          <div className="p-4 border-t border-[#3f3f3f]">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-[#ff6b35] rounded-full flex items-center justify-center">
-                <span className="text-white font-medium text-sm">
+          <div className="p-3 lg:p-4 border-t border-[#3f3f3f] flex-shrink-0">
+            <div className="flex items-center space-x-2 lg:space-x-3">
+              <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#ff6b35] rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-medium text-xs lg:text-sm">
                   {user.name?.[0] || 'U'}
                 </span>
               </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-white">
+              <div className="flex-1 min-w-0">
+                <div className="text-xs lg:text-sm font-medium text-white truncate">
                   {user.name || t('chatbot.user')}
                 </div>
                 <div className="text-xs text-gray-400">
@@ -347,48 +347,48 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       <div className="flex-1 flex flex-col w-full md:w-auto">
         {/* Welcome Message */}
         {messages.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center max-w-2xl mx-auto px-6">
-              <div className="mb-8">
-                <div className="inline-block p-4 bg-[#ff6b35] rounded-2xl mb-4">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="text-center max-w-2xl mx-auto">
+              <div className="mb-6 lg:mb-8">
+                <div className="inline-block p-3 lg:p-4 bg-[#ff6b35] rounded-2xl mb-4">
+                  <svg className="w-6 h-6 lg:w-8 lg:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z" />
                   </svg>
                 </div>
-                <div className="text-3xl font-medium text-white mb-4">
-{t('chatbot.welcome')}
+                <div className="text-xl lg:text-3xl font-medium text-white mb-3 lg:mb-4">
+                  {t('chatbot.welcome')}
                 </div>
-                <p className="text-lg text-gray-400">
-{t('chatbot.welcome_question')}
+                <p className="text-base lg:text-lg text-gray-400">
+                  {t('chatbot.welcome_question')}
                 </p>
               </div>
               
               {/* Quick Actions */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
                 <button
                   onClick={() => setInput(t('chatbot.quick_actions.services_question'))}
-                  className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
+                  className="p-3 lg:p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
                 >
                   <div className="text-sm font-medium text-white mb-1">{t('chatbot.quick_actions.services')}</div>
                   <div className="text-xs text-gray-400">{t('chatbot.quick_actions.services_desc')}</div>
                 </button>
                 <button
                   onClick={() => setInput(t('chatbot.quick_actions.consulting_question'))}
-                  className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
+                  className="p-3 lg:p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
                 >
                   <div className="text-sm font-medium text-white mb-1">{t('chatbot.quick_actions.consulting')}</div>
                   <div className="text-xs text-gray-400">{t('chatbot.quick_actions.consulting_desc')}</div>
                 </button>
                 <button
                   onClick={() => setInput(t('chatbot.quick_actions.about_question'))}
-                  className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
+                  className="p-3 lg:p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
                 >
                   <div className="text-sm font-medium text-white mb-1">{t('chatbot.quick_actions.about')}</div>
                   <div className="text-xs text-gray-400">{t('chatbot.quick_actions.about_desc')}</div>
                 </button>
                 <button
                   onClick={() => setInput(t('chatbot.quick_actions.contact_question'))}
-                  className="p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
+                  className="p-3 lg:p-4 bg-[#3f3f3f] hover:bg-[#4f4f4f] rounded-xl transition-colors text-left"
                 >
                   <div className="text-sm font-medium text-white mb-1">{t('chatbot.quick_actions.contact')}</div>
                   <div className="text-xs text-gray-400">{t('chatbot.quick_actions.contact_desc')}</div>
@@ -399,46 +399,46 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
         ) : (
           /* Messages Area */
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto py-4 md:py-8">
+            <div className="max-w-4xl mx-auto py-3 lg:py-8">
               {messages.map((message) => (
-                <div key={message.id} className="mb-6 md:mb-8 px-4 md:px-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div key={message.id} className="mb-4 lg:mb-6 px-3 lg:px-6">
+                  <div className="flex items-start space-x-3 lg:space-x-4">
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
                       {message.isFromUser ? (
-                        <div className="w-8 h-8 bg-[#ff6b35] rounded-lg flex items-center justify-center">
-                          <span className="text-white font-medium text-sm">
+                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#ff6b35] rounded-lg flex items-center justify-center">
+                          <span className="text-white font-medium text-xs lg:text-sm">
                             {user?.name?.[0] || 'U'}
                           </span>
                         </div>
                       ) : (
-                        <div className="w-8 h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center">
-                          <span className="text-white font-medium text-sm">A</span>
+                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center">
+                          <span className="text-white font-medium text-xs lg:text-sm">A</span>
                         </div>
                       )}
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="text-gray-100">
+                      <div className="text-gray-100 text-sm lg:text-base">
                         {message.isFromUser ? (
                           <p className="whitespace-pre-wrap">{message.content}</p>
                         ) : (
                           <ReactMarkdown
                             components={{
-                              p: ({ children }) => <p className="mb-4 last:mb-0 leading-relaxed">{children}</p>,
+                              p: ({ children }) => <p className="mb-3 lg:mb-4 last:mb-0 leading-relaxed">{children}</p>,
                               code: ({ children }) => (
-                                <code className="bg-[#1e1e1e] px-1.5 py-1 rounded text-sm font-mono text-green-400">
+                                <code className="bg-[#1e1e1e] px-1 lg:px-1.5 py-0.5 lg:py-1 rounded text-xs lg:text-sm font-mono text-green-400">
                                   {children}
                                 </code>
                               ),
                               pre: ({ children }) => (
-                                <pre className="bg-[#1e1e1e] p-4 rounded-lg overflow-x-auto my-4 border border-[#3f3f3f]">
-                                  <code className="text-green-400 font-mono text-sm">{children}</code>
+                                <pre className="bg-[#1e1e1e] p-3 lg:p-4 rounded-lg overflow-x-auto my-3 lg:my-4 border border-[#3f3f3f]">
+                                  <code className="text-green-400 font-mono text-xs lg:text-sm">{children}</code>
                                 </pre>
                               ),
-                              ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-1">{children}</ul>,
-                              ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-1">{children}</ol>,
+                              ul: ({ children }) => <ul className="list-disc list-inside mb-3 lg:mb-4 space-y-1">{children}</ul>,
+                              ol: ({ children }) => <ol className="list-decimal list-inside mb-3 lg:mb-4 space-y-1">{children}</ol>,
                               blockquote: ({ children }) => (
-                                <blockquote className="border-l-4 border-[#ff6b35] pl-4 italic my-4 text-gray-300">
+                                <blockquote className="border-l-4 border-[#ff6b35] pl-3 lg:pl-4 italic my-3 lg:my-4 text-gray-300">
                                   {children}
                                 </blockquote>
                               ),
@@ -454,10 +454,10 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
               ))}
               
               {isLoading && (
-                <div className="mb-8 px-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-medium text-sm">A</span>
+                <div className="mb-6 lg:mb-8 px-3 lg:px-6">
+                  <div className="flex items-start space-x-3 lg:space-x-4">
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#4f4f4f] rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-medium text-xs lg:text-sm">A</span>
                     </div>
                     <div className="flex-1">
                       <div className="flex space-x-1">
@@ -476,10 +476,10 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
         )}
 
         {/* Input Area */}
-        <div className="border-t border-[#3f3f3f] bg-[#2f2f2f]">
-          <div className="max-w-4xl mx-auto p-4 md:p-6">
+        <div className="border-t border-[#3f3f3f] bg-[#2f2f2f] flex-shrink-0">
+          <div className="max-w-4xl mx-auto p-3 lg:p-6">
             <div className="relative">
-              <div className="bg-[#3f3f3f] rounded-2xl border border-[#4f4f4f] overflow-hidden">
+              <div className="bg-[#3f3f3f] rounded-xl lg:rounded-2xl border border-[#4f4f4f] overflow-hidden">
                 <textarea
                   ref={textareaRef}
                   value={input}
@@ -490,10 +490,10 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                   onKeyDown={handleKeyPress}
                   placeholder={t('chatbot.placeholder')}
                   rows={1}
-                  className="w-full resize-none bg-transparent px-4 py-4 pr-16 text-white placeholder-gray-400 focus:outline-none"
+                  className="w-full resize-none bg-transparent px-3 lg:px-4 py-3 lg:py-4 pr-12 lg:pr-16 text-sm lg:text-base text-white placeholder-gray-400 focus:outline-none"
                   style={{ 
-                    minHeight: '56px',
-                    maxHeight: '200px',
+                    minHeight: '48px',
+                    maxHeight: '160px',
                   }}
                 />
                 
@@ -501,9 +501,9 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-lg bg-[#ff6b35] hover:bg-[#e55a2b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="absolute right-2 lg:right-3 top-1/2 transform -translate-y-1/2 p-1.5 lg:p-2 rounded-lg bg-[#ff6b35] hover:bg-[#e55a2b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                 </button>
