@@ -19,7 +19,8 @@ export default function WhatsAppSidebar() {
 
   const fetchCurrentWhatsApp = async () => {
     try {
-      const response = await fetch("/api/user/whatsapp");
+      // Try simple endpoint first
+      const response = await fetch("/api/whatsapp-simple");
       if (response.ok) {
         const contentType = response.headers.get("content-type");
         if (contentType?.includes("application/json")) {
@@ -27,6 +28,19 @@ export default function WhatsAppSidebar() {
           setCurrentWhatsApp(data.whatsapp);
           if (data.whatsapp) {
             setWhatsapp(data.whatsapp);
+          }
+        }
+      } else {
+        console.log("Simple endpoint failed, trying original");
+        const fallbackResponse = await fetch("/api/user/whatsapp");
+        if (fallbackResponse.ok) {
+          const contentType = fallbackResponse.headers.get("content-type");
+          if (contentType?.includes("application/json")) {
+            const data = await fallbackResponse.json();
+            setCurrentWhatsApp(data.whatsapp);
+            if (data.whatsapp) {
+              setWhatsapp(data.whatsapp);
+            }
           }
         }
       }
@@ -46,13 +60,26 @@ export default function WhatsAppSidebar() {
     setIsLoading(true);
     
     try {
-      const response = await fetch("/api/user/whatsapp", {
+      // Try simple endpoint first
+      let response = await fetch("/api/whatsapp-simple", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ whatsapp: whatsapp.trim() }),
       });
+
+      // Fallback to original endpoint if simple fails
+      if (!response.ok || response.status === 404) {
+        console.log("Simple endpoint failed, trying original");
+        response = await fetch("/api/user/whatsapp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ whatsapp: whatsapp.trim() }),
+        });
+      }
 
       const contentType = response.headers.get("content-type");
       if (!contentType?.includes("application/json")) {

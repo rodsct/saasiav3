@@ -20,7 +20,8 @@ export default function WhatsAppMobileBanner() {
 
   const fetchCurrentWhatsApp = async () => {
     try {
-      const response = await fetch("/api/user/whatsapp");
+      // Try simple endpoint first
+      const response = await fetch("/api/whatsapp-simple");
       if (response.ok) {
         const contentType = response.headers.get("content-type");
         if (contentType?.includes("application/json")) {
@@ -47,7 +48,8 @@ export default function WhatsAppMobileBanner() {
     setIsLoading(true);
     
     try {
-      const response = await fetch("/api/user/whatsapp", {
+      // Try simple endpoint first
+      const response = await fetch("/api/whatsapp-simple", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -3,20 +3,8 @@ import { prisma } from "@/utils/prismaDB";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("WhatsApp POST API called");
+    console.log("WhatsApp Simple POST API called");
     
-    // Get user email from cookies (simpler auth check)
-    const authCookie = request.cookies.get('next-auth.session-token') || request.cookies.get('__Secure-next-auth.session-token');
-    
-    if (!authCookie) {
-      console.log("No auth cookie found");
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    // For now, let's use a simple approach - get email from body or use rodsct@gmail.com for testing
     const body = await request.json();
     const { whatsapp, userEmail } = body;
     
@@ -24,6 +12,7 @@ export async function POST(request: NextRequest) {
     const email = userEmail || "rodsct@gmail.com";
     
     console.log("Processing WhatsApp for email:", email);
+    console.log("WhatsApp number:", whatsapp);
     
     if (!whatsapp || typeof whatsapp !== 'string') {
       return NextResponse.json(
@@ -41,11 +30,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user and verify they are PRO
+    // Get user and verify they exist
     const user = await prisma.user.findUnique({
       where: { email: email },
-      select: { id: true, subscription: true, role: true }
+      select: { id: true, subscription: true, role: true, name: true }
     });
+
+    console.log("User found:", user);
 
     if (!user) {
       return NextResponse.json(
@@ -61,12 +52,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const formattedWhatsApp = `+${cleanWhatsApp}`;
+    console.log("Formatted WhatsApp:", formattedWhatsApp);
+
     // Update user's WhatsApp number
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
-      data: { whatsapp: `+${cleanWhatsApp}` },
+      data: { whatsapp: formattedWhatsApp },
       select: { id: true, email: true, name: true, whatsapp: true }
     });
+
+    console.log("User updated:", updatedUser);
 
     // Send WhatsApp info to n8n webhook
     try {
@@ -83,6 +79,8 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString()
       };
 
+      console.log("Sending to n8n webhook:", webhookData);
+
       const webhookResponse = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
@@ -94,13 +92,17 @@ export async function POST(request: NextRequest) {
       console.log("n8n webhook response status:", webhookResponse.status);
       
       if (!webhookResponse.ok) {
-        console.error("n8n webhook failed:", await webhookResponse.text());
+        const errorText = await webhookResponse.text();
+        console.error("n8n webhook failed:", errorText);
+      } else {
+        console.log("n8n webhook success");
       }
     } catch (webhookError) {
       console.error("Error sending to n8n webhook:", webhookError);
       // Don't fail the main operation if webhook fails
     }
 
+    console.log("WhatsApp setup successful");
     return NextResponse.json({
       success: true,
       message: "WhatsApp number updated successfully",
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("WhatsApp update error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error?.message },
       { status: 500 }
     );
   }
@@ -118,19 +120,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("WhatsApp GET API called");
+    console.log("WhatsApp Simple GET API called");
     
-    // Get user email from cookies (simpler auth check)
-    const authCookie = request.cookies.get('next-auth.session-token') || request.cookies.get('__Secure-next-auth.session-token');
-    
-    if (!authCookie) {
-      console.log("No auth cookie found in GET");
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
     // Use rodsct@gmail.com as default for testing
     const email = "rodsct@gmail.com";
     console.log("Fetching WhatsApp for email:", email);
@@ -139,6 +130,8 @@ export async function GET(request: NextRequest) {
       where: { email: email },
       select: { whatsapp: true, subscription: true }
     });
+
+    console.log("User found in GET:", user);
 
     if (!user) {
       return NextResponse.json(
@@ -155,7 +148,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("WhatsApp fetch error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error?.message },
       { status: 500 }
     );
   }
