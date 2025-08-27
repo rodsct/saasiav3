@@ -13,12 +13,16 @@ export async function POST(request: NextRequest) {
     const pricingData = await request.json();
 
     // Validate pricing data
-    if (!pricingData.id || !pricingData.unit_amount || !pricingData.nickname) {
+    if (!pricingData.unit_amount || !pricingData.nickname) {
       return NextResponse.json(
         { error: "Missing required pricing fields" },
         { status: 400 }
       );
     }
+
+    // Generate price ID based on amount if not provided or if it's being updated
+    const newPriceId = `price_pro_monthly_${pricingData.unit_amount / 100}`;
+    pricingData.id = newPriceId;
 
     // Check if Stripe is configured
     if (process.env.STRIPE_SECRET_KEY) {
@@ -43,7 +47,6 @@ export async function POST(request: NextRequest) {
         }
 
         // Create new price in Stripe (Stripe doesn't allow updating prices, only creating new ones)
-        const newPriceId = `price_pro_monthly_${pricingData.unit_amount / 100}`;
         try {
           await stripe.prices.create({
             id: newPriceId,
@@ -53,16 +56,14 @@ export async function POST(request: NextRequest) {
             product: product.id,
           });
           
-          // Update the pricing data to use the new price ID
-          pricingData.id = newPriceId;
           console.log("Price created in Stripe with ID:", newPriceId);
           
         } catch (stripeError: any) {
           if (stripeError.code === 'resource_already_exists') {
-            pricingData.id = newPriceId;
             console.log("Price already exists in Stripe:", newPriceId);
           } else {
             console.error("Stripe price creation error:", stripeError);
+            // Continue anyway - the local file will be updated
           }
         }
 

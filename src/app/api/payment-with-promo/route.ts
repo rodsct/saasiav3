@@ -120,14 +120,16 @@ export async function POST(request: NextRequest) {
     // Add discount if promo code is valid
     if (discountPercentage > 0) {
       // Create or get coupon
-      let couponId = `${promoCode.toUpperCase()}_${discountPercentage}`;
+      let couponId = `${promoCode.toUpperCase()}-${discountPercentage}PCT`;
       try {
         await stripe.coupons.retrieve(couponId);
+        console.log("Using existing coupon:", couponId);
       } catch {
+        console.log("Creating new coupon:", couponId);
         await stripe.coupons.create({
           id: couponId,
           percent_off: discountPercentage,
-          duration: 'once',
+          duration: 'forever', // Apply discount for the lifetime of subscription
           name: `${promoCode.toUpperCase()} - ${discountPercentage}% descuento`,
         });
       }
@@ -135,6 +137,8 @@ export async function POST(request: NextRequest) {
       sessionConfig.discounts = [{
         coupon: couponId,
       }];
+      
+      console.log("Applied discount:", discountPercentage, "% with coupon:", couponId);
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);

@@ -60,10 +60,31 @@ export async function POST(request: NextRequest) {
           });
         }
         
+        // Extract price amount from ID or read from pricing file
+        let priceAmount = 4900; // default $49
+        
+        try {
+          // Try to read current pricing from file
+          const fs = require('fs');
+          const pricingPath = require('path').join(process.cwd(), "src", "stripe", "pricingData.ts");
+          const pricingContent = fs.readFileSync(pricingPath, 'utf8');
+          const amountMatch = pricingContent.match(/unit_amount:\s*(\d+)/);
+          if (amountMatch) {
+            priceAmount = parseInt(amountMatch[1]);
+            console.log("Using price amount from file:", priceAmount);
+          }
+        } catch (fileError) {
+          console.log("Could not read pricing file, extracting from ID");
+          const priceMatch = priceId.match(/price_pro_monthly_(\d+)/);
+          if (priceMatch) {
+            priceAmount = parseInt(priceMatch[1]) * 100;
+          }
+        }
+        
         // Create the price
         await stripe.prices.create({
           id: priceId,
-          unit_amount: 4900, // $49.00
+          unit_amount: priceAmount,
           currency: 'usd',
           recurring: { interval: 'month' },
           product: product.id,
