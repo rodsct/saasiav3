@@ -20,6 +20,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if Stripe is configured
+    if (process.env.STRIPE_SECRET_KEY) {
+      try {
+        const Stripe = require('stripe');
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+          apiVersion: "2023-10-16",
+        });
+
+        console.log("Creating/updating price in Stripe:", pricingData.id, "Amount:", pricingData.unit_amount);
+
+        // Create or get product
+        let product;
+        try {
+          product = await stripe.products.retrieve('prod_saasiav3_pro');
+        } catch {
+          product = await stripe.products.create({
+            id: 'prod_saasiav3_pro',
+            name: 'SaaS IA v3 - PRO Subscription',
+            description: 'Acceso completo a la plataforma con IA avanzada',
+          });
+        }
+
+        // Create new price in Stripe (Stripe doesn't allow updating prices, only creating new ones)
+        const newPriceId = `price_pro_monthly_${pricingData.unit_amount / 100}`;
+        try {
+          await stripe.prices.create({
+            id: newPriceId,
+            unit_amount: pricingData.unit_amount,
+            currency: 'usd',
+            recurring: { interval: 'month' },
+            product: product.id,
+          });
+          
+          // Update the pricing data to use the new price ID
+          pricingData.id = newPriceId;
+          console.log("Price created in Stripe with ID:", newPriceId);
+          
+        } catch (stripeError: any) {
+          if (stripeError.code === 'resource_already_exists') {
+            pricingData.id = newPriceId;
+            console.log("Price already exists in Stripe:", newPriceId);
+          } else {
+            console.error("Stripe price creation error:", stripeError);
+          }
+        }
+
+      } catch (stripeError) {
+        console.error("Stripe integration error:", stripeError);
+      }
+    }
+
     // Read current pricing file
     const pricingFilePath = path.join(process.cwd(), "src", "stripe", "pricingData.ts");
     
@@ -44,6 +95,7 @@ ${pricingData.offers.map((offer: string) => `      "${offer}",`).join('\n')}
     return NextResponse.json({
       success: true,
       message: "Pricing updated successfully",
+      updatedPriceId: pricingData.id
     });
 
   } catch (error) {

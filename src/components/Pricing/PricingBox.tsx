@@ -8,6 +8,7 @@ const PricingBox = ({ product }: { product: Price }) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [promoCode, setPromoCode] = useState("");
 
   // POST request
   const handleSubscription = async (e: any) => {
@@ -17,9 +18,10 @@ const PricingBox = ({ product }: { product: Price }) => {
 
     try {
       const { data } = await axios.post(
-        "/api/payment",
+        promoCode ? "/api/payment-with-promo" : "/api/payment",
         {
           priceId: product.id,
+          ...(promoCode && { promoCode: promoCode })
         },
         {
           headers: {
@@ -30,6 +32,8 @@ const PricingBox = ({ product }: { product: Price }) => {
       
       if (typeof data === 'string' && data.startsWith('http')) {
         window.location.assign(data);
+      } else if (data.url) {
+        window.location.assign(data.url);
       } else {
         setError(t('pricing.errors.payment_error'));
       }
@@ -90,7 +94,21 @@ const PricingBox = ({ product }: { product: Price }) => {
           </div>
         )}
         
-        <div className="w-full">
+        <div className="w-full space-y-4">
+          {/* Promo Code Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Código Promocional (Opcional)
+            </label>
+            <input
+              type="text"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+              placeholder="WELCOME20, SAVE30..."
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
+            />
+          </div>
+          
           <button
             onClick={handleSubscription}
             disabled={isLoading}
@@ -105,7 +123,10 @@ const PricingBox = ({ product }: { product: Price }) => {
                 {t('pricing.processing')}
               </span>
             ) : (
-              t('pricing.activate_subscription')
+              <>
+                {t('pricing.activate_subscription')}
+                {promoCode && <span className="block text-xs mt-1">Con código: {promoCode}</span>}
+              </>
             )}
           </button>
         </div>
