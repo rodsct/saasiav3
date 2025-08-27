@@ -37,64 +37,24 @@ export async function POST(request: NextRequest) {
 
     console.log("Creating Stripe session for price:", priceId);
 
-    try {
-      // First verify if the price exists in Stripe
-      await stripe.prices.retrieve(priceId);
-      console.log("Price found in Stripe:", priceId);
-    } catch (priceError: any) {
-      console.error("Price not found in Stripe:", priceError.message);
+    // Use the existing Stripe price ID instead of creating new ones
+    let finalPriceId = "price_1RzoxvIXvj4hGUgkm0F1JN6p"; // Your real Stripe price
+    
+    // If it's a custom price from admin, try to use it, but fallback to the real one
+    if (priceId !== "price_pro_monthly_49") {
+      finalPriceId = priceId;
       
-      // If price doesn't exist, create it
-      if (priceError.code === 'resource_missing') {
-        console.log("Creating new price in Stripe...");
-        
-        // First create or get product
-        let product;
-        try {
-          product = await stripe.products.retrieve('prod_saasiav3_pro');
-        } catch {
-          product = await stripe.products.create({
-            id: 'prod_saasiav3_pro',
-            name: 'SaaS IA v3 - PRO Subscription',
-            description: 'Acceso completo a la plataforma con IA avanzada',
-          });
-        }
-        
-        // Extract price amount from ID or read from pricing file
-        let priceAmount = 4900; // default $49
-        
-        try {
-          // Try to read current pricing from file
-          const fs = require('fs');
-          const pricingPath = require('path').join(process.cwd(), "src", "stripe", "pricingData.ts");
-          const pricingContent = fs.readFileSync(pricingPath, 'utf8');
-          const amountMatch = pricingContent.match(/unit_amount:\s*(\d+)/);
-          if (amountMatch) {
-            priceAmount = parseInt(amountMatch[1]);
-            console.log("Using price amount from file:", priceAmount);
-          }
-        } catch (fileError) {
-          console.log("Could not read pricing file, extracting from ID");
-          const priceMatch = priceId.match(/price_pro_monthly_(\d+)/);
-          if (priceMatch) {
-            priceAmount = parseInt(priceMatch[1]) * 100;
-          }
-        }
-        
-        // Create the price
-        await stripe.prices.create({
-          id: priceId,
-          unit_amount: priceAmount,
-          currency: 'usd',
-          recurring: { interval: 'month' },
-          product: product.id,
-        });
-        
-        console.log("Price created successfully in Stripe");
-      } else {
-        throw priceError;
+      // Try to verify if custom price exists, if not use the real one
+      try {
+        await stripe.prices.retrieve(finalPriceId);
+        console.log("Custom price found in Stripe:", finalPriceId);
+      } catch (priceError: any) {
+        console.log("Custom price not found, using default:", "price_1RzoxvIXvj4hGUgkm0F1JN6p");
+        finalPriceId = "price_1RzoxvIXvj4hGUgkm0F1JN6p";
       }
     }
+
+    console.log("Using final price ID:", finalPriceId);
 
     // Create Stripe checkout session
     const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -102,7 +62,7 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
-          price: priceId,
+          price: finalPriceId,
           quantity: 1,
         },
       ],
@@ -110,17 +70,28 @@ export async function POST(request: NextRequest) {
       success_url: `${baseUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}&plan=pro&price=49`,
       cancel_url: `${baseUrl}/pricing?canceled=true`,
       metadata: {
-        priceId: priceId,
+        originalPriceId: priceId,
+        finalPriceId: finalPriceId,
       },
     });
 
     // Return checkout URL
     return NextResponse.json(session.url);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Payment API error:", error);
+    
+    // Detailed error logging
+    if (error?.type === 'StripeError') {
+      console.error("Stripe API Error:", error.message, "Code:", error.code);
+      return NextResponse.json(
+        { error: `Stripe error: ${error.message}` },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error?.message || "Unknown error" },
       { status: 500 }
     );
   }

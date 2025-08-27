@@ -54,50 +54,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    try {
-      // First verify if the price exists in Stripe
-      await stripe.prices.retrieve(priceId);
-      console.log("Price found in Stripe:", priceId);
-    } catch (priceError: any) {
-      console.error("Price not found in Stripe:", priceError.message);
+    // Use the existing Stripe price ID instead of creating new ones
+    let finalPriceId = "price_1RzoxvIXvj4hGUgkm0F1JN6p"; // Your real Stripe price
+    
+    // If it's a custom price from admin, try to use it, but fallback to the real one
+    if (priceId !== "price_pro_monthly_49") {
+      finalPriceId = priceId;
       
-      // If price doesn't exist, create it
-      if (priceError.code === 'resource_missing') {
-        console.log("Creating new price in Stripe...");
-        
-        // First create or get product
-        let product;
-        try {
-          product = await stripe.products.retrieve('prod_saasiav3_pro');
-        } catch {
-          product = await stripe.products.create({
-            id: 'prod_saasiav3_pro',
-            name: 'SaaS IA v3 - PRO Subscription',
-            description: 'Acceso completo a la plataforma con IA avanzada',
-          });
-        }
-        
-        // Extract price amount from ID or use default
-        let priceAmount = 4900; // default $49
-        const priceMatch = priceId.match(/price_pro_monthly_(\d+)/);
-        if (priceMatch) {
-          priceAmount = parseInt(priceMatch[1]) * 100;
-        }
-        
-        // Create the price
-        await stripe.prices.create({
-          id: priceId,
-          unit_amount: priceAmount,
-          currency: 'usd',
-          recurring: { interval: 'month' },
-          product: product.id,
-        });
-        
-        console.log("Price created successfully in Stripe");
-      } else {
-        throw priceError;
+      // Try to verify if custom price exists, if not use the real one
+      try {
+        await stripe.prices.retrieve(finalPriceId);
+        console.log("Custom price found in Stripe:", finalPriceId);
+      } catch (priceError: any) {
+        console.log("Custom price not found, using default:", "price_1RzoxvIXvj4hGUgkm0F1JN6p");
+        finalPriceId = "price_1RzoxvIXvj4hGUgkm0F1JN6p";
       }
     }
+
+    console.log("Using final price ID for promo:", finalPriceId);
 
     // Create Stripe checkout session
     const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -105,15 +79,17 @@ export async function POST(request: NextRequest) {
     const sessionConfig: any = {
       line_items: [
         {
-          price: priceId,
+          price: finalPriceId,
           quantity: 1,
         },
       ],
       mode: "subscription",
-      success_url: `${baseUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}&plan=pro&price=${priceId}`,
+      success_url: `${baseUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}&plan=pro&price=${finalPriceId}`,
       cancel_url: `${baseUrl}/pricing?canceled=true`,
       metadata: {
-        priceId: priceId,
+        originalPriceId: priceId,
+        finalPriceId: finalPriceId,
+        promoCode: promoCode || '',
       },
     };
 
@@ -149,3 +125,22 @@ export async function POST(request: NextRequest) {
       discount_applied: discountPercentage > 0,
       discount_percentage: discountPercentage
     });
+
+  } catch (error: any) {
+    console.error("Payment with promo API error:", error);
+    
+    // Detailed error logging
+    if (error?.type === 'StripeError') {
+      console.error("Stripe API Error:", error.message, "Code:", error.code);
+      return NextResponse.json(
+        { error: `Stripe error: ${error.message}` },
+        { status: 500 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: "Internal server error", details: error?.message || "Unknown error" },
+      { status: 500 }
+    );
+  }
+}
