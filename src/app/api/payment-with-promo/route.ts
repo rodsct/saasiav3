@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { findTempPromotion } from "@/utils/tempPromotions";
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,19 +40,34 @@ export async function POST(request: NextRequest) {
 
     // Validate promotion code if provided
     let discountPercentage = 0;
+    let discountAmount = 0;
+    let discountType = "PERCENTAGE";
+    
     if (promoCode) {
-      // Simple validation - in production this would check the database
-      const validPromoCodes = ['WELCOME20', 'SAVE30', 'FIRST50'];
-      if (validPromoCodes.includes(promoCode.toUpperCase())) {
-        if (promoCode.toUpperCase() === 'WELCOME20') discountPercentage = 20;
-        if (promoCode.toUpperCase() === 'SAVE30') discountPercentage = 30;
-        if (promoCode.toUpperCase() === 'FIRST50') discountPercentage = 50;
-      } else {
+      const promotion = findTempPromotion(promoCode);
+      
+      if (!promotion) {
         return NextResponse.json(
           { error: "Código de promoción inválido" },
           { status: 400 }
         );
       }
+      
+      if (promotion.expiresAt && new Date(promotion.expiresAt) < new Date()) {
+        return NextResponse.json(
+          { error: "Código de promoción expirado" },
+          { status: 400 }
+        );
+      }
+      
+      discountType = promotion.discountType;
+      if (promotion.discountType === "PERCENTAGE") {
+        discountPercentage = promotion.discountValue;
+      } else {
+        discountAmount = promotion.discountValue * 100; // Convert to cents
+      }
+      
+      console.log("Promotion found:", promotion.code, "Type:", discountType, "Value:", promotion.discountValue);
     }
 
     // Use the existing Stripe price ID instead of creating new ones
@@ -94,27 +110,45 @@ export async function POST(request: NextRequest) {
     };
 
     // Add discount if promo code is valid
-    if (discountPercentage > 0) {
-      // Create or get coupon
-      let couponId = `${promoCode.toUpperCase()}-${discountPercentage}PCT`;
-      try {
-        await stripe.coupons.retrieve(couponId);
-        console.log("Using existing coupon:", couponId);
-      } catch {
-        console.log("Creating new coupon:", couponId);
-        await stripe.coupons.create({
-          id: couponId,
-          percent_off: discountPercentage,
-          duration: 'forever', // Apply discount for the lifetime of subscription
-          name: `${promoCode.toUpperCase()} - ${discountPercentage}% descuento`,
-        });
+    if (discountPercentage > 0 || discountAmount > 0) {
+      let couponId: string;
+      
+      if (discountType === "PERCENTAGE") {
+        couponId = `${promoCode.toUpperCase()}-${discountPercentage}PCT`;
+        try {
+          await stripe.coupons.retrieve(couponId);
+          console.log("Using existing percentage coupon:", couponId);
+        } catch {
+          console.log("Creating new percentage coupon:", couponId);
+          await stripe.coupons.create({
+            id: couponId,
+            percent_off: discountPercentage,
+            duration: 'forever',
+            name: `${promoCode.toUpperCase()} - ${discountPercentage}% descuento`,
+          });
+        }
+      } else {
+        couponId = `${promoCode.toUpperCase()}-${discountAmount / 100}USD`;
+        try {
+          await stripe.coupons.retrieve(couponId);
+          console.log("Using existing amount coupon:", couponId);
+        } catch {
+          console.log("Creating new amount coupon:", couponId);
+          await stripe.coupons.create({
+            id: couponId,
+            amount_off: discountAmount,
+            currency: 'usd',
+            duration: 'forever',
+            name: `${promoCode.toUpperCase()} - $${discountAmount / 100} descuento`,
+          });
+        }
       }
       
       sessionConfig.discounts = [{
         coupon: couponId,
       }];
       
-      console.log("Applied discount:", discountPercentage, "% with coupon:", couponId);
+      console.log("Applied discount:", discountType === "PERCENTAGE" ? `${discountPercentage}%` : `$${discountAmount / 100}`, "with coupon:", couponId);
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
@@ -122,8 +156,10 @@ export async function POST(request: NextRequest) {
     // Return checkout URL
     return NextResponse.json({
       url: session.url,
-      discount_applied: discountPercentage > 0,
-      discount_percentage: discountPercentage
+      discount_applied: discountPercentage > 0 || discountAmount > 0,
+      discount_percentage: discountPercentage,
+      discount_amount: discountAmount / 100,
+      discount_type: discountType
     });
 
   } catch (error: any) {

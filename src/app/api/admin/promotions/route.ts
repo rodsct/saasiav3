@@ -1,19 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Temporary in-memory storage for promotions (same pattern as WhatsApp config)
-let tempPromotions: any[] = [
-  {
-    id: "WELCOME20",
-    code: "WELCOME20", 
-    description: "20% de descuento para nuevos usuarios",
-    discountType: "percentage",
-    discountValue: 20,
-    usageLimit: 100,
-    usedCount: 0,
-    isActive: true,
-    createdAt: new Date().toISOString()
-  }
-];
+import { getTempPromotions, addTempPromotion } from "@/utils/tempPromotions";
 
 export async function GET(request: NextRequest) {
   // Simple auth check using headers (same pattern as other admin endpoints)
@@ -23,7 +9,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json({ promotions: tempPromotions });
+    return NextResponse.json({ promotions: getTempPromotions() });
 
   } catch (error) {
     console.error("Get promotions error:", error);
@@ -59,7 +45,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if code already exists
-    const existingPromo = tempPromotions.find(p => p.code === code.toUpperCase());
+    const existingPromotions = getTempPromotions();
+    const existingPromo = existingPromotions.find(p => p.code === code.toUpperCase());
     if (existingPromo) {
       return NextResponse.json(
         { error: "El código de promoción ya existe" },
@@ -77,11 +64,11 @@ export async function POST(request: NextRequest) {
       usageLimit,
       usedCount: 0,
       isActive: true,
-      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
       createdAt: new Date().toISOString()
     };
 
-    tempPromotions.push(newPromotion);
+    addTempPromotion(newPromotion);
 
     return NextResponse.json({ promotion: newPromotion });
 
