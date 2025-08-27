@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 interface Promotion {
   id: string;
   code: string;
@@ -48,31 +51,34 @@ const DEFAULT_PROMOTIONS: Promotion[] = [
   }
 ];
 
-// Get custom promotions from environment variable
+const CUSTOM_PROMOTIONS_FILE = path.join(process.cwd(), 'public', 'custom-promotions.json');
+
+// Get custom promotions from file
 function getCustomPromotions(): Promotion[] {
   try {
-    const customPromosEnv = process.env.CUSTOM_PROMOTIONS;
-    if (!customPromosEnv) {
+    if (!fs.existsSync(CUSTOM_PROMOTIONS_FILE)) {
+      console.log('Custom promotions file does not exist, returning empty array');
       return [];
     }
     
-    const customPromos = JSON.parse(customPromosEnv) as Promotion[];
-    console.log('Loaded custom promotions from env:', customPromos.length);
+    const fileContent = fs.readFileSync(CUSTOM_PROMOTIONS_FILE, 'utf8');
+    const customPromos = JSON.parse(fileContent) as Promotion[];
+    console.log('Loaded custom promotions from file:', customPromos.length);
     return customPromos;
   } catch (error) {
-    console.error('Error parsing custom promotions from env:', error);
+    console.error('Error reading custom promotions from file:', error);
     return [];
   }
 }
 
-// Save custom promotions to environment
+// Save custom promotions to file
 function saveCustomPromotions(promotions: Promotion[]): void {
   try {
-    const customPromosJson = JSON.stringify(promotions);
-    process.env.CUSTOM_PROMOTIONS = customPromosJson;
-    console.log('Saved custom promotions to env:', promotions.length);
+    const fileContent = JSON.stringify(promotions, null, 2);
+    fs.writeFileSync(CUSTOM_PROMOTIONS_FILE, fileContent, 'utf8');
+    console.log('Saved custom promotions to file:', promotions.length);
   } catch (error) {
-    console.error('Error saving custom promotions to env:', error);
+    console.error('Error saving custom promotions to file:', error);
   }
 }
 
