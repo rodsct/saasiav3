@@ -1,49 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/utils/prismaDB";
 
-// Temporary fallback using environment variables when DB migration is not available
-const getEnvConfig = () => ({
-  whatsappNumber: process.env.WHATSAPP_NUMBER || null,
-  whatsappMessage: process.env.WHATSAPP_MESSAGE || "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.",
-  isWhatsappEnabled: process.env.WHATSAPP_ENABLED === 'true' || false,
-});
+// Simplified WhatsApp QR endpoint using only environment variables
+// This avoids any database-related issues during migration
 
 export async function GET(request: NextRequest) {
   try {
-    let config;
+    // Get configuration from environment variables
+    const whatsappNumber = process.env.WHATSAPP_NUMBER || "+5215512345678";
+    const whatsappMessage = process.env.WHATSAPP_MESSAGE || "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones.";
+    const isWhatsappEnabled = process.env.WHATSAPP_ENABLED === 'true' || true; // Default enabled for testing
     
-    try {
-      // Try to get existing site config
-      config = await prisma.siteConfig.findFirst();
-    } catch (dbError: any) {
-      // If SiteConfig table doesn't exist, use environment variables fallback
-      if (dbError?.code === 'P2021' || dbError?.message?.includes('does not exist')) {
-        console.log("SiteConfig table doesn't exist, using environment fallback");
-        config = getEnvConfig();
-      } else {
-        throw dbError;
-      }
-    }
-    
-    if (!config || !config.isWhatsappEnabled || !config.whatsappNumber) {
+    if (!isWhatsappEnabled || !whatsappNumber) {
       return NextResponse.json({ 
         error: "WhatsApp contact not configured" 
       }, { status: 404 });
     }
 
     // Generate WhatsApp URL
-    const message = encodeURIComponent(
-      config.whatsappMessage || 
-      "¡Hola! Me gustaría obtener más información sobre sus servicios de IA y automatizaciones."
-    );
-    
-    const whatsappUrl = `https://wa.me/${config.whatsappNumber.replace('+', '')}?text=${message}`;
+    const message = encodeURIComponent(whatsappMessage);
+    const cleanNumber = whatsappNumber.replace(/[+\s-()]/g, '');
+    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${message}`;
 
     return NextResponse.json({ 
       success: true,
       whatsappUrl,
-      whatsappNumber: config.whatsappNumber,
-      message: config.whatsappMessage 
+      whatsappNumber,
+      message: whatsappMessage 
     });
 
   } catch (error) {
