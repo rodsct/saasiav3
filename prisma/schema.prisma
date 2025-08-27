@@ -159,3 +159,14 @@ enum DiscountType {
   PERCENTAGE
   FIXED_AMOUNT
 }
+
+model SiteConfig {
+  id                String   @id @default(cuid())
+  whatsappNumber    String?  // Número de WhatsApp de soporte (ej: +5212345678901)
+  whatsappMessage   String?  @db.Text // Mensaje predeterminado para el QR
+  isWhatsappEnabled Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("site_config")
+}

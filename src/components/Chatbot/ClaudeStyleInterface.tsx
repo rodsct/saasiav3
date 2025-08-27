@@ -6,8 +6,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
-import WhatsAppSidebar from "@/components/WhatsApp/WhatsAppSidebar";
-import WhatsAppMobileBanner from "@/components/WhatsApp/WhatsAppMobileBanner";
+import WhatsAppContactQR from "@/components/WhatsApp/WhatsAppContactQR";
+import WhatsAppContactBanner from "@/components/WhatsApp/WhatsAppContactBanner";
 
 interface Message {
   id: string;
@@ -525,8 +525,8 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
           </button>
         </div>
 
-        {/* WhatsApp Section */}
-        {sidebarOpen && <WhatsAppSidebar />}
+        {/* WhatsApp Contact Section */}
+        {sidebarOpen && <WhatsAppContactQR />}
 
         {/* Conversations List */}
         {sidebarOpen && (
@@ -632,8 +632,8 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col w-full md:w-auto">
-        {/* Mobile WhatsApp Banner */}
-        <WhatsAppMobileBanner />
+        {/* Mobile WhatsApp Contact Banner */}
+        <WhatsAppContactBanner />
         
         {/* Welcome Message */}
         {messages.length === 0 ? (

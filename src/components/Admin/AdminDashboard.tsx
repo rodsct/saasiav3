@@ -7,6 +7,7 @@ import AdminOverview from "./AdminOverview";
 import PricingManagement from "./PricingManagement";
 import PromotionsManagement from "./PromotionsManagement";
 import UserManagement from "./UserManagement";
+import WhatsAppConfig from "./WhatsAppConfig";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -18,6 +19,7 @@ export default function AdminDashboard() {
     { id: "users", label: "Usuarios", icon: "👥" },
     { id: "downloads", label: "Descargas", icon: "📁" },
     { id: "webhooks", label: "Webhooks", icon: "🔗" },
+    { id: "whatsapp", label: "WhatsApp", icon: "📱" },
   ];
 
   return (
@@ -58,6 +60,7 @@ export default function AdminDashboard() {
           {activeTab === "users" && <UserManagement />}
           {activeTab === "downloads" && <AdminDownloads />}
           {activeTab === "webhooks" && <WebhookConfig />}
+          {activeTab === "whatsapp" && <WhatsAppConfig />}
         </div>
       </div>
     </div>
