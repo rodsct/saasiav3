@@ -64,27 +64,31 @@ export async function POST(request: NextRequest) {
 
     console.log("User updated:", updatedUser);
 
-    // Send WhatsApp info to n8n webhook
+    // Send WhatsApp info to n8n webhook using same format as chatbot
     try {
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3";
       
       const webhookData = {
+        message: `WhatsApp conectado: ${formattedWhatsApp}`,
+        conversationId: `whatsapp-setup-${updatedUser.id}-${Date.now()}`,
+        chatbotId: "whatsapp-setup",
+        userId: updatedUser.id,
+        userEmail: updatedUser.email,
+        userName: updatedUser.name,
+        userSubscription: user.subscription,
+        userWhatsApp: updatedUser.whatsapp,
         action: "whatsapp_setup",
-        user: {
-          id: updatedUser.id,
-          email: updatedUser.email,
-          name: updatedUser.name,
-          whatsapp: updatedUser.whatsapp
-        },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        messageHistory: []
       };
 
-      console.log("Sending to n8n webhook:", webhookData);
+      console.log("Sending WhatsApp setup to n8n webhook:", JSON.stringify(webhookData, null, 2));
 
       const webhookResponse = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "User-Agent": "SaaS-v3-WhatsApp/1.0"
         },
         body: JSON.stringify(webhookData),
       });

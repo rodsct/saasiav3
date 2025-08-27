@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
     let userEmail = "anonymous@example.com";
     let userName = "Usuario Anónimo";
     let userSubscription = "FREE";
+    let userWhatsApp = null;
     
     // If user info is provided from frontend, use it
     if (userInfo?.id) {
@@ -28,6 +29,19 @@ export async function POST(request: NextRequest) {
       userName = userInfo.name || "Usuario";
       userSubscription = userInfo.subscription || "FREE";
       console.log("Using real user info:", userEmail);
+      
+      // Try to get WhatsApp number from database
+      try {
+        const { prisma } = await import("@/utils/prismaDB");
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { whatsapp: true }
+        });
+        userWhatsApp = user?.whatsapp;
+        console.log("User WhatsApp:", userWhatsApp);
+      } catch (dbError) {
+        console.log("Could not fetch WhatsApp from DB:", dbError);
+      }
     } else {
       // Fallback: create persistent ID based on browser fingerprint
       const userAgent = request.headers.get("user-agent") || "unknown";
@@ -54,6 +68,7 @@ export async function POST(request: NextRequest) {
       userEmail: userEmail,
       userName: userName,
       userSubscription: userSubscription,
+      userWhatsApp: userWhatsApp,
       timestamp: new Date().toISOString(),
       messageHistory: [] // Empty for now to avoid database issues
     };
