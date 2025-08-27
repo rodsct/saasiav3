@@ -21,10 +21,15 @@ export default function WhatsAppSetup() {
     try {
       const response = await fetch("/api/user/whatsapp");
       if (response.ok) {
-        const data = await response.json();
-        setCurrentWhatsApp(data.whatsapp);
-        if (data.whatsapp) {
-          setWhatsapp(data.whatsapp);
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          const data = await response.json();
+          setCurrentWhatsApp(data.whatsapp);
+          if (data.whatsapp) {
+            setWhatsapp(data.whatsapp);
+          }
+        } else {
+          console.error("WhatsApp fetch response is not JSON:", contentType);
         }
       }
     } catch (error) {
@@ -52,6 +57,13 @@ export default function WhatsAppSetup() {
         },
         body: JSON.stringify({ whatsapp: whatsapp.trim() }),
       });
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        console.error("WhatsApp setup response is not JSON:", contentType);
+        toast.error("Error del servidor. Intenta nuevamente.");
+        return;
+      }
 
       const data = await response.json();
 
