@@ -24,7 +24,7 @@ export default function PromotionsManagement() {
     code: "",
     description: "",
     discountType: "PERCENTAGE" as const,
-    discountValue: 0,
+    discountValue: "" as string | number,
     usageLimit: "",
     expiresAt: "",
   });
@@ -58,6 +58,7 @@ export default function PromotionsManagement() {
         },
         body: JSON.stringify({
           ...formData,
+          discountValue: typeof formData.discountValue === 'string' ? parseFloat(formData.discountValue) : formData.discountValue,
           usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
           expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
         }),
@@ -70,7 +71,7 @@ export default function PromotionsManagement() {
           code: "",
           description: "",
           discountType: "PERCENTAGE",
-          discountValue: 0,
+          discountValue: "",
           usageLimit: "",
           expiresAt: "",
         });
@@ -193,7 +194,7 @@ export default function PromotionsManagement() {
                 <input
                   type="number"
                   value={formData.discountValue || ""}
-                  onChange={(e) => setFormData({...formData, discountValue: parseFloat(e.target.value) || 0})}
+                  onChange={(e) => setFormData({...formData, discountValue: e.target.value})}
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
                   min="0"
                   step={formData.discountType === "PERCENTAGE" ? "1" : "0.01"}

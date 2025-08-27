@@ -39,8 +39,15 @@ const PricingBox = ({ product }: { product: Price }) => {
       }
     } catch (error: any) {
       console.error("Payment error:", error);
+      console.error("Error response:", error.response?.data);
+      
       if (error.response?.status === 401) {
         setError(t('pricing.errors.login_required'));
+      } else if (error.response?.status === 400) {
+        // Show specific 400 error message
+        const errorMessage = error.response?.data?.error || "Error de validación";
+        setError(errorMessage);
+        console.error("Validation error:", errorMessage);
       } else if (error.response?.data?.error) {
         setError(error.response.data.error);
       } else {
