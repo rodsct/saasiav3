@@ -2,6 +2,8 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { pricingData } from "@/stripe/pricingData";
 
 interface ProSubscriptionRequiredProps {
   expired?: boolean;
@@ -9,6 +11,32 @@ interface ProSubscriptionRequiredProps {
 
 export default function ProSubscriptionRequired({ expired = false }: ProSubscriptionRequiredProps) {
   const { user } = useAuth();
+  const [currentPrice, setCurrentPrice] = useState(49);
+
+  useEffect(() => {
+    // First try to get price from local pricing data
+    if (pricingData && pricingData.length > 0) {
+      const proPrice = pricingData[0];
+      setCurrentPrice(proPrice.unit_amount / 100);
+    }
+    
+    // Also fetch the most current price from API
+    const fetchCurrentPrice = async () => {
+      try {
+        const response = await fetch("/api/current-pricing");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.pricing) {
+            setCurrentPrice(data.pricing.price_dollars);
+          }
+        }
+      } catch (error) {
+        console.log("Could not fetch current pricing, using default");
+      }
+    };
+    
+    fetchCurrentPrice();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#00d4ff]/10 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
@@ -77,7 +105,7 @@ export default function ProSubscriptionRequired({ expired = false }: ProSubscrip
           <div className="mb-8 p-6 bg-gradient-to-r from-[#00d4ff]/10 to-[#00d4ff]/20 dark:from-[#00d4ff]/10 dark:to-[#00d4ff]/20 rounded-xl border border-[#00d4ff]/30 dark:border-[#00d4ff]/30">
             <div className="text-center">
               <div className="text-3xl font-bold text-[#00d4ff] dark:text-[#00d4ff]">
-                $49
+                ${currentPrice}
                 <span className="text-lg font-normal text-gray-600 dark:text-gray-300">/mes</span>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
