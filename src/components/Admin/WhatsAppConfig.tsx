@@ -132,43 +132,43 @@ export default function WhatsAppConfig() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="space-y-4 sm:space-y-6 max-w-none">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-2 sm:mb-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             Configuración de WhatsApp
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Configura el número de WhatsApp para que los usuarios puedan contactarte
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
+            Configura el número de WhatsApp para contacto
           </p>
         </div>
       </div>
 
       {/* Migration Notice */}
       {migrationNeeded && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 sm:p-4">
           <h4 className="text-sm font-semibold text-red-900 dark:text-red-200 mb-2">
             ⚠️ Migración de Base de Datos Requerida
           </h4>
           <p className="text-sm text-red-800 dark:text-red-300 mb-3">
             Para usar la configuración de WhatsApp, es necesario ejecutar las migraciones de la base de datos.
           </p>
-          <div className="bg-red-100 dark:bg-red-800/30 rounded p-2">
-            <code className="text-xs text-red-900 dark:text-red-200">
+          <div className="bg-red-100 dark:bg-red-800/30 rounded p-2 overflow-x-auto">
+            <code className="text-xs text-red-900 dark:text-red-200 whitespace-nowrap">
               npx prisma migrate dev
             </code>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Configuration Form */}
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 sm:p-6 order-1">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Configuración
           </h3>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Habilitar WhatsApp
@@ -221,7 +221,7 @@ export default function WhatsAppConfig() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 sm:py-3 px-4 rounded-md transition-colors disabled:opacity-50 text-sm sm:text-base"
             >
               {isLoading ? "Guardando..." : "Guardar configuración"}
             </button>
@@ -229,8 +229,8 @@ export default function WhatsAppConfig() {
         </div>
 
         {/* QR Code Preview */}
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 sm:p-6 order-2 xl:order-2">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Vista previa del QR
           </h3>
           
@@ -240,7 +240,7 @@ export default function WhatsAppConfig() {
                 <img 
                   src={qrUrl} 
                   alt="WhatsApp QR Code" 
-                  className="w-48 h-48 border border-gray-300 dark:border-gray-600 rounded-lg"
+                  className="w-36 h-36 sm:w-48 sm:h-48 border border-gray-300 dark:border-gray-600 rounded-lg bg-white"
                 />
               </div>
               
@@ -248,21 +248,21 @@ export default function WhatsAppConfig() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Escanea para chatear por WhatsApp
                 </p>
-                <p className="text-xs font-mono text-gray-500">
+                <p className="text-xs font-mono text-gray-500 break-all">
                   {config.whatsappNumber}
                 </p>
               </div>
 
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={copyQRUrl}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded-md transition-colors"
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm py-2.5 sm:py-2 px-3 rounded-md transition-colors"
                 >
                   Copiar URL del QR
                 </button>
                 <button
                   onClick={downloadQR}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded-md transition-colors"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm py-2.5 sm:py-2 px-3 rounded-md transition-colors"
                 >
                   Descargar QR
                 </button>
@@ -284,22 +284,22 @@ export default function WhatsAppConfig() {
       </div>
 
       {/* Temporary Storage Notice */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4">
         <h4 className="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mb-2">
           ⚠️ Configuración Temporal
         </h4>
         <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-2">
           Los cambios se guardan temporalmente en memoria y se perderán al reiniciar el servidor.
         </p>
-        <div className="bg-yellow-100 dark:bg-yellow-800/30 rounded p-2">
-          <code className="text-xs text-yellow-900 dark:text-yellow-200">
+        <div className="bg-yellow-100 dark:bg-yellow-800/30 rounded p-2 overflow-x-auto">
+          <code className="text-xs text-yellow-900 dark:text-yellow-200 whitespace-nowrap">
             Para persistencia: npx prisma migrate dev
           </code>
         </div>
       </div>
 
       {/* Instructions */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
         <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">
           ℹ️ Instrucciones de uso
         </h4>
