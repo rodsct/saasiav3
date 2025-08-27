@@ -104,6 +104,7 @@ enum ChatbotModel {
 
 model Conversation {
   id         String    @id @default(cuid())
+  title      String?   @db.Text
   chatbotId  String
   userId     String
   messages   Message[]

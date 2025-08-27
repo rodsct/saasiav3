@@ -18,8 +18,10 @@ interface Message {
 
 interface Conversation {
   id: string;
+  title?: string;
   messages: Message[];
   createdAt: string;
+  updatedAt: string;
 }
 
 interface ChatbotProps {
@@ -36,6 +38,8 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -263,11 +267,22 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
 
       // If this was the first message (no current conversation), update conversation state
       if (!currentConversation?.id && data.conversationId) {
-        setCurrentConversation({
+        const newConversation = {
           id: data.conversationId,
           messages: [],
           createdAt: new Date().toISOString(),
-        });
+          updatedAt: new Date().toISOString(),
+        };
+        setCurrentConversation(newConversation);
+        
+        // Generate automatic title for new conversation
+        setTimeout(async () => {
+          const generatedTitle = await generateTitle(data.conversationId);
+          if (generatedTitle) {
+            setCurrentConversation(prev => prev ? { ...prev, title: generatedTitle } : null);
+          }
+        }, 1000);
+        
         // Reload conversations list to show new conversation in Recientes
         await reloadConversationsList();
       }
@@ -304,6 +319,139 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   const selectConversation = (conversation: Conversation) => {
     setCurrentConversation(conversation);
     setMessages(conversation.messages || []);
+  };
+
+  const generateTitle = async (conversationId: string) => {
+    try {
+      const response = await fetch("/api/chatbot/conversation-title", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.title;
+      }
+    } catch (error) {
+      console.error("Error generating title:", error);
+    }
+    return null;
+  };
+
+  const deleteConversation = async (conversationId: string) => {
+    try {
+      const response = await fetch(`/api/chatbot/conversation-actions?conversationId=${conversationId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setConversations(prev => prev.filter(c => c.id !== conversationId));
+        
+        // If deleting current conversation, start new chat
+        if (currentConversation?.id === conversationId) {
+          setCurrentConversation(null);
+          setMessages([]);
+        }
+        
+        toast.success("Conversación eliminada");
+      } else {
+        toast.error("Error al eliminar conversación");
+      }
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      toast.error("Error al eliminar conversación");
+    }
+  };
+
+  const updateConversationTitle = async (conversationId: string, newTitle: string) => {
+    try {
+      const response = await fetch("/api/chatbot/conversation-title", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId, title: newTitle }),
+      });
+
+      if (response.ok) {
+        setConversations(prev => prev.map(c => 
+          c.id === conversationId ? { ...c, title: newTitle } : c
+        ));
+        
+        if (currentConversation?.id === conversationId) {
+          setCurrentConversation(prev => prev ? { ...prev, title: newTitle } : null);
+        }
+        
+        toast.success("Título actualizado");
+        return true;
+      } else {
+        toast.error("Error al actualizar título");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error updating title:", error);
+      toast.error("Error al actualizar título");
+      return false;
+    }
+  };
+
+  const handleTitleEdit = async (conversationId: string) => {
+    if (editingTitle.trim()) {
+      const success = await updateConversationTitle(conversationId, editingTitle.trim());
+      if (success) {
+        setEditingConversationId(null);
+        setEditingTitle("");
+      }
+    } else {
+      setEditingConversationId(null);
+      setEditingTitle("");
+    }
+  };
+
+  const startEditingTitle = (conversation: Conversation) => {
+    setEditingConversationId(conversation.id);
+    setEditingTitle(conversation.title || getConversationDisplayTitle(conversation));
+  };
+
+  const getConversationDisplayTitle = (conversation: Conversation) => {
+    if (conversation.title) return conversation.title;
+    return conversation.messages?.[0]?.content.slice(0, 30) || 'Nueva conversación';
+  };
+
+  const groupConversationsByDate = (conversations: Conversation[]) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(today);
+    monthAgo.setDate(monthAgo.getDate() - 30);
+
+    const groups = {
+      today: [] as Conversation[],
+      yesterday: [] as Conversation[],
+      thisWeek: [] as Conversation[],
+      thisMonth: [] as Conversation[],
+      older: [] as Conversation[]
+    };
+
+    conversations.forEach(conv => {
+      const date = new Date(conv.updatedAt || conv.createdAt);
+      
+      if (date >= today) {
+        groups.today.push(conv);
+      } else if (date >= yesterday) {
+        groups.yesterday.push(conv);
+      } else if (date >= weekAgo) {
+        groups.thisWeek.push(conv);
+      } else if (date >= monthAgo) {
+        groups.thisMonth.push(conv);
+      } else {
+        groups.older.push(conv);
+      }
+    });
+
+    return groups;
   };
 
   const adjustTextareaHeight = () => {
@@ -364,37 +512,115 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
         {sidebarOpen && (
           <div className="flex-1 overflow-y-auto">
             <div className="px-3 lg:px-4 py-2">
-              <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-                {t('chatbot.recent')}
-              </h3>
-              <div className="space-y-1">
-                {conversations.length > 0 ? (
-                  conversations.map((conversation) => (
-                    <button
-                      key={conversation.id}
-                      onClick={() => selectConversation(conversation)}
-                      className={`w-full text-left p-2 lg:p-3 rounded-lg transition-all duration-300 hover:bg-[#00d4ff]/20 border border-transparent hover:border-[#00d4ff]/30 ${
-                        currentConversation?.id === conversation.id ? 'bg-[#00d4ff]/20 border-[#00d4ff]/30' : ''
-                      }`}
-                    >
-                      <div className="text-xs lg:text-sm text-white truncate">
-                        {conversation.messages?.[0]?.content.slice(0, 30) || t('chatbot.new_conversation')}...
+              {conversations.length > 0 ? (
+                (() => {
+                  const groups = groupConversationsByDate(conversations);
+                  const sections = [
+                    { key: 'today', title: 'Hoy', conversations: groups.today },
+                    { key: 'yesterday', title: 'Ayer', conversations: groups.yesterday },
+                    { key: 'thisWeek', title: 'Esta semana', conversations: groups.thisWeek },
+                    { key: 'thisMonth', title: 'Este mes', conversations: groups.thisMonth },
+                    { key: 'older', title: 'Más antiguas', conversations: groups.older }
+                  ];
+
+                  return sections.map(section => 
+                    section.conversations.length > 0 && (
+                      <div key={section.key} className="mb-6">
+                        <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
+                          {section.title}
+                        </h3>
+                        <div className="space-y-1">
+                          {section.conversations.map((conversation) => (
+                            <div
+                              key={conversation.id}
+                              className={`group relative rounded-lg transition-all duration-300 hover:bg-[#00d4ff]/20 border border-transparent hover:border-[#00d4ff]/30 ${
+                                currentConversation?.id === conversation.id ? 'bg-[#00d4ff]/20 border-[#00d4ff]/30' : ''
+                              }`}
+                            >
+                              <button
+                                onClick={() => selectConversation(conversation)}
+                                className="w-full text-left p-2 lg:p-3"
+                              >
+                                {editingConversationId === conversation.id ? (
+                                  <input
+                                    type="text"
+                                    value={editingTitle}
+                                    onChange={(e) => setEditingTitle(e.target.value)}
+                                    onBlur={() => handleTitleEdit(conversation.id)}
+                                    onKeyDown={(e) => {
+                                      e.stopPropagation();
+                                      if (e.key === 'Enter') {
+                                        handleTitleEdit(conversation.id);
+                                      } else if (e.key === 'Escape') {
+                                        setEditingConversationId(null);
+                                        setEditingTitle("");
+                                      }
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-full bg-[#1a1a2e] text-white text-xs lg:text-sm px-2 py-1 rounded border border-[#00d4ff]/50 focus:outline-none focus:border-[#00d4ff]"
+                                    autoFocus
+                                  />
+                                ) : (
+                                  <>
+                                    <div className="text-xs lg:text-sm text-white truncate pr-6">
+                                      {getConversationDisplayTitle(conversation)}
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {new Date(conversation.updatedAt || conversation.createdAt).toLocaleDateString()}
+                                    </div>
+                                  </>
+                                )}
+                              </button>
+                              
+                              {/* Action buttons */}
+                              {editingConversationId !== conversation.id && (
+                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="flex space-x-1">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startEditingTitle(conversation);
+                                      }}
+                                      className="p-1 hover:bg-[#3f3f3f] rounded text-gray-400 hover:text-white transition-colors"
+                                      title="Renombrar"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (confirm('¿Estás seguro de que quieres eliminar esta conversación?')) {
+                                          deleteConversation(conversation.id);
+                                        }
+                                      }}
+                                      className="p-1 hover:bg-red-600/20 rounded text-gray-400 hover:text-red-400 transition-colors"
+                                      title="Eliminar"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-400 mt-1">
-                        {new Date(conversation.createdAt).toLocaleDateString()}
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-400">
-                    <svg className="w-8 h-8 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <p className="text-xs">No hay conversaciones aún</p>
-                    <p className="text-xs mt-1">¡Empieza un nuevo chat!</p>
-                  </div>
-                )}
-              </div>
+                    )
+                  );
+                })()
+              ) : (
+                <div className="text-center py-8 text-gray-400">
+                  <svg className="w-8 h-8 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <p className="text-xs">No hay conversaciones aún</p>
+                  <p className="text-xs mt-1">¡Empieza un nuevo chat!</p>
+                </div>
+              )}
             </div>
           </div>
         )}
