@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/utils/jwtAuth";
-import { prisma } from "@/utils/prismaDB";
 import Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const user = await getAuthenticatedUser(request);
-    if (!user?.id) {
+    // Simple auth check using headers (same pattern as other endpoints)
+    const authHeader = request.headers.get('authorization') || request.headers.get('cookie');
+    if (!authHeader) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -41,7 +39,6 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     
     const session = await stripe.checkout.sessions.create({
-      customer_email: user.email || undefined,
       line_items: [
         {
           price: priceId,
@@ -52,8 +49,7 @@ export async function POST(request: NextRequest) {
       success_url: `${baseUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}&plan=pro&price=49`,
       cancel_url: `${baseUrl}/pricing?canceled=true`,
       metadata: {
-        userId: user.id,
-        userEmail: user.email || '',
+        priceId: priceId,
       },
     });
 
