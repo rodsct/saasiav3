@@ -3,7 +3,7 @@ import { prisma } from "@/utils/prismaDB";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "simple-auth-secret-key";
-const PRODUCTION_URL = "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+const PRODUCTION_URL = "https://agente.aranza.io";
 
 export async function GET(request: NextRequest) {
   console.log("Google OAuth callback received");

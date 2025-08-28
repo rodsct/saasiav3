@@ -7,14 +7,14 @@ const nextConfig = {
   serverExternalPackages: ['@prisma/client', 'prisma'],
   
   // Allow development origins
-  allowedDevOrigins: ['proyectonuevo-saasiav3.uclxiv.easypanel.host'],
+  allowedDevOrigins: ['agente.aranza.io'],
   
   // Note: i18n configuration is not supported in App Router
   // Using custom client-side translation hook instead
   
   // Optimize images
   images: {
-    domains: ['localhost', 'proyectonuevo-saasiav3.uclxiv.easypanel.host'],
+    domains: ['localhost', 'agente.aranza.io'],
     unoptimized: process.env.NODE_ENV === 'development',
   },
   

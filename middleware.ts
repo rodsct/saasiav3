@@ -9,21 +9,21 @@ export function middleware(request: NextRequest) {
     console.log('🔧 Middleware - intercepting auth route:', url.pathname)
     
     // Override environment variables
-    process.env.NEXTAUTH_URL = 'https://proyectonuevo-saasiav3.uclxiv.easypanel.host'
-    process.env.NEXTAUTH_URL_INTERNAL = 'https://proyectonuevo-saasiav3.uclxiv.easypanel.host'
-    process.env.VERCEL_URL = 'proyectonuevo-saasiav3.uclxiv.easypanel.host'
+    process.env.NEXTAUTH_URL = 'https://agente.aranza.io'
+    process.env.NEXTAUTH_URL_INTERNAL = 'https://agente.aranza.io'
+    process.env.VERCEL_URL = 'agente.aranza.io'
     
     // Create new request with modified headers
     const newHeaders = new Headers(request.headers)
-    newHeaders.set('host', 'proyectonuevo-saasiav3.uclxiv.easypanel.host')
-    newHeaders.set('x-forwarded-host', 'proyectonuevo-saasiav3.uclxiv.easypanel.host')
+    newHeaders.set('host', 'agente.aranza.io')
+    newHeaders.set('x-forwarded-host', 'agente.aranza.io')
     newHeaders.set('x-forwarded-proto', 'https')
     newHeaders.set('x-forwarded-port', '443')
-    newHeaders.set('x-url', 'https://proyectonuevo-saasiav3.uclxiv.easypanel.host')
+    newHeaders.set('x-url', 'https://agente.aranza.io')
     
     // Force the URL to production
     url.protocol = 'https:'
-    url.host = 'proyectonuevo-saasiav3.uclxiv.easypanel.host'
+    url.host = 'agente.aranza.io'
     url.port = '443'
     
     const response = NextResponse.next({
@@ -33,7 +33,7 @@ export function middleware(request: NextRequest) {
     })
     
     // Set response headers as well
-    response.headers.set('x-forwarded-host', 'proyectonuevo-saasiav3.uclxiv.easypanel.host')
+    response.headers.set('x-forwarded-host', 'agente.aranza.io')
     response.headers.set('x-forwarded-proto', 'https')
     
     return response

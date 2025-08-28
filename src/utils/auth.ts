@@ -6,7 +6,7 @@ import GitHubProvider from "next-auth/providers/github";
 import { prisma } from "./prismaDB";
 
 // Force production URL in environment - Override any .env values
-const PRODUCTION_URL = "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+const PRODUCTION_URL = "https://agente.aranza.io";
 
 // Aggressively override ALL URL environment variables
 process.env.NEXTAUTH_URL = PRODUCTION_URL;
@@ -123,7 +123,7 @@ export const authOptions: NextAuthOptions = {
       }
       
       // Allow production URL domain
-      if (url.includes("proyectonuevo-saasiav3.uclxiv.easypanel.host")) return url;
+      if (url.includes("agente.aranza.io")) return url;
       
       console.log("🔀 Default redirect to production URL:", PRODUCTION_URL);
       return PRODUCTION_URL;

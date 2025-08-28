@@ -55,16 +55,16 @@ services:
       DATABASE_URL: postgresql://saasiav3:${POSTGRES_PASSWORD:-saasiav3_secure_password_123}@postgres:5432/saasiav3
       REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_123}@redis:6379
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-tu_nextauth_secret_muy_largo_32_caracteres_2024}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
-      NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://agente.aranza.io}
+      NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL:-https://agente.aranza.io}
       AUTH_TRUST_HOST: true
       NODE_ENV: development
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
-      SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://proyectonuevo-saasiav3.uclxiv.easypanel.host}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://agente.aranza.io}
+      SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://agente.aranza.io}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
       AUTHOR_NAME: ${AUTHOR_NAME:-Aranza Team}
       DEFAULT_N8N_WEBHOOK: ${DEFAULT_N8N_WEBHOOK:-https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@proyectonuevo-saasiav3.uclxiv.easypanel.host}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@agente.aranza.io}
       PORT: 3000
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}

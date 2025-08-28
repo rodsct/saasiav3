@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   // Force production URL for Google OAuth
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
-  const PRODUCTION_URL = "https://proyectonuevo-saasiav3.uclxiv.easypanel.host";
+  const PRODUCTION_URL = "https://agente.aranza.io";
   const redirectUri = `${PRODUCTION_URL}/api/auth/callback/google`;
   
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
