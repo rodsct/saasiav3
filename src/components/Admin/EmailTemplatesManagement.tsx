@@ -22,6 +22,7 @@ export default function EmailTemplatesManagement() {
   const [showEditor, setShowEditor] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [isSendingTest, setIsSendingTest] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -70,6 +71,30 @@ export default function EmailTemplatesManagement() {
     } catch (error) {
       console.error("Error saving template:", error);
       toast.error("Error de conexión");
+    }
+  };
+
+  const initializeTemplates = async () => {
+    setIsInitializing(true);
+    try {
+      const response = await fetch("/api/admin/init-email-templates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        toast.success("Plantillas inicializadas exitosamente");
+        loadTemplates(); // Reload templates
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Error al inicializar plantillas");
+      }
+    } catch (error) {
+      console.error("Error initializing templates:", error);
+      toast.error("Error de conexión");
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -185,6 +210,13 @@ export default function EmailTemplatesManagement() {
             placeholder="email@ejemplo.com"
             className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
           />
+          <button
+            onClick={initializeTemplates}
+            disabled={isInitializing}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm transition-colors"
+          >
+            {isInitializing ? "Iniciando..." : "Inicializar"}
+          </button>
           <button
             onClick={sendTestEmail}
             disabled={isSendingTest}

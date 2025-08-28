@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendTestEmail } from "@/utils/emailService";
+import { checkEmailConfiguration, initializeEmailTemplates } from "@/utils/initEmailTemplates";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,13 +28,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check email configuration
+    const config = await checkEmailConfiguration();
+    
+    if (!config.smtpReady) {
+      return NextResponse.json(
+        { 
+          error: "SMTP configuration incomplete", 
+          details: `Missing environment variables: ${config.missingVars.join(', ')}`,
+          missingVars: config.missingVars
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!config.templatesReady) {
+      console.log('Email templates not found, initializing...');
+      await initializeEmailTemplates();
+    }
+
     // Send test email
     const success = await sendTestEmail(to);
 
     if (success) {
       return NextResponse.json({
         success: true,
-        message: "Test email sent successfully"
+        message: "Test email sent successfully",
+        config: {
+          templatesReady: config.templatesReady,
+          smtpReady: config.smtpReady
+        }
       });
     } else {
       return NextResponse.json(
@@ -45,7 +69,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Send test email error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { 
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
