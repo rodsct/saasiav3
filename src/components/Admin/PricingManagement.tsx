@@ -30,8 +30,29 @@ export default function PricingManagement() {
   const [stripeProducts, setStripeProducts] = useState([]);
 
   useEffect(() => {
+    loadCurrentPricing();
     loadStripeProducts();
   }, []);
+
+  const loadCurrentPricing = async () => {
+    try {
+      const response = await fetch("/api/current-pricing");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.pricing) {
+          setPricing(prevPricing => ({
+            ...prevPricing,
+            id: data.pricing.id,
+            unit_amount: data.pricing.unit_amount,
+            nickname: data.pricing.nickname,
+          }));
+          console.log("Loaded current pricing from database:", data.pricing, "Source:", data.source);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading current pricing:", error);
+    }
+  };
 
   const loadStripeProducts = async () => {
     try {
