@@ -122,36 +122,6 @@ export default function EmailTemplatesManagement() {
     }
   };
 
-  const testBasicEmail = async () => {
-    if (!testEmail) {
-      toast.error("Ingresa un email para la prueba");
-      return;
-    }
-    setIsSendingTest(true);
-    try {
-      const response = await fetch("/api/admin/email-debug", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ to: testEmail }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        toast.success("Email básico enviado exitosamente");
-        console.log("Email sent with ID:", data.messageId);
-      } else {
-        const data = await response.json();
-        toast.error(data.error || "Error al enviar email básico");
-        console.error("Email error details:", data.details);
-      }
-    } catch (error) {
-      console.error("Error sending basic test email:", error);
-      toast.error("Error de conexión");
-    } finally {
-      setIsSendingTest(false);
-    }
-  };
 
   const checkNodemailer = async () => {
     setIsCheckingNodemailer(true);
@@ -326,23 +296,16 @@ export default function EmailTemplatesManagement() {
             <button
               onClick={testSimpleEmail}
               disabled={isSendingTest}
-              className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
             >
-              {isSendingTest ? "Enviando..." : "🚀 Simple"}
-            </button>
-            <button
-              onClick={testBasicEmail}
-              disabled={isSendingTest}
-              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
-            >
-              {isSendingTest ? "Enviando..." : "📧 Básico"}
+              {isSendingTest ? "Enviando..." : "🚀 Test Simple"}
             </button>
             <button
               onClick={sendTestEmail}
               disabled={isSendingTest}
               className="bg-[#00d4ff] hover:bg-[#0099cc] disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
             >
-              {isSendingTest ? "Enviando..." : "✉️ Completo"}
+              {isSendingTest ? "Enviando..." : "✉️ Test Completo"}
             </button>
           </div>
         </div>
