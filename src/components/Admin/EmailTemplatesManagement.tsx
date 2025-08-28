@@ -23,10 +23,6 @@ export default function EmailTemplatesManagement() {
   const [testEmail, setTestEmail] = useState("");
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
-  const [isDebugging, setIsDebugging] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
-  const [isCheckingNodemailer, setIsCheckingNodemailer] = useState(false);
-  const [nodemailerInfo, setNodemailerInfo] = useState<any>(null);
 
   useEffect(() => {
     loadTemplates();
@@ -102,52 +98,12 @@ export default function EmailTemplatesManagement() {
     }
   };
 
-  const debugEmail = async () => {
-    setIsDebugging(true);
-    try {
-      const response = await fetch("/api/admin/email-debug");
-      if (response.ok) {
-        const data = await response.json();
-        setDebugInfo(data.diagnostics);
-        toast.success("Diagnóstico completado");
-      } else {
-        const data = await response.json();
-        toast.error(data.error || "Error en diagnóstico");
-      }
-    } catch (error) {
-      console.error("Error debugging email:", error);
-      toast.error("Error de conexión");
-    } finally {
-      setIsDebugging(false);
-    }
-  };
-
-
-  const checkNodemailer = async () => {
-    setIsCheckingNodemailer(true);
-    try {
-      const response = await fetch("/api/admin/check-nodemailer");
-      if (response.ok) {
-        const data = await response.json();
-        setNodemailerInfo(data.diagnostics);
-        toast.success("Verificación de nodemailer completada");
-      } else {
-        const data = await response.json();
-        toast.error(data.error || "Error verificando nodemailer");
-      }
-    } catch (error) {
-      console.error("Error checking nodemailer:", error);
-      toast.error("Error de conexión");
-    } finally {
-      setIsCheckingNodemailer(false);
-    }
-  };
-
-  const testSimpleEmail = async () => {
+  const sendTestEmail = async () => {
     if (!testEmail) {
       toast.error("Ingresa un email para la prueba");
       return;
     }
+
     setIsSendingTest(true);
     try {
       const response = await fetch("/api/admin/email-simple-test", {
@@ -157,45 +113,16 @@ export default function EmailTemplatesManagement() {
         },
         body: JSON.stringify({ to: testEmail }),
       });
-      if (response.ok) {
-        const data = await response.json();
-        toast.success("Email simple enviado exitosamente");
-        console.log("Email sent with ID:", data.messageId);
-      } else {
-        const data = await response.json();
-        toast.error(data.error || "Error al enviar email simple");
-        console.error("Email error details:", data.details);
-      }
-    } catch (error) {
-      console.error("Error sending simple test email:", error);
-      toast.error("Error de conexión");
-    } finally {
-      setIsSendingTest(false);
-    }
-  };
-
-  const sendTestEmail = async () => {
-    if (!testEmail) {
-      toast.error("Ingresa un email para la prueba");
-      return;
-    }
-
-    setIsSendingTest(true);
-    try {
-      const response = await fetch("/api/admin/test-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ to: testEmail }),
-      });
 
       if (response.ok) {
+        const data = await response.json();
         toast.success("Email de prueba enviado exitosamente");
+        console.log("Email sent with ID:", data.messageId);
         setTestEmail("");
       } else {
         const data = await response.json();
         toast.error(data.error || "Error al enviar email de prueba");
+        console.error("Email error details:", data.details);
       }
     } catch (error) {
       console.error("Error sending test email:", error);
@@ -260,107 +187,29 @@ export default function EmailTemplatesManagement() {
         <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
           🧪 Probar Configuración de Email
         </h4>
-        <div className="space-y-3">
-          <div className="flex gap-2">
-            <button
-              onClick={checkNodemailer}
-              disabled={isCheckingNodemailer}
-              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
-            >
-              {isCheckingNodemailer ? "Verificando..." : "📦 Verificar"}
-            </button>
-            <button
-              onClick={debugEmail}
-              disabled={isDebugging}
-              className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
-            >
-              {isDebugging ? "Diagnosticando..." : "🔍 Diagnosticar"}
-            </button>
-            <button
-              onClick={initializeTemplates}
-              disabled={isInitializing}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
-            >
-              {isInitializing ? "Iniciando..." : "🔧 Inicializar"}
-            </button>
-          </div>
-          
-          <div className="flex gap-2">
-            <input
-              type="email"
-              value={testEmail}
-              onChange={(e) => setTestEmail(e.target.value)}
-              placeholder="email@ejemplo.com"
-              className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
-            />
-            <button
-              onClick={testSimpleEmail}
-              disabled={isSendingTest}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
-            >
-              {isSendingTest ? "Enviando..." : "🚀 Test Simple"}
-            </button>
-            <button
-              onClick={sendTestEmail}
-              disabled={isSendingTest}
-              className="bg-[#00d4ff] hover:bg-[#0099cc] disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
-            >
-              {isSendingTest ? "Enviando..." : "✉️ Test Completo"}
-            </button>
-          </div>
+        <div className="flex gap-3">
+          <button
+            onClick={initializeTemplates}
+            disabled={isInitializing}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm transition-colors"
+          >
+            {isInitializing ? "Iniciando..." : "🔧 Inicializar Plantillas"}
+          </button>
+          <input
+            type="email"
+            value={testEmail}
+            onChange={(e) => setTestEmail(e.target.value)}
+            placeholder="tu-email@ejemplo.com"
+            className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
+          />
+          <button
+            onClick={sendTestEmail}
+            disabled={isSendingTest || !testEmail}
+            className="bg-[#00d4ff] hover:bg-[#0099cc] disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm transition-colors"
+          >
+            {isSendingTest ? "Enviando..." : "📧 Enviar Prueba"}
+          </button>
         </div>
-        
-        {/* Nodemailer Information */}
-        {nodemailerInfo && (
-          <div className="mt-4 p-4 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-            <h5 className="font-medium text-gray-900 dark:text-white mb-2">📦 Información de Nodemailer</h5>
-            <div className="space-y-2 text-sm">
-              {nodemailerInfo.checks.map((check: any, index: number) => (
-                <div key={index} className="flex items-start space-x-2">
-                  <span className={check.status === 'success' ? 'text-green-600' : 'text-red-600'}>
-                    {check.status === 'success' ? '✅' : '❌'}
-                  </span>
-                  <div>
-                    <strong>{check.test}:</strong> {check.status}
-                    {check.error && <div className="text-red-600 text-xs ml-2">{check.error}</div>}
-                    {check.hasCreateTransporter !== undefined && (
-                      <div className="text-gray-600 text-xs ml-2">
-                        createTransporter: {check.hasCreateTransporter ? 'disponible' : 'no disponible'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Debug Information */}
-        {debugInfo && (
-          <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-            <h5 className="font-medium text-gray-900 dark:text-white mb-2">📋 Información de Diagnóstico</h5>
-            <div className="space-y-2 text-sm">
-              <div>
-                <strong>Configuración SMTP:</strong> {debugInfo.summary.canSendEmail ? "✅ OK" : "❌ ERROR"}
-              </div>
-              {debugInfo.environment.missingVars.length > 0 && (
-                <div className="text-red-600 dark:text-red-400">
-                  <strong>Variables faltantes:</strong> {debugInfo.environment.missingVars.join(", ")}
-                </div>
-              )}
-              {debugInfo.summary.issues.length > 0 && (
-                <div className="text-red-600 dark:text-red-400">
-                  <strong>Problemas:</strong>
-                  <ul className="list-disc list-inside ml-2">
-                    {debugInfo.summary.issues.map((issue: string, index: number) => (
-                      <li key={index}>{issue}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Templates List */}
