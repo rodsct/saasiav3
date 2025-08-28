@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import jwt from "jsonwebtoken";
+import { getSiteUrl, getOAuthCallbackUrl, buildUrl } from "@/utils/siteConfig";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "simple-auth-secret-key";
-const PRODUCTION_URL = "https://agente.aranza.io";
+const PRODUCTION_URL = getSiteUrl();
 
 export async function GET(request: NextRequest) {
   console.log("Google OAuth callback received");
@@ -17,18 +18,18 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     console.log("Google OAuth error:", error);
-    return NextResponse.redirect(`${PRODUCTION_URL}/signin?error=oauth_cancelled`);
+    return NextResponse.redirect(buildUrl("/signin?error=oauth_cancelled"));
   }
 
   if (!code) {
     console.log("No code parameter received");
-    return NextResponse.redirect(`${PRODUCTION_URL}/signin?error=no_code`);
+    return NextResponse.redirect(buildUrl("/signin?error=no_code"));
   }
 
   try {
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
     const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = `${PRODUCTION_URL}/api/auth/callback/google`;
+    const redirectUri = getOAuthCallbackUrl("google");
 
     console.log("Processing Google OAuth callback with code:", code.substring(0, 20) + "...");
 
@@ -50,14 +51,14 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.text();
       console.error("Token exchange failed:", errorData);
-      return NextResponse.redirect(`${PRODUCTION_URL}/signin?error=token_exchange_failed`);
+      return NextResponse.redirect(buildUrl("/signin?error=token_exchange_failed"));
     }
 
     const tokenData = await tokenResponse.json();
 
     if (!tokenData.access_token) {
       console.error("No access token received:", tokenData);
-      return NextResponse.redirect(`${PRODUCTION_URL}/signin?error=no_access_token`);
+      return NextResponse.redirect(buildUrl("/signin?error=no_access_token"));
     }
 
     // Get user info from Google
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     if (!userResponse.ok) {
       console.error("Failed to get user info from Google");
-      return NextResponse.redirect(`${PRODUCTION_URL}/signin?error=user_info_failed`);
+      return NextResponse.redirect(buildUrl("/signin?error=user_info_failed"));
     }
 
     const googleUser = await userResponse.json();
@@ -110,7 +111,7 @@ export async function GET(request: NextRequest) {
     );
 
     // Redirect to home page with auth cookie
-    const response = NextResponse.redirect(`${PRODUCTION_URL}/`);
+    const response = NextResponse.redirect(buildUrl("/"));
     
     response.cookies.set("auth-token", token, {
       httpOnly: true,
@@ -125,6 +126,6 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("Google OAuth callback error:", error);
-    return NextResponse.redirect(`${PRODUCTION_URL}/signin?error=oauth_error`);
+    return NextResponse.redirect(buildUrl("/signin?error=oauth_error"));
   }
 }

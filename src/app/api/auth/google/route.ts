@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSiteUrl, getOAuthCallbackUrl } from "@/utils/siteConfig";
 
 export async function GET(request: NextRequest) {
-  // Force production URL for Google OAuth
+  // Get production URL from centralized configuration
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
-  const PRODUCTION_URL = "https://agente.aranza.io";
-  const redirectUri = `${PRODUCTION_URL}/api/auth/callback/google`;
+  const PRODUCTION_URL = getSiteUrl();
+  const redirectUri = getOAuthCallbackUrl("google");
   
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
     `client_id=${googleClientId}&` +

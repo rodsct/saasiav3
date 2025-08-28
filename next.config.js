@@ -6,15 +6,15 @@ const nextConfig = {
   // External packages for server
   serverExternalPackages: ['@prisma/client', 'prisma'],
   
-  // Allow development origins
-  allowedDevOrigins: ['agente.aranza.io'],
+  // Allow development origins - get domain from environment
+  allowedDevOrigins: [process.env.NEXT_PUBLIC_SITE_URL?.replace('https://', '') || 'agente.aranza.io'],
   
   // Note: i18n configuration is not supported in App Router
   // Using custom client-side translation hook instead
   
   // Optimize images
   images: {
-    domains: ['localhost', 'agente.aranza.io'],
+    domains: ['localhost', process.env.NEXT_PUBLIC_SITE_URL?.replace('https://', '') || 'agente.aranza.io'],
     unoptimized: process.env.NODE_ENV === 'development',
   },
   

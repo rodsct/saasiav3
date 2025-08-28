@@ -4,14 +4,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { prisma } from "./prismaDB";
+import { getSiteUrl, getOAuthCallbackUrl, isOwnDomain } from "./siteConfig";
 
-// Force production URL in environment - Override any .env values
-const PRODUCTION_URL = "https://agente.aranza.io";
+// Get production URL from centralized configuration
+const PRODUCTION_URL = getSiteUrl();
 
-// Aggressively override ALL URL environment variables
+// Ensure consistency across all URL environment variables
 process.env.NEXTAUTH_URL = PRODUCTION_URL;
 process.env.NEXTAUTH_URL_INTERNAL = PRODUCTION_URL;
-process.env.NEXT_PUBLIC_SITE_URL = PRODUCTION_URL;
 process.env.SITE_URL = PRODUCTION_URL;
 
 // Log for debugging
@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
         params: {
           scope: "openid email profile",
           response_type: "code",
-          redirect_uri: `${PRODUCTION_URL}/api/auth/callback/google`
+          redirect_uri: getOAuthCallbackUrl("google")
         }
       },
       token: "https://oauth2.googleapis.com/token",
@@ -122,8 +122,15 @@ export const authOptions: NextAuthOptions = {
         return finalUrl;
       }
       
+      // If it's the old EasyPanel URL, redirect to new domain
+      if (url.includes("proyectonuevo-saasiav3.uclxiv.easypanel.host")) {
+        const finalUrl = url.replace("https://proyectonuevo-saasiav3.uclxiv.easypanel.host", PRODUCTION_URL);
+        console.log("🔀 Replacing old domain with:", finalUrl);
+        return finalUrl;
+      }
+      
       // Allow production URL domain
-      if (url.includes("agente.aranza.io")) return url;
+      if (isOwnDomain(url)) return url;
       
       console.log("🔀 Default redirect to production URL:", PRODUCTION_URL);
       return PRODUCTION_URL;
