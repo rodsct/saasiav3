@@ -165,6 +165,10 @@ model SiteConfig {
   whatsappNumber    String?  // Número de WhatsApp de soporte (ej: +5212345678901)
   whatsappMessage   String?  @db.Text // Mensaje predeterminado para el QR
   isWhatsappEnabled Boolean  @default(false)
+  // Pricing configuration
+  proPriceId        String?  // Stripe Price ID for PRO subscription
+  proPriceAmount    Int?     // Price amount in cents (4900 = $49.00)
+  proPriceName      String?  @default("PRO") // Plan name
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   

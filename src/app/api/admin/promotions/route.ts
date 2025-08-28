@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllPromotions, addCustomPromotion } from "@/utils/envPromotions";
+import { getAllPromotions, createPromotion } from "@/utils/dbPromotions";
 
 export async function GET(request: NextRequest) {
   // Simple auth check using headers (same pattern as other admin endpoints)
@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json({ promotions: getAllPromotions() });
+    const promotions = await getAllPromotions();
+    return NextResponse.json({ promotions });
 
   } catch (error) {
     console.error("Get promotions error:", error);
@@ -44,31 +45,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new promotion
-    const newPromotion = {
-      id: code.toUpperCase(),
+    // Create new promotion in database
+    const result = await createPromotion({
       code: code.toUpperCase(),
       description,
       discountType,
       discountValue,
       usageLimit,
-      usedCount: 0,
-      isActive: true,
-      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
-      createdAt: new Date().toISOString()
-    };
-
-    const success = addCustomPromotion(newPromotion);
+      expiresAt
+    });
     
-    if (!success) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: "El código de promoción ya existe" },
+        { error: result.error || "Error al crear la promoción" },
         { status: 400 }
       );
     }
 
-    console.log("Custom promotion created and saved to env:", newPromotion.code);
-    return NextResponse.json({ promotion: newPromotion });
+    console.log("Promotion created in database:", result.promotion?.code);
+    return NextResponse.json({ promotion: result.promotion });
 
   } catch (error) {
     console.error("Create promotion error:", error);

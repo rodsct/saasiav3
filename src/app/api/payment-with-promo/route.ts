@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { findActivePromotion, getAllPromotions } from "@/utils/envPromotions";
+import { findActivePromotion, getAllPromotions, incrementPromotionUsage } from "@/utils/dbPromotions";
+import { getCurrentPricing } from "@/utils/dbPricing";
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,10 +46,10 @@ export async function POST(request: NextRequest) {
     
     if (promoCode) {
       console.log("Looking for promo code:", promoCode);
-      const allPromotions = getAllPromotions();
+      const allPromotions = await getAllPromotions();
       console.log("Available promotions:", allPromotions.map(p => p.code));
       
-      const promotion = findActivePromotion(promoCode);
+      const promotion = await findActivePromotion(promoCode);
       console.log("Found promotion:", promotion);
       
       if (!promotion) {
@@ -76,23 +77,30 @@ export async function POST(request: NextRequest) {
       console.log("Promotion found:", promotion.code, "Type:", discountType, "Value:", promotion.discountValue);
     }
 
-    // Get current pricing from local file
+    // Get current pricing from database
     let finalPriceId = priceId;
     
     try {
-      const fs = require('fs');
-      const path = require('path');
-      const pricingPath = path.join(process.cwd(), "src", "stripe", "pricingData.ts");
-      const pricingContent = fs.readFileSync(pricingPath, 'utf8');
-      
-      // Extract price ID from the file
-      const idMatch = pricingContent.match(/id:\s*"([^"]+)"/);
-      if (idMatch) {
-        finalPriceId = idMatch[1];
-        console.log("Using current price ID from file for promo:", finalPriceId);
+      const dbPricing = await getCurrentPricing();
+      if (dbPricing.priceId !== 'price_default') {
+        finalPriceId = dbPricing.priceId;
+        console.log("Using current price ID from database for promo:", finalPriceId);
+      } else {
+        // Fallback to file-based pricing
+        const fs = require('fs');
+        const path = require('path');
+        const pricingPath = path.join(process.cwd(), "src", "stripe", "pricingData.ts");
+        const pricingContent = fs.readFileSync(pricingPath, 'utf8');
+        
+        // Extract price ID from the file
+        const idMatch = pricingContent.match(/id:\s*"([^"]+)"/);
+        if (idMatch) {
+          finalPriceId = idMatch[1];
+          console.log("Using current price ID from file for promo:", finalPriceId);
+        }
       }
-    } catch (fileError) {
-      console.log("Could not read pricing file, using provided price ID for promo");
+    } catch (pricingError) {
+      console.log("Could not get pricing from database, using provided price ID for promo");
     }
     
     // Verify the price exists in Stripe
@@ -170,6 +178,17 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
+
+    // Increment promotion usage count if a valid promo was applied
+    if (promoCode && (discountPercentage > 0 || discountAmount > 0)) {
+      try {
+        await incrementPromotionUsage(promoCode);
+        console.log("Incremented usage count for promotion:", promoCode);
+      } catch (error) {
+        console.error("Error incrementing promotion usage:", error);
+        // Don't fail the payment, just log the error
+      }
+    }
 
     // Return checkout URL
     return NextResponse.json({

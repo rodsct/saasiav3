@@ -56,7 +56,8 @@
       "WebFetch(domain:proyectonuevo-saasiav3.uclxiv.easypanel.host)",
       "Bash(touch:*)",
       "Bash(git checkout:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(scriptssetup-docker.bat)"
     ],
     "deny": [],
     "ask": []

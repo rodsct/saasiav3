@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updatePromotion, deleteCustomPromotion } from "@/utils/envPromotions";
+import { updatePromotion, deletePromotion } from "@/utils/dbPromotions";
 
 export async function PATCH(
   request: NextRequest,
@@ -19,7 +19,7 @@ export async function PATCH(
 
     console.log("Updating promotion:", promotionId, "with:", updates);
 
-    const success = updatePromotion(promotionId, updates);
+    const success = await updatePromotion(promotionId, updates);
     
     if (!success) {
       return NextResponse.json(
@@ -56,11 +56,11 @@ export async function DELETE(
 
     console.log("Deleting promotion:", promotionId);
 
-    const success = deleteCustomPromotion(promotionId);
+    const result = await deletePromotion(promotionId);
     
-    if (!success) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Promoción no encontrada" },
+        { error: result.error || "Promoción no encontrada" },
         { status: 404 }
       );
     }

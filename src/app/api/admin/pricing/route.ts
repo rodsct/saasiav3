@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
+import { updatePricingConfig, getCurrentPricing, initializePricingConfig } from "@/utils/dbPricing";
 
 export async function POST(request: NextRequest) {
   // Simple auth check using headers (same pattern as other admin endpoints)
@@ -116,13 +117,25 @@ ${pricingData.offers.map((offer: string) => `      "${offer}",`).join('\n')}
 ];
 `;
 
-    // Write updated pricing file
+    // Write updated pricing file (for backwards compatibility)
     await fs.writeFile(pricingFilePath, newPricingContent, 'utf8');
+
+    // Update pricing in database for persistent storage
+    const dbUpdateSuccess = await updatePricingConfig({
+      priceId: pricingData.id,
+      amount: pricingData.unit_amount,
+      name: pricingData.nickname
+    });
+
+    if (!dbUpdateSuccess) {
+      console.warn("Failed to update pricing in database, but file was updated");
+    }
 
     return NextResponse.json({
       success: true,
       message: "Pricing updated successfully",
-      updatedPriceId: pricingData.id
+      updatedPriceId: pricingData.id,
+      databaseUpdated: dbUpdateSuccess
     });
 
   } catch (error) {
