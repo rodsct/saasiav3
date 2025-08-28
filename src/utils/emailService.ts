@@ -252,13 +252,24 @@ export async function sendPaymentSuccess(
 // Test email function
 export async function sendTestEmail(to: string): Promise<boolean> {
   try {
+    console.log('🔧 Starting test email process...');
+    
     const transporter = createTransporter();
-    if (!transporter) return false;
+    if (!transporter) {
+      console.error('❌ Failed to create email transporter');
+      return false;
+    }
 
-    const sender = await getSenderInfo();
+    console.log('✅ Email transporter created successfully');
+    
+    // Use simple sender info to avoid database dependencies
+    const senderName = 'Aranza.io';
+    const senderAddress = process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io';
+    
+    console.log('📧 Sender info:', { senderName, senderAddress });
     
     const mailOptions = {
-      from: `"${sender.name}" <${sender.address}>`,
+      from: `"${senderName}" <${senderAddress}>`,
       to,
       subject: 'Test Email - Configuración de Email Funcional',
       html: `
@@ -276,10 +287,24 @@ export async function sendTestEmail(to: string): Promise<boolean> {
       text: 'Test Email - La configuración de email está funcionando correctamente.'
     };
 
-    await transporter.sendMail(mailOptions);
+    console.log('📤 Sending email with options:', { 
+      from: mailOptions.from, 
+      to: mailOptions.to, 
+      subject: mailOptions.subject 
+    });
+    
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully:', result.messageId);
     return true;
   } catch (error) {
-    console.error('Error sending test email:', error);
+    console.error('❌ Error sending test email:', error);
+    
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
     return false;
   }
 }

@@ -47,10 +47,14 @@ export async function POST(request: NextRequest) {
       await initializeEmailTemplates();
     }
 
+    console.log('🧪 Starting test email process for:', to);
+    console.log('📋 Configuration status:', config);
+    
     // Send test email
     const success = await sendTestEmail(to);
 
     if (success) {
+      console.log('✅ Test email sent successfully to:', to);
       return NextResponse.json({
         success: true,
         message: "Test email sent successfully",
@@ -60,8 +64,16 @@ export async function POST(request: NextRequest) {
         }
       });
     } else {
+      console.error('❌ Test email failed for:', to);
       return NextResponse.json(
-        { error: "Failed to send test email. Please check your email configuration." },
+        { 
+          error: "Failed to send test email. Please check your email configuration.",
+          config: {
+            templatesReady: config.templatesReady,
+            smtpReady: config.smtpReady,
+            missingVars: config.missingVars
+          }
+        },
         { status: 500 }
       );
     }
