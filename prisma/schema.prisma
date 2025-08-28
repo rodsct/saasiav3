@@ -169,8 +169,42 @@ model SiteConfig {
   proPriceId        String?  // Stripe Price ID for PRO subscription
   proPriceAmount    Int?     // Price amount in cents (4900 = $49.00)
   proPriceName      String?  @default("PRO") // Plan name
+  // Email configuration
+  emailFromName     String?  @default("Aranza.io") // From name for emails
+  emailFromAddress  String?  // From email address
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   
   @@map("site_config")
+}
+
+model EmailTemplate {
+  id          String            @id @default(cuid())
+  type        EmailTemplateType @unique // Type of email template
+  subject     String            // Email subject line
+  htmlContent String            @db.Text // HTML email content
+  textContent String?           @db.Text // Plain text fallback
+  isActive    Boolean           @default(true)
+  variables   String[]          // Available variables for this template
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  @@map("email_templates")
+}
+
+enum EmailTemplateType {
+  WELCOME_REGISTRATION      // When user registers
+  EMAIL_VERIFICATION        // Email verification
+  PASSWORD_RESET           // Password reset
+  SUBSCRIPTION_ACTIVATED    // When subscription starts
+  SUBSCRIPTION_CANCELLED    // When subscription is cancelled
+  SUBSCRIPTION_RENEWED      // When subscription renews successfully
+  SUBSCRIPTION_FAILED       // When subscription renewal fails
+  SUBSCRIPTION_EXPIRING     // Warning before subscription expires
+  PAYMENT_SUCCESS          // Successful payment
+  PAYMENT_FAILED           // Failed payment
+  TRIAL_STARTED           // When trial period starts
+  TRIAL_ENDING            // Trial ending warning
+  ACCOUNT_SUSPENDED       // Account suspended
+  ACCOUNT_REACTIVATED     // Account reactivated
 }

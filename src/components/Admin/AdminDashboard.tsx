@@ -8,6 +8,7 @@ import PricingManagement from "./PricingManagement";
 import PromotionsManagement from "./PromotionsManagement";
 import UserManagement from "./UserManagement";
 import WhatsAppConfig from "./WhatsAppConfig";
+import EmailTemplatesManagement from "./EmailTemplatesManagement";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -21,6 +22,7 @@ export default function AdminDashboard() {
     { id: "downloads", label: "Descargas", shortLabel: "Files", icon: "📁" },
     { id: "webhooks", label: "Webhooks", shortLabel: "API", icon: "🔗" },
     { id: "whatsapp", label: "WhatsApp", shortLabel: "WhatsApp", icon: "📱" },
+    { id: "emails", label: "Plantillas Email", shortLabel: "Email", icon: "📧" },
   ];
 
   return (
@@ -132,6 +134,7 @@ export default function AdminDashboard() {
             {activeTab === "downloads" && <AdminDownloads />}
             {activeTab === "webhooks" && <WebhookConfig />}
             {activeTab === "whatsapp" && <WhatsAppConfig />}
+            {activeTab === "emails" && <EmailTemplatesManagement />}
           </div>
         </div>
       </div>
