@@ -13,9 +13,9 @@ const Features = () => {
     <section className="pb-8 pt-20 bg-[#2f2f2f] lg:pb-[70px] lg:pt-[120px]">
       <div className="container">
         <SectionTitle
-          subtitle={t('features.subtitle')}
-          title={t('features.title')}
-          paragraph={t('features.paragraph')}
+          subtitle="¿Qué incluye la academia?"
+          title="Todo lo que necesitas para escalar tu agencia de IA"
+          paragraph="Desde plantillas profesionales hasta Aranza IA, tu asistente personal. Una suscripción completa con acceso ilimitado a recursos premium para agencias de inteligencia artificial."
         />
 
         <div className="-mx-4 mt-12 flex flex-wrap lg:mt-20">

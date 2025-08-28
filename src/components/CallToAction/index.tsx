@@ -9,22 +9,30 @@ const CallToAction = () => {
             <div className="w-full px-4">
               <div className="mx-auto max-w-[570px] text-center">
                 <h2 className="mb-2.5 text-3xl font-bold text-white md:text-[38px] md:leading-[1.44]">
-                  <span>¿Qué Estás Buscando?</span>
+                  <span>¿Listo para Transformar tu Agencia?</span>
                   <span className="text-3xl font-normal md:text-[40px]">
                     {" "}
-                    Comienza Ahora{" "}
+                    Únete a la Academia{" "}
                   </span>
                 </h2>
                 <p className="mx-auto mb-6 max-w-[515px] text-base leading-[1.5] text-gray-300">
-                  Descubre el poder de la inteligencia artificial con Aranza.io.
-                  Transforma tu negocio con nuestras herramientas avanzadas.
+                  Accede a plantillas exclusivas, cursos especializados y Aranza IA. 
+                  Todo lo que necesitas para escalar tu agencia con inteligencia artificial.
                 </p>
-                <Link
-                  href="/chatbot"
-                  className="inline-block rounded-md border border-transparent bg-[#ff6b35] px-7 py-3 text-base font-medium text-white transition hover:bg-[#e55a2b]"
-                >
-                  Prueba Aranza Gratis
-                </Link>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Link
+                    href="/pricing"
+                    className="inline-block rounded-md border border-transparent bg-[#00d4ff] px-7 py-3 text-base font-medium text-white transition hover:bg-[#0099cc]"
+                  >
+                    Ver Planes de Suscripción
+                  </Link>
+                  <Link
+                    href="/chatbot"
+                    className="inline-block rounded-md border border-[#00d4ff] bg-transparent px-7 py-3 text-base font-medium text-[#00d4ff] transition hover:bg-[#00d4ff] hover:text-white"
+                  >
+                    Probar Aranza IA Gratis
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

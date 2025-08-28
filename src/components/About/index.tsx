@@ -18,19 +18,19 @@ const About = () => {
             <div className="w-full px-4 lg:w-1/2">
               <div className="mb-12 max-w-[540px] lg:mb-0">
                 <h2 className="mb-5 text-3xl font-bold leading-tight text-white sm:text-[40px] sm:leading-[1.2]">
-                  {t('about.title')}
+                  La Academia Líder en Inteligencia Artificial
                 </h2>
                 <p className="mb-10 text-base leading-relaxed text-gray-400">
-                  {t('about.description')}
+                  En Academia Aranza.io transformamos agencias tradicionales en potencias de inteligencia artificial. Ofrecemos las herramientas, conocimiento y soporte necesario para que escales tu negocio con automatizaciones avanzadas.
                   <br /> <br />
-                  {t('about.description2')}
+                  Desde plantillas profesionales hasta cursos especializados, pasando por tu asistente personal Aranza IA integrado con WhatsApp. Todo lo que necesitas para dominar el futuro de los negocios digitales.
                 </p>
 
                 <Link
-                  href="#"
-                  className="inline-flex items-center justify-center rounded-md bg-[#ff6b35] px-7 py-3 text-center text-base font-medium text-white duration-300 hover:bg-[#e55a2b]"
+                  href="/pricing"
+                  className="inline-flex items-center justify-center rounded-md bg-[#00d4ff] px-7 py-3 text-center text-base font-medium text-white duration-300 hover:bg-[#0099cc]"
                 >
-                  {t('about.cta_button')}
+                  Comenzar Ahora
                 </Link>
               </div>
             </div>
@@ -60,16 +60,16 @@ const About = () => {
                     />
                   </div>
 
-                  <div className="relative z-10 mb-4 flex items-center justify-center overflow-hidden bg-[#ff6b35] px-6 py-12 sm:mb-8 sm:h-[160px] sm:p-5 lg:mb-4 xl:mb-8">
+                  <div className="relative z-10 mb-4 flex items-center justify-center overflow-hidden bg-[#00d4ff] px-6 py-12 sm:mb-8 sm:h-[160px] sm:p-5 lg:mb-4 xl:mb-8">
                     <div>
                       <span className="block text-5xl font-extrabold text-white">
-                        {t('about.stats.years')}
+                        5+
                       </span>
                       <span className="block text-base font-semibold text-white">
-                        {t('about.stats.years_label')}
+                        Años de Experiencia
                       </span>
                       <span className="block text-base font-medium text-white text-opacity-70">
-                        {t('about.stats.years_desc')}
+                        En Inteligencia Artificial
                       </span>
                     </div>
                     <div>

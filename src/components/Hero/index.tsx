@@ -31,39 +31,42 @@ const Hero = () => {
                   </div>
                 </div>
 
-                <h1 className="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-6xl lg:leading-[1.1]">
+                <h1 className="mb-6 text-3xl font-bold leading-snug text-white sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.1]">
                   <span className="bg-gradient-to-r from-white via-[#00d4ff] to-white bg-clip-text text-transparent">
-                    {t('hero.title')}
+                    Academia Aranza.io
                   </span>
                 </h1>
-                <p className="mx-auto mb-12 max-w-[700px] text-base font-medium text-gray-300 sm:text-xl sm:leading-[1.6] lg:text-xl">
-                  {t('hero.subtitle')}
+                <p className="mx-auto mb-4 max-w-[600px] text-lg font-medium text-[#00d4ff] sm:text-xl">
+                  Automatizaciones e Inteligencia Artificial para potenciar tu negocio
                 </p>
-                <div className="mb-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                <p className="mx-auto mb-12 max-w-[700px] text-base font-medium text-gray-300 sm:text-lg sm:leading-[1.6]">
+                  Academia por suscripción para agencias de IA. Accede a plantillas exclusivas, tutoriales especializados, cursos completos y Aranza IA - tu asistente personal integrado con WhatsApp.
+                </p>
+                <div className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                  <Link
+                    href="/pricing"
+                    className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] transition-all duration-300 shadow-lg shadow-[#00d4ff]/25 hover:shadow-xl hover:shadow-[#00d4ff]/40 transform hover:scale-105"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    Acceder a la Academia
+                  </Link>
                   <Link
                     href="/chatbot"
-                    className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] transition-all duration-300 shadow-lg shadow-[#00d4ff]/25 hover:shadow-xl hover:shadow-[#00d4ff]/40 transform hover:scale-105"
+                    className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white rounded-xl bg-[#1a1a2e]/80 border border-[#00d4ff]/30 hover:bg-[#00d4ff]/20 transition-all duration-300 backdrop-blur-sm"
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z" />
                     </svg>
-                    {t('hero.cta_primary')}
-                  </Link>
-                  <Link
-                    href="/downloads"
-                    className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white rounded-xl bg-[#1a1a2e]/80 border border-[#00d4ff]/30 hover:bg-[#00d4ff]/20 transition-all duration-300 backdrop-blur-sm"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    {t('hero.cta_secondary')}
+                    Probar Aranza IA
                   </Link>
                 </div>
 
                 {/* Tech Stack Icons */}
                 <div className="mb-16">
                   <p className="mb-8 text-center text-base font-medium text-[#00d4ff]/80">
-                    {t('hero.tech_subtitle')}
+                    Tecnologías que potencian tu agencia de IA
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 max-w-2xl mx-auto">
                     {/* AI/Neural Network */}
