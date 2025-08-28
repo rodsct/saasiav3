@@ -129,24 +129,6 @@ export default function EmailTemplatesManagement() {
     }
   };
 
-  const initializeTemplates = async () => {
-    try {
-      const response = await fetch("/api/admin/email-templates/initialize", {
-        method: "POST",
-      });
-
-      if (response.ok) {
-        toast.success("Plantillas inicializadas exitosamente");
-        loadTemplates();
-      } else {
-        toast.error("Error al inicializar plantillas");
-      }
-    } catch (error) {
-      console.error("Error initializing templates:", error);
-      toast.error("Error de conexión");
-    }
-  };
-
   const getTemplateDisplayName = (type: string): string => {
     const names: { [key: string]: string } = {
       WELCOME_REGISTRATION: "Bienvenida - Registro",
