@@ -49,17 +49,17 @@ const DEFAULT_PROMOTIONS: Omit<PromotionData, 'createdAt'>[] = [
   }
 ];
 
-// Initialize default promotions in database
+// Initialize default promotions in database (only if none exist)
 export async function initializeDefaultPromotions(): Promise<void> {
   try {
-    for (const promoData of DEFAULT_PROMOTIONS) {
-      // Check if promotion already exists
-      const existingPromo = await prisma.promotion.findUnique({
-        where: { code: promoData.code }
-      });
-
-      if (!existingPromo) {
-        // Create the promotion
+    // Check if any promotions exist in the database
+    const existingPromotionsCount = await prisma.promotion.count();
+    
+    // Only initialize defaults if no promotions exist at all
+    if (existingPromotionsCount === 0) {
+      console.log('No promotions found in database, initializing defaults...');
+      
+      for (const promoData of DEFAULT_PROMOTIONS) {
         await prisma.promotion.create({
           data: {
             id: promoData.id,
@@ -74,14 +74,9 @@ export async function initializeDefaultPromotions(): Promise<void> {
           }
         });
         console.log('Created default promotion:', promoData.code);
-      } else if (!existingPromo.isActive && promoData.isActive) {
-        // Reactivate default promotion if it was deactivated
-        await prisma.promotion.update({
-          where: { id: existingPromo.id },
-          data: { isActive: true }
-        });
-        console.log('Reactivated default promotion:', promoData.code);
       }
+    } else {
+      console.log('Promotions already exist in database, skipping initialization');
     }
   } catch (error) {
     console.error('Error initializing default promotions:', error);
