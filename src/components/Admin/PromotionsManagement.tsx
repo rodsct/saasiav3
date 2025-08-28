@@ -327,32 +327,29 @@ export default function PromotionsManagement() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                    {DEFAULT_PROMOTION_IDS.includes(promotion.id) ? (
-                      <div className="flex items-center space-x-2">
-                        <span className="px-3 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
-                          Promoción por defecto
+                    <div className="flex items-center space-x-2">
+                      {DEFAULT_PROMOTION_IDS.includes(promotion.id) && (
+                        <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                          Por defecto
                         </span>
-                      </div>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => togglePromotion(promotion.id, promotion.isActive)}
-                          className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                            promotion.isActive
-                              ? "bg-red-100 text-red-700 hover:bg-red-200"
-                              : "bg-green-100 text-green-700 hover:bg-green-200"
-                          }`}
-                        >
-                          {promotion.isActive ? "Desactivar" : "Activar"}
-                        </button>
-                        <button
-                          onClick={() => deletePromotion(promotion.id)}
-                          className="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                        >
-                          Eliminar
-                        </button>
-                      </>
-                    )}
+                      )}
+                      <button
+                        onClick={() => togglePromotion(promotion.id, promotion.isActive)}
+                        className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                          promotion.isActive
+                            ? "bg-red-100 text-red-700 hover:bg-red-200"
+                            : "bg-green-100 text-green-700 hover:bg-green-200"
+                        }`}
+                      >
+                        {promotion.isActive ? "Desactivar" : "Activar"}
+                      </button>
+                      <button
+                        onClick={() => deletePromotion(promotion.id)}
+                        className="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

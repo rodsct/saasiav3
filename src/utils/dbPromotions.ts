@@ -231,18 +231,9 @@ export async function updatePromotion(
   }
 }
 
-// Delete promotion (only non-default ones)
+// Delete promotion (now allows deletion of all promotions including defaults)
 export async function deletePromotion(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    // Check if it's a default promotion
-    const defaultIds = DEFAULT_PROMOTIONS.map(p => p.id);
-    if (defaultIds.includes(id)) {
-      return {
-        success: false,
-        error: 'No se pueden eliminar las promociones predeterminadas'
-      };
-    }
-
     await prisma.promotion.delete({
       where: { id }
     });
