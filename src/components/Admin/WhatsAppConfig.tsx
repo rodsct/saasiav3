@@ -84,11 +84,7 @@ export default function WhatsAppConfig() {
         setConfig(data.config);
         setMigrationNeeded(false);
         
-        if (data.message) {
-          toast.success("Configuración actualizada temporalmente");
-        } else {
-          toast.success("Configuración de WhatsApp actualizada");
-        }
+        toast.success("Configuración de WhatsApp actualizada");
       } else {
         if (data.requiresMigration) {
           setMigrationNeeded(true);
@@ -283,19 +279,14 @@ export default function WhatsAppConfig() {
         </div>
       </div>
 
-      {/* Temporary Storage Notice */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4">
-        <h4 className="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mb-2">
-          ⚠️ Configuración Temporal
+      {/* Storage Notice */}
+      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 sm:p-4">
+        <h4 className="text-sm font-semibold text-green-900 dark:text-green-200 mb-2">
+          ✅ Configuración Persistente
         </h4>
-        <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-2">
-          Los cambios se guardan temporalmente en memoria y se perderán al reiniciar el servidor.
+        <p className="text-sm text-green-800 dark:text-green-300">
+          Los cambios se guardan en la base de datos y persisten después de reiniciar el servidor.
         </p>
-        <div className="bg-yellow-100 dark:bg-yellow-800/30 rounded p-2 overflow-x-auto">
-          <code className="text-xs text-yellow-900 dark:text-yellow-200 whitespace-nowrap">
-            Para persistencia: npx prisma migrate dev
-          </code>
-        </div>
       </div>
 
       {/* Instructions */}

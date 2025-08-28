@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTempWhatsAppConfig, setTempWhatsAppConfig } from "@/utils/tempWhatsAppConfig";
+import { getWhatsAppConfig, updateWhatsAppConfig, initializeWhatsAppConfig } from "@/utils/dbWhatsApp";
 
-// Simplified WhatsApp config using shared in-memory storage
-// This avoids any database-related issues during migration
+// WhatsApp config using database storage for persistence
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const config = getTempWhatsAppConfig();
+    const config = await getWhatsAppConfig();
     
     return NextResponse.json({ 
       success: true, 
@@ -55,17 +54,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update the shared in-memory configuration
-    const updatedConfig = setTempWhatsAppConfig({
+    // Update configuration in database
+    const updateSuccess = await updateWhatsAppConfig({
       whatsappNumber,
       whatsappMessage,
       isWhatsappEnabled,
     });
 
+    if (!updateSuccess) {
+      return NextResponse.json(
+        { error: "Failed to update WhatsApp configuration in database" },
+        { status: 500 }
+      );
+    }
+
+    // Get updated config from database to return
+    const updatedConfig = await getWhatsAppConfig();
+
     return NextResponse.json({ 
       success: true, 
       config: updatedConfig,
-      message: "Configuration updated temporarily in memory. For persistence, run: npx prisma migrate dev"
+      message: "WhatsApp configuration updated successfully in database"
     });
 
   } catch (error) {

@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTempWhatsAppConfig } from "@/utils/tempWhatsAppConfig";
+import { getWhatsAppConfig } from "@/utils/dbWhatsApp";
 
-// Simplified WhatsApp QR endpoint using shared in-memory configuration
-// This avoids any database-related issues during migration
+// WhatsApp QR endpoint using database configuration
 
 export async function GET(request: NextRequest) {
   try {
-    // Get configuration from shared in-memory storage
-    const config = getTempWhatsAppConfig();
+    // Get configuration from database
+    const config = await getWhatsAppConfig();
     const { whatsappNumber, whatsappMessage, isWhatsappEnabled } = config;
     
     if (!isWhatsappEnabled || !whatsappNumber) {
