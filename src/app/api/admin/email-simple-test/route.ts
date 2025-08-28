@@ -43,10 +43,11 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Dynamic import of nodemailer
+      // Import nodemailer using require (CommonJS)
       console.log('📦 Importing nodemailer...');
-      const { default: nodemailer } = await import('nodemailer');
+      const nodemailer = require('nodemailer');
       console.log('✅ Nodemailer imported successfully');
+      console.log('🔍 Nodemailer object:', Object.keys(nodemailer));
 
       // Create transporter
       console.log('🔧 Creating transporter...');

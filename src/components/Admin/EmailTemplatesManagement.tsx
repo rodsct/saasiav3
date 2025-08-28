@@ -25,6 +25,8 @@ export default function EmailTemplatesManagement() {
   const [isInitializing, setIsInitializing] = useState(false);
   const [isDebugging, setIsDebugging] = useState(false);
   const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [isCheckingNodemailer, setIsCheckingNodemailer] = useState(false);
+  const [nodemailerInfo, setNodemailerInfo] = useState<any>(null);
 
   useEffect(() => {
     loadTemplates();
@@ -151,6 +153,26 @@ export default function EmailTemplatesManagement() {
     }
   };
 
+  const checkNodemailer = async () => {
+    setIsCheckingNodemailer(true);
+    try {
+      const response = await fetch("/api/admin/check-nodemailer");
+      if (response.ok) {
+        const data = await response.json();
+        setNodemailerInfo(data.diagnostics);
+        toast.success("Verificación de nodemailer completada");
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Error verificando nodemailer");
+      }
+    } catch (error) {
+      console.error("Error checking nodemailer:", error);
+      toast.error("Error de conexión");
+    } finally {
+      setIsCheckingNodemailer(false);
+    }
+  };
+
   const testSimpleEmail = async () => {
     if (!testEmail) {
       toast.error("Ingresa un email para la prueba");
@@ -271,6 +293,13 @@ export default function EmailTemplatesManagement() {
         <div className="space-y-3">
           <div className="flex gap-2">
             <button
+              onClick={checkNodemailer}
+              disabled={isCheckingNodemailer}
+              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
+            >
+              {isCheckingNodemailer ? "Verificando..." : "📦 Verificar"}
+            </button>
+            <button
               onClick={debugEmail}
               disabled={isDebugging}
               className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
@@ -317,6 +346,31 @@ export default function EmailTemplatesManagement() {
             </button>
           </div>
         </div>
+        
+        {/* Nodemailer Information */}
+        {nodemailerInfo && (
+          <div className="mt-4 p-4 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+            <h5 className="font-medium text-gray-900 dark:text-white mb-2">📦 Información de Nodemailer</h5>
+            <div className="space-y-2 text-sm">
+              {nodemailerInfo.checks.map((check: any, index: number) => (
+                <div key={index} className="flex items-start space-x-2">
+                  <span className={check.status === 'success' ? 'text-green-600' : 'text-red-600'}>
+                    {check.status === 'success' ? '✅' : '❌'}
+                  </span>
+                  <div>
+                    <strong>{check.test}:</strong> {check.status}
+                    {check.error && <div className="text-red-600 text-xs ml-2">{check.error}</div>}
+                    {check.hasCreateTransporter !== undefined && (
+                      <div className="text-gray-600 text-xs ml-2">
+                        createTransporter: {check.hasCreateTransporter ? 'disponible' : 'no disponible'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* Debug Information */}
         {debugInfo && (
