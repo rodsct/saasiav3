@@ -43,7 +43,14 @@ function createTransporter(): nodemailer.Transporter | null {
       },
     };
 
-    return nodemailer.createTransporter(config);
+    // Try both createTransporter and createTransport
+    if (typeof nodemailer.createTransporter === 'function') {
+      return nodemailer.createTransporter(config);
+    } else if (typeof nodemailer.createTransport === 'function') {
+      return nodemailer.createTransport(config);
+    } else {
+      throw new Error('Neither createTransporter nor createTransport are available');
+    }
   } catch (error) {
     console.error('Error creating email transporter:', error);
     return null;

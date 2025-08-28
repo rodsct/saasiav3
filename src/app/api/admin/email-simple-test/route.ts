@@ -49,17 +49,41 @@ export async function POST(request: NextRequest) {
       console.log('✅ Nodemailer imported successfully');
       console.log('🔍 Nodemailer object:', Object.keys(nodemailer));
 
-      // Create transporter
+      // Create transporter (try both methods)
       console.log('🔧 Creating transporter...');
-      const transporter = nodemailer.createTransporter({
-        host: requiredVars.EMAIL_SERVER_HOST,
-        port: parseInt(requiredVars.EMAIL_SERVER_PORT),
-        secure: parseInt(requiredVars.EMAIL_SERVER_PORT) === 465,
-        auth: {
-          user: requiredVars.EMAIL_SERVER_USER,
-          pass: requiredVars.EMAIL_SERVER_PASSWORD,
-        },
-      });
+      console.log('Available nodemailer methods:', Object.getOwnPropertyNames(nodemailer));
+      
+      let transporter;
+      if (typeof nodemailer.createTransporter === 'function') {
+        console.log('Using createTransporter...');
+        transporter = nodemailer.createTransporter({
+          host: requiredVars.EMAIL_SERVER_HOST,
+          port: parseInt(requiredVars.EMAIL_SERVER_PORT),
+          secure: parseInt(requiredVars.EMAIL_SERVER_PORT) === 465,
+          auth: {
+            user: requiredVars.EMAIL_SERVER_USER,
+            pass: requiredVars.EMAIL_SERVER_PASSWORD,
+          },
+        });
+      } else if (typeof nodemailer.createTransport === 'function') {
+        console.log('Using createTransport...');
+        transporter = nodemailer.createTransport({
+          host: requiredVars.EMAIL_SERVER_HOST,
+          port: parseInt(requiredVars.EMAIL_SERVER_PORT),
+          secure: parseInt(requiredVars.EMAIL_SERVER_PORT) === 465,
+          auth: {
+            user: requiredVars.EMAIL_SERVER_USER,
+            pass: requiredVars.EMAIL_SERVER_PASSWORD,
+          },
+        });
+      } else {
+        throw new Error('Neither createTransporter nor createTransport are available on nodemailer object');
+      }
+      
+      if (!transporter) {
+        throw new Error('Failed to create transporter');
+      }
+      
       console.log('✅ Transporter created');
 
       // Verify connection

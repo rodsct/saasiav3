@@ -28,21 +28,32 @@ export async function GET(request: NextRequest) {
         hasCreateTransporter: typeof nodemailer.createTransporter === 'function'
       });
 
-      // Test 2: Try to access createTransporter
-      if (typeof nodemailer.createTransporter === 'function') {
+      // Test 2: Try to access createTransporter and createTransport
+      const hasCreateTransporter = typeof nodemailer.createTransporter === 'function';
+      const hasCreateTransport = typeof nodemailer.createTransport === 'function';
+      
+      if (hasCreateTransporter) {
         console.log('✅ createTransporter is available');
         diagnostics.checks.push({
           test: 'createTransporter function',
           status: 'success',
           type: typeof nodemailer.createTransporter
         });
-      } else {
-        console.log('❌ createTransporter is not a function');
+      } else if (hasCreateTransport) {
+        console.log('✅ createTransport is available (correct method)');
         diagnostics.checks.push({
-          test: 'createTransporter function',
+          test: 'createTransport function',
+          status: 'success',
+          type: typeof nodemailer.createTransport,
+          message: 'Using createTransport instead of createTransporter'
+        });
+      } else {
+        console.log('❌ Neither createTransporter nor createTransport are available');
+        diagnostics.checks.push({
+          test: 'transport creation functions',
           status: 'error',
-          type: typeof nodemailer.createTransporter,
-          message: 'createTransporter is not a function'
+          message: 'Neither createTransporter nor createTransport are available',
+          availableMethods: Object.getOwnPropertyNames(nodemailer)
         });
       }
 
