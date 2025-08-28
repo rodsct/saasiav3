@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import jwt from "jsonwebtoken";
 import { getSiteUrl, getOAuthCallbackUrl, buildUrl } from "@/utils/siteConfig";
+import { triggerUserRegistered } from "@/utils/userEvents";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "simple-auth-secret-key";
 const PRODUCTION_URL = getSiteUrl();
@@ -93,6 +94,11 @@ export async function GET(request: NextRequest) {
         },
       });
       console.log("Created new user:", user.email);
+      
+      // Trigger welcome email for new user (async, don't wait)
+      triggerUserRegistered(user.email, user.name || undefined, false).catch(error => {
+        console.error("Error triggering welcome email:", error);
+      });
     } else {
       console.log("Found existing user:", user.email);
     }
