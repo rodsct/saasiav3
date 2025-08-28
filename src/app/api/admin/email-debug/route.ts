@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     let transporterCreated = false;
 
     try {
-      const nodemailer = require('nodemailer');
+      const nodemailer = await import('nodemailer');
       
       if (missingVars.length === 0) {
         const config = {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
           auth: { ...config.auth, pass: '***' }
         });
 
-        const transporter = nodemailer.createTransporter(config);
+        const transporter = nodemailer.default.createTransporter(config);
         
         // Test connection
         await transporter.verify();
@@ -146,9 +146,9 @@ export async function POST(request: NextRequest) {
 
     // Try the most basic email send possible
     try {
-      const nodemailer = require('nodemailer');
+      const nodemailer = await import('nodemailer');
       
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.default.createTransporter({
         host: process.env.EMAIL_SERVER_HOST,
         port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
         secure: parseInt(process.env.EMAIL_SERVER_PORT || '587') === 465,

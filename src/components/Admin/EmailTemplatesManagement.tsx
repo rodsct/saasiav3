@@ -151,6 +151,37 @@ export default function EmailTemplatesManagement() {
     }
   };
 
+  const testSimpleEmail = async () => {
+    if (!testEmail) {
+      toast.error("Ingresa un email para la prueba");
+      return;
+    }
+    setIsSendingTest(true);
+    try {
+      const response = await fetch("/api/admin/email-simple-test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ to: testEmail }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        toast.success("Email simple enviado exitosamente");
+        console.log("Email sent with ID:", data.messageId);
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Error al enviar email simple");
+        console.error("Email error details:", data.details);
+      }
+    } catch (error) {
+      console.error("Error sending simple test email:", error);
+      toast.error("Error de conexión");
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
   const sendTestEmail = async () => {
     if (!testEmail) {
       toast.error("Ingresa un email para la prueba");
@@ -264,18 +295,25 @@ export default function EmailTemplatesManagement() {
               className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
             />
             <button
+              onClick={testSimpleEmail}
+              disabled={isSendingTest}
+              className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
+            >
+              {isSendingTest ? "Enviando..." : "🚀 Simple"}
+            </button>
+            <button
               onClick={testBasicEmail}
               disabled={isSendingTest}
               className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
             >
-              {isSendingTest ? "Enviando..." : "📧 Test Básico"}
+              {isSendingTest ? "Enviando..." : "📧 Básico"}
             </button>
             <button
               onClick={sendTestEmail}
               disabled={isSendingTest}
               className="bg-[#00d4ff] hover:bg-[#0099cc] disabled:bg-gray-400 text-white px-3 py-2 rounded-md text-sm transition-colors"
             >
-              {isSendingTest ? "Enviando..." : "✉️ Test Completo"}
+              {isSendingTest ? "Enviando..." : "✉️ Completo"}
             </button>
           </div>
         </div>
