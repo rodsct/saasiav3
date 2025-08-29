@@ -1,27 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/utils/auth";
 import { prisma } from "@/utils/prismaDB";
 
 export async function POST(request: NextRequest) {
   try {
     console.log("WhatsApp POST API called");
     
-    // Get user email from cookies (simpler auth check)
-    const authCookie = request.cookies.get('next-auth.session-token') || request.cookies.get('__Secure-next-auth.session-token');
+    // Get session using proper NextAuth method
+    const session = await getServerSession(authOptions);
     
-    if (!authCookie) {
-      console.log("No auth cookie found");
+    if (!session?.user?.email) {
+      console.log("No valid session found");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       );
     }
 
-    // For now, let's use a simple approach - get email from body or use rodsct@gmail.com for testing
     const body = await request.json();
-    const { whatsapp, userEmail } = body;
+    const { whatsapp } = body;
     
-    // Use rodsct@gmail.com as default for testing
-    const email = userEmail || "rodsct@gmail.com";
+    const email = session.user.email;
     
     console.log("Processing WhatsApp for email:", email);
     
@@ -120,19 +120,18 @@ export async function GET(request: NextRequest) {
   try {
     console.log("WhatsApp GET API called");
     
-    // Get user email from cookies (simpler auth check)
-    const authCookie = request.cookies.get('next-auth.session-token') || request.cookies.get('__Secure-next-auth.session-token');
+    // Get session using proper NextAuth method
+    const session = await getServerSession(authOptions);
     
-    if (!authCookie) {
-      console.log("No auth cookie found in GET");
+    if (!session?.user?.email) {
+      console.log("No valid session found in GET");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       );
     }
 
-    // Use rodsct@gmail.com as default for testing
-    const email = "rodsct@gmail.com";
+    const email = session.user.email;
     console.log("Fetching WhatsApp for email:", email);
 
     const user = await prisma.user.findUnique({

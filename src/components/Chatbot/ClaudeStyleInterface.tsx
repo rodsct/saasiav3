@@ -6,7 +6,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
-import WhatsAppContactQR from "@/components/WhatsApp/WhatsAppContactQR";
+import WhatsAppIntegrated from "@/components/WhatsApp/WhatsAppIntegrated";
 import WhatsAppContactBanner from "@/components/WhatsApp/WhatsAppContactBanner";
 
 interface Message {
@@ -525,8 +525,8 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
           </button>
         </div>
 
-        {/* WhatsApp Contact Section */}
-        {sidebarOpen && <WhatsAppContactQR />}
+        {/* WhatsApp Premium Section */}
+        {sidebarOpen && <WhatsAppIntegrated />}
 
         {/* Conversations List */}
         {sidebarOpen && (
