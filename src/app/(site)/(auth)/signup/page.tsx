@@ -1,4 +1,4 @@
-import SimpleSignUp from "@/components/Auth/SimpleSignUp";
+import SignUp from "@/components/Auth/SignUp";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 const SignupPage = () => {
-  return <SimpleSignUp />;
+  return <SignUp />;
 };
 
 export default SignupPage;
