@@ -39,8 +39,28 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [scriptError, setScriptError] = useState<string>('');
 
+  // Create stable refs for callbacks to prevent re-renders
+  const onVerifyRef = useRef(onVerify);
+  const onErrorRef = useRef(onError);
+  const onExpireRef = useRef(onExpire);
+  const onLoadRef = useRef(onLoad);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+    onErrorRef.current = onError;
+    onExpireRef.current = onExpire;
+    onLoadRef.current = onLoad;
+  }, [onVerify, onError, onExpire, onLoad]);
+
   useEffect(() => {
     console.log('HCaptcha useEffect triggered with sitekey:', sitekey);
+    
+    // Don't re-render if already loaded and verified
+    if (isLoaded && widgetId) {
+      console.log('hCaptcha already loaded and rendered, skipping...');
+      return;
+    }
     
     // Cleanup function to remove existing widget
     const cleanupExistingWidget = () => {
@@ -59,6 +79,12 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
     const loadHCaptcha = () => {
       console.log('Attempting to load hCaptcha widget...');
       
+      // Don't reload if already rendered
+      if (widgetId && window.hcaptcha) {
+        console.log('hCaptcha widget already exists, skipping render');
+        return;
+      }
+      
       // First cleanup any existing widget
       cleanupExistingWidget();
       
@@ -76,22 +102,23 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
             theme,
             size,
             callback: (token: string) => {
-              console.log('hCaptcha callback triggered with token');
-              onVerify(token);
+              console.log('hCaptcha callback triggered with token - KEEPING WIDGET');
+              onVerifyRef.current(token);
+              // Don't reset the widget after verification
             },
             'error-callback': (err: any) => {
               console.error('hCaptcha error:', err);
-              onError?.();
+              onErrorRef.current?.();
             },
             'expired-callback': () => {
-              console.log('hCaptcha expired');
-              onExpire?.();
+              console.log('hCaptcha expired - will need new verification');
+              onExpireRef.current?.();
             },
           });
           console.log('hCaptcha widget rendered with ID:', id);
           setWidgetId(id);
           setIsLoaded(true);
-          onLoad?.();
+          onLoadRef.current?.();
         } catch (error) {
           console.error('Error rendering hCaptcha:', error);
           setScriptError('Error rendering hCaptcha widget: ' + error);
@@ -170,7 +197,7 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
       setWidgetId(null);
       setIsLoaded(false);
     };
-  }, [sitekey, theme, size, onVerify, onError, onExpire, onLoad]);
+  }, [sitekey, theme, size]); // Removed callback dependencies to prevent re-renders
 
   const reset = () => {
     if (widgetId && window.hcaptcha) {
