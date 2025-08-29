@@ -28,9 +28,15 @@ const Signin = () => {
   const hcaptchaSiteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || '';
   
   useEffect(() => {
-    console.log('hCaptcha Site Key:', hcaptchaSiteKey ? `${hcaptchaSiteKey.substring(0, 10)}...` : 'NOT_SET');
+    console.log('🔧 hCaptcha Debug Info (SignIn):');
+    console.log('- hCaptcha Site Key:', hcaptchaSiteKey ? `${hcaptchaSiteKey.substring(0, 10)}...` : 'NOT_SET');
+    console.log('- Raw env var:', process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY);
+    console.log('- All NEXT_PUBLIC_ vars:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')));
+    
     if (!hcaptchaSiteKey || hcaptchaSiteKey.trim() === '') {
-      console.error('NEXT_PUBLIC_HCAPTCHA_SITE_KEY not configured!');
+      console.error('❌ NEXT_PUBLIC_HCAPTCHA_SITE_KEY not configured!');
+    } else {
+      console.log('✅ hCaptcha configurado correctamente');
     }
   }, [hcaptchaSiteKey]);
 
