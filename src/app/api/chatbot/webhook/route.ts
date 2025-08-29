@@ -17,7 +17,18 @@ export async function POST(request: NextRequest) {
 
     const chatbot = await prisma.chatbot.findUnique({
       where: { id: chatbotId },
-      include: { user: true }
+      include: { 
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            whatsapp: true,
+            subscription: true,
+            subscriptionEndsAt: true
+          }
+        }
+      }
     });
 
     if (!chatbot || !chatbot.isActive) {
@@ -57,20 +68,35 @@ export async function POST(request: NextRequest) {
       throw new Error("No valid webhook URL configured");
     }
     
+    // Check if user subscription is still active
+    const isSubscriptionActive = chatbot.user.subscription === "PRO" && 
+      (!chatbot.user.subscriptionEndsAt || new Date() <= new Date(chatbot.user.subscriptionEndsAt));
+
+    const webhookPayload = {
+      message,
+      conversationId: conversation.id,
+      chatbotId,
+      userId: chatbot.userId,
+      user: {
+        id: chatbot.user.id,
+        name: chatbot.user.name,
+        email: chatbot.user.email,
+        whatsapp: chatbot.user.whatsapp,
+        subscription: chatbot.user.subscription,
+        subscriptionActive: isSubscriptionActive,
+        subscriptionEndsAt: chatbot.user.subscriptionEndsAt
+      }
+    };
+    
     console.log('Sending to webhook:', webhookUrl);
-    console.log('Payload:', { message, conversationId: conversation.id, chatbotId, userId: chatbot.userId });
+    console.log('Payload:', webhookPayload);
     
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        message,
-        conversationId: conversation.id,
-        chatbotId,
-        userId: chatbot.userId,
-      }),
+      body: JSON.stringify(webhookPayload),
     });
 
     console.log('Webhook response status:', response.status);
