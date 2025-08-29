@@ -17,23 +17,21 @@ const SignUp = () => {
   const [hcaptchaToken, setHcaptchaToken] = useState<string>('');
   const [captchaVerified, setCaptchaVerified] = useState(false);
 
-  const hcaptchaSiteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || '';
+  // TEMPORARY TEST: Using hardcoded hCaptcha key for testing
+  const hcaptchaSiteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || '3c8c7fc4-1566-44ca-bb54-809c2f2657b6';
   
   useEffect(() => {
-    console.log('🔧 hCaptcha Debug Info:');
+    console.log('🧪 TEMPORARY TEST - hCaptcha Debug Info:');
     console.log('- hCaptcha Site Key:', hcaptchaSiteKey ? `${hcaptchaSiteKey.substring(0, 10)}...` : 'NOT_SET');
     console.log('- Raw env var:', process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY);
+    console.log('- Using hardcoded key for testing:', !process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY);
     console.log('- All NEXT_PUBLIC_ vars:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')));
     
-    if (!hcaptchaSiteKey || hcaptchaSiteKey.trim() === '') {
-      console.error('❌ NEXT_PUBLIC_HCAPTCHA_SITE_KEY not configured!');
-      console.log('ℹ️ Para configurar hCaptcha:');
-      console.log('1. Ve a https://hcaptcha.com/');
-      console.log('2. Crea un sitio y obtén las claves');
-      console.log('3. Agrega NEXT_PUBLIC_HCAPTCHA_SITE_KEY a tus variables de entorno');
-      console.log('4. Redeploy la aplicación');
+    if (!process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY) {
+      console.warn('⚠️ Using hardcoded hCaptcha key for testing');
+      console.log('✅ hCaptcha should now be visible with test key');
     } else {
-      console.log('✅ hCaptcha configurado correctamente');
+      console.log('✅ hCaptcha configurado desde variables de entorno');
     }
   }, [hcaptchaSiteKey]);
 
