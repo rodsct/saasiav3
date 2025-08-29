@@ -37,18 +37,33 @@ export default function WhatsAppIntegrated() {
     setMessage("");
 
     try {
-      // First try the debug endpoint
-      let response = await fetch("/api/debug/whatsapp-auth", {
+      // Try the new simple endpoint with user email
+      let response = await fetch("/api/user/whatsapp-simple", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           whatsapp: phoneNumber.trim(),
+          userEmail: user?.email,
         }),
       });
 
-      // If debug endpoint fails, try the original
+      // If simple endpoint fails, try debug
+      if (!response.ok) {
+        console.log("Simple endpoint failed, trying debug...");
+        response = await fetch("/api/debug/whatsapp-auth", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            whatsapp: phoneNumber.trim(),
+          }),
+        });
+      }
+
+      // If debug also fails, try original
       if (!response.ok) {
         console.log("Debug endpoint failed, trying original...");
         response = await fetch("/api/user/whatsapp", {
@@ -103,15 +118,17 @@ export default function WhatsAppIntegrated() {
 
   const testAuth = async () => {
     try {
+      console.log("🔍 Testing auth with user:", user);
+      
       const response = await fetch("/api/debug/whatsapp-auth", {
         method: "GET",
       });
       const data = await response.json();
       console.log("Auth test result:", data);
-      setMessage(`Auth: ${data.hasSession ? 'OK' : 'FAIL'} - Email: ${data.email || 'None'}`);
+      setMessage(`Session: ${data.hasSession ? 'OK' : 'FAIL'} | User: ${user?.email || 'None'} | Pro: ${user?.subscription === 'PRO'}`);
     } catch (error) {
       console.error("Auth test error:", error);
-      setMessage("Error probando autenticación");
+      setMessage(`Error testing auth | User: ${user?.email || 'None'}`);
     }
   };
 
@@ -190,7 +207,7 @@ export default function WhatsAppIntegrated() {
                       onClick={testAuth}
                       className="w-full bg-gray-600/80 hover:bg-gray-600 text-white text-xs py-1 rounded-lg transition-colors"
                     >
-                      🔍 Probar Auth
+                      🔍 Debug Info
                     </button>
                   </div>
                 </form>
