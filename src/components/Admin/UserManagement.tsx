@@ -233,6 +233,29 @@ export default function UserManagement() {
     }
   };
 
+  const sendFixedEmail = async (userId: string, emailType: 'welcome' | 'verification') => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/send-fixed-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ emailType }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(`✅ Correo FIJO de ${emailType === 'welcome' ? 'bienvenida' : 'verificación'} enviado a ${data.sentTo}`);
+      } else {
+        const error = await response.json();
+        toast.error(`❌ Error fijo: ${error.error || 'No se pudo enviar el correo'}`);
+      }
+    } catch (error) {
+      console.error("Error sending fixed email:", error);
+      toast.error("Error enviando correo fijo");
+    }
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -434,6 +457,22 @@ export default function UserManagement() {
                           title="Enviar correo directo de verificación (sin BD)"
                         >
                           ✉️ Directo Verificación
+                        </button>
+                        
+                        <div className="text-xs text-gray-500 font-medium mt-2">FIJO (con BD):</div>
+                        <button
+                          onClick={() => sendFixedEmail(user.id, 'welcome')}
+                          className="px-2 py-1 rounded text-xs font-medium bg-purple-200 text-purple-800 hover:bg-purple-300 transition-colors w-full"
+                          title="Enviar correo ARREGLADO de bienvenida"
+                        >
+                          📧 FIJO Bienvenida
+                        </button>
+                        <button
+                          onClick={() => sendFixedEmail(user.id, 'verification')}
+                          className="px-2 py-1 rounded text-xs font-medium bg-purple-200 text-purple-800 hover:bg-purple-300 transition-colors w-full"
+                          title="Enviar correo ARREGLADO de verificación"
+                        >
+                          ✉️ FIJO Verificación
                         </button>
                       </div>
                       
