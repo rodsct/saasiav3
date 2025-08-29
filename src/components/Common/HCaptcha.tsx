@@ -42,10 +42,34 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
   useEffect(() => {
     console.log('HCaptcha useEffect triggered with sitekey:', sitekey);
     
+    // Cleanup function to remove existing widget
+    const cleanupExistingWidget = () => {
+      if (widgetId && window.hcaptcha) {
+        try {
+          console.log('Cleaning up existing hCaptcha widget:', widgetId);
+          window.hcaptcha.remove(widgetId);
+        } catch (error) {
+          console.warn('Error removing existing hCaptcha widget:', error);
+        }
+      }
+      setWidgetId(null);
+      setIsLoaded(false);
+    };
+    
     const loadHCaptcha = () => {
       console.log('Attempting to load hCaptcha widget...');
+      
+      // First cleanup any existing widget
+      cleanupExistingWidget();
+      
       if (window.hcaptcha && captchaRef.current) {
         console.log('hCaptcha API and ref available, rendering widget...');
+        
+        // Clear the container first
+        if (captchaRef.current) {
+          captchaRef.current.innerHTML = '';
+        }
+        
         try {
           const id = window.hcaptcha.render(captchaRef.current, {
             sitekey,
@@ -70,7 +94,7 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
           onLoad?.();
         } catch (error) {
           console.error('Error rendering hCaptcha:', error);
-          setScriptError('Error rendering hCaptcha widget');
+          setScriptError('Error rendering hCaptcha widget: ' + error);
         }
       } else {
         console.warn('hCaptcha API or captchaRef not available');
@@ -130,6 +154,7 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
     }
 
     return () => {
+      console.log('HCaptcha cleanup triggered');
       if (widgetId && window.hcaptcha) {
         try {
           console.log('Removing hCaptcha widget:', widgetId);
@@ -138,6 +163,12 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
           console.warn('Error removing hCaptcha widget:', error);
         }
       }
+      // Clear the container
+      if (captchaRef.current) {
+        captchaRef.current.innerHTML = '';
+      }
+      setWidgetId(null);
+      setIsLoaded(false);
     };
   }, [sitekey, theme, size, onVerify, onError, onExpire, onLoad]);
 
@@ -164,8 +195,8 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
   }
 
   return (
-    <div className="hcaptcha-container">
-      <div ref={captchaRef} className="hcaptcha-widget"></div>
+    <div className="hcaptcha-container" key={`hcaptcha-${sitekey}`}>
+      <div ref={captchaRef} className="hcaptcha-widget" id={`hcaptcha-${Date.now()}`}></div>
       {!isLoaded && (
         <div className="flex items-center justify-center p-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
