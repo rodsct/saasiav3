@@ -10,9 +10,11 @@ export default function WhatsAppIntegrated() {
   const [message, setMessage] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showConfig, setShowConfig] = useState(!user?.whatsapp);
+  const [savedWhatsApp, setSavedWhatsApp] = useState(user?.whatsapp || "");
 
   useEffect(() => {
     setPhoneNumber(user?.whatsapp || "");
+    setSavedWhatsApp(user?.whatsapp || "");
     setShowConfig(!user?.whatsapp);
   }, [user?.whatsapp]);
 
@@ -35,7 +37,8 @@ export default function WhatsAppIntegrated() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/user/whatsapp", {
+      // First try the debug endpoint
+      let response = await fetch("/api/debug/whatsapp-auth", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,9 +48,25 @@ export default function WhatsAppIntegrated() {
         }),
       });
 
+      // If debug endpoint fails, try the original
+      if (!response.ok) {
+        console.log("Debug endpoint failed, trying original...");
+        response = await fetch("/api/user/whatsapp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            whatsapp: phoneNumber.trim(),
+          }),
+        });
+      }
+
       if (response.ok) {
         const data = await response.json();
+        console.log("WhatsApp save response:", data);
         setMessage("¡WhatsApp configurado exitosamente!");
+        setSavedWhatsApp(phoneNumber.trim());
         setShowConfig(false);
         
         // Update user context
@@ -56,7 +75,8 @@ export default function WhatsAppIntegrated() {
         }
       } else {
         const errorData = await response.json();
-        setMessage(errorData.error || "Error al guardar el número");
+        console.error("WhatsApp save error:", errorData);
+        setMessage(errorData.error || errorData.debug?.errorMessage || "Error al guardar el número");
       }
     } catch (error) {
       console.error("Error saving WhatsApp:", error);
@@ -67,14 +87,33 @@ export default function WhatsAppIntegrated() {
   };
 
   const generateWhatsAppUrl = () => {
-    if (!user?.whatsapp) return "";
-    const message = `Hola Aranza, soy ${user.name || 'un usuario'} premium. Quiero usar mis funciones de WhatsApp.`;
-    return `https://wa.me/${user.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    if (!savedWhatsApp) return "";
+    const message = `Hola Aranza, soy ${user?.name || 'un usuario'} premium. Quiero usar mis funciones de WhatsApp.`;
+    return `https://wa.me/${savedWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
   };
 
-  const qrApiUrl = user?.whatsapp 
+  const qrApiUrl = savedWhatsApp 
     ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(generateWhatsAppUrl())}`
     : "";
+
+  const handleEditWhatsApp = () => {
+    setShowConfig(true);
+    setMessage("");
+  };
+
+  const testAuth = async () => {
+    try {
+      const response = await fetch("/api/debug/whatsapp-auth", {
+        method: "GET",
+      });
+      const data = await response.json();
+      console.log("Auth test result:", data);
+      setMessage(`Auth: ${data.hasSession ? 'OK' : 'FAIL'} - Email: ${data.email || 'None'}`);
+    } catch (error) {
+      console.error("Auth test error:", error);
+      setMessage("Error probando autenticación");
+    }
+  };
 
   return (
     <div className="border-t border-[#00d4ff]/20 p-3 lg:p-4">
@@ -92,10 +131,10 @@ export default function WhatsAppIntegrated() {
             </div>
             <div>
               <h3 className="text-xs font-medium text-white">
-                {user?.whatsapp ? "WhatsApp Premium" : "Configurar WhatsApp"}
+                {savedWhatsApp ? "WhatsApp Premium" : "Configurar WhatsApp"}
               </h3>
               <span className="text-xs text-green-400">
-                {user?.whatsapp ? "¡Listo para usar!" : "PRO requerido"}
+                {savedWhatsApp ? "¡Listo para usar!" : "PRO requerido"}
               </span>
             </div>
           </div>
@@ -112,7 +151,7 @@ export default function WhatsAppIntegrated() {
         {/* WhatsApp Content */}
         {isExpanded && (
           <div className="space-y-3 bg-[#1a1a2e]/30 rounded-lg p-4">
-            {showConfig || !user?.whatsapp ? (
+            {showConfig || !savedWhatsApp ? (
               // Configuration Form
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-white">
@@ -137,13 +176,23 @@ export default function WhatsAppIntegrated() {
                     </p>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {isLoading ? "Guardando..." : "Configurar WhatsApp"}
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {isLoading ? "Guardando..." : "Configurar WhatsApp"}
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={testAuth}
+                      className="w-full bg-gray-600/80 hover:bg-gray-600 text-white text-xs py-1 rounded-lg transition-colors"
+                    >
+                      🔍 Probar Auth
+                    </button>
+                  </div>
                 </form>
 
                 {message && (
@@ -173,7 +222,7 @@ export default function WhatsAppIntegrated() {
                   </p>
                   
                   <p className="text-xs text-gray-400 mb-3">
-                    {user.whatsapp}
+                    {savedWhatsApp}
                   </p>
                   
                   <div className="space-y-2">
@@ -188,7 +237,7 @@ export default function WhatsAppIntegrated() {
                     </button>
                     
                     <button
-                      onClick={() => setShowConfig(true)}
+                      onClick={handleEditWhatsApp}
                       className="w-full bg-blue-600/80 hover:bg-blue-600 text-white text-xs py-2 rounded-lg transition-colors"
                     >
                       Cambiar número
