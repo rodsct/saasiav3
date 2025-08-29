@@ -37,7 +37,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -63,15 +63,6 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
     }
   }, [user, currentChatbotId]);
 
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setSidebarOpen(window.innerWidth >= 1024);
-    };
-    
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
 
   const initializeChatbot = async () => {
     if (!user?.id) {
@@ -482,33 +473,14 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] text-white overflow-hidden relative"
+    <div className="flex h-[calc(100vh-80px)] bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] text-white"
          style={{ height: 'calc(100vh - 80px)' }}>
-      {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
       
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-80 max-w-[85vw] sm:max-w-[70vw] lg:max-w-none' : 'w-0 lg:w-16'} bg-[#0a0a0a]/95 border-r border-[#00d4ff]/20 backdrop-blur-xl transition-all duration-300 flex flex-col ${sidebarOpen ? 'fixed lg:relative inset-y-0 left-0 z-40' : 'overflow-hidden'}`}>
+      {/* Sidebar - Always visible */}
+      <div className="w-64 sm:w-72 lg:w-80 bg-[#0a0a0a]/95 border-r border-[#00d4ff]/20 backdrop-blur-xl flex flex-col flex-shrink-0">
         {/* Header */}
         <div className="p-3 lg:p-4 border-b border-[#00d4ff]/20 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <h1 className="text-base lg:text-lg font-semibold text-white truncate">{t('chatbot.chats')}</h1>
-            )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 lg:p-2 hover:bg-[#3f3f3f] rounded-lg transition-colors flex-shrink-0"
-            >
-              <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
+          <h1 className="text-base lg:text-lg font-semibold text-white">{t('chatbot.chats')}</h1>
         </div>
 
         {/* New Chat Section */}
@@ -516,20 +488,19 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
           {/* New Chat Button */}
           <button
             onClick={createNewChat}
-            className={`w-full flex items-center justify-center space-x-2 py-2 lg:py-3 px-2 lg:px-4 bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] rounded-lg transition-all duration-300 shadow-lg shadow-[#00d4ff]/20 ${!sidebarOpen ? 'px-2' : ''}`}
+            className="w-full flex items-center justify-center space-x-2 py-2 lg:py-3 px-2 lg:px-4 bg-gradient-to-r from-[#00d4ff] to-[#0099cc] hover:from-[#0099cc] hover:to-[#007acc] rounded-lg transition-all duration-300 shadow-lg shadow-[#00d4ff]/20"
           >
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            {sidebarOpen && <span className="text-sm font-medium truncate">{t('chatbot.new_chat')}</span>}
+            <span className="text-sm font-medium">{t('chatbot.new_chat')}</span>
           </button>
         </div>
 
         {/* WhatsApp Premium Section */}
-        {sidebarOpen && <WhatsAppIntegrated />}
+        <WhatsAppIntegrated />
 
         {/* Conversations List */}
-        {sidebarOpen && (
           <div className="flex-1 overflow-y-auto">
             <div className="px-3 lg:px-4 py-2">
               {conversations.length > 0 ? (
@@ -606,10 +577,9 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
               )}
             </div>
           </div>
-        )}
 
         {/* User Info */}
-        {sidebarOpen && user && (
+        {user && (
           <div className="p-3 lg:p-4 border-t border-[#00d4ff]/20 flex-shrink-0">
             <div className="flex items-center space-x-2 lg:space-x-3">
               <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-[#00d4ff] to-[#0099cc] rounded-full flex items-center justify-center flex-shrink-0">
@@ -631,7 +601,7 @@ export default function ClaudeStyleInterface({ chatbotId: initialChatbotId }: Ch
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col w-full md:w-auto">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile WhatsApp Contact Banner */}
         <WhatsAppContactBanner />
         
