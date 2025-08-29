@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
           (window as any)?.process?.env?.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || "NOT_AVAILABLE_ON_SERVER" :
           "RUNNING_ON_SERVER"
       },
-      status: "Debug endpoint working - checking hCaptcha configuration"
+      status: "Debug endpoint working - checking hCaptcha configuration v2.0"
     };
 
     return NextResponse.json(debug);
