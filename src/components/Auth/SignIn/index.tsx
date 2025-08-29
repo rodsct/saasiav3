@@ -3,12 +3,14 @@ import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import SocialSignIn from "../SocialSignIn";
 import SwitchOption from "../SwitchOption";
 import MagicLink from "../MagicLink";
 import Loader from "@/components/Common/Loader";
+import HCaptcha from "@/components/Common/HCaptcha";
+import MathCaptcha from "@/components/Common/MathCaptcha";
 
 const Signin = () => {
   const router = useRouter();
@@ -21,9 +23,39 @@ const Signin = () => {
 
   const [isPassword, setIsPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hcaptchaSiteKey, setHcaptchaSiteKey] = useState<string>('');
+  const [hcaptchaToken, setHcaptchaToken] = useState<string>('');
+  const [mathCaptcha, setMathCaptcha] = useState<{answer: string, correctAnswer: number} | null>(null);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+
+  // Get hCaptcha site key from environment
+  useEffect(() => {
+    const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
+    if (siteKey) {
+      setHcaptchaSiteKey(siteKey);
+    }
+  }, []);
+
+  const handleHCaptchaVerify = (token: string) => {
+    setHcaptchaToken(token);
+    setCaptchaVerified(true);
+    console.log('hCaptcha verified:', token.substring(0, 20) + '...');
+  };
+
+  const handleMathCaptchaVerify = (answer: string, correctAnswer: number) => {
+    setMathCaptcha({ answer, correctAnswer });
+    const isCorrect = parseInt(answer, 10) === correctAnswer;
+    setCaptchaVerified(isCorrect);
+    console.log('Math captcha:', { answer, correctAnswer, isCorrect });
+  };
 
   const loginUser = (e: any) => {
     e.preventDefault();
+
+    if (!captchaVerified) {
+      toast.error("Por favor completa la verificación CAPTCHA");
+      return;
+    }
 
     setLoading(true);
     signIn("credentials", { ...loginData, redirect: false })
@@ -45,6 +77,10 @@ const Signin = () => {
         setLoading(false);
         console.log(err.message);
         toast.error(err.message);
+        // Reset captcha on error
+        setCaptchaVerified(false);
+        setHcaptchaToken('');
+        setMathCaptcha(null);
       });
   };
 
@@ -112,14 +148,56 @@ const Signin = () => {
                       className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
                     />
                   </div>
+                  
+                  {/* CAPTCHA Section */}
+                  <div className="mb-6">
+                    {hcaptchaSiteKey ? (
+                      <HCaptcha
+                        sitekey={hcaptchaSiteKey}
+                        onVerify={handleHCaptchaVerify}
+                        onError={() => {
+                          setCaptchaVerified(false);
+                          setHcaptchaToken('');
+                          toast.error("Error en la verificación CAPTCHA");
+                        }}
+                        onExpire={() => {
+                          setCaptchaVerified(false);
+                          setHcaptchaToken('');
+                          toast.warning("CAPTCHA expirado, por favor verifica nuevamente");
+                        }}
+                        theme="light"
+                        size="normal"
+                      />
+                    ) : (
+                      <MathCaptcha
+                        onVerify={handleMathCaptchaVerify}
+                        onError={() => {
+                          setCaptchaVerified(false);
+                          setMathCaptcha(null);
+                        }}
+                        className="mb-4"
+                      />
+                    )}
+                  </div>
+
                   <div className="mb-9">
                     <button
                       onClick={loginUser}
                       type="submit"
-                      className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90"
+                      disabled={!captchaVerified || loading}
+                      className={`flex w-full cursor-pointer items-center justify-center rounded-md border border-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out ${
+                        captchaVerified && !loading
+                          ? 'bg-primary hover:bg-primary/90'
+                          : 'bg-gray-400 cursor-not-allowed'
+                      }`}
                     >
                       Sign In {loading && <Loader />}
                     </button>
+                    {!captchaVerified && (
+                      <p className="text-center text-sm text-red-500 mt-2">
+                        Complete la verificación CAPTCHA para continuar
+                      </p>
+                    )}
                   </div>
                 </form>
               ) : (

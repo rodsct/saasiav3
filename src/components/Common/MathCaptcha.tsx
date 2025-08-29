@@ -18,21 +18,11 @@ const MathCaptcha: React.FC<MathCaptchaProps> = ({
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
-  const generateCaptcha = async () => {
+  const generateCaptcha = () => {
     setIsLoading(true);
-    try {
-      const response = await fetch('/api/captcha/math');
-      const data = await response.json();
-      
-      setQuestion(data.question);
-      setCorrectAnswer(data.answer);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error generating math captcha:', error);
-      // Fallback to client-side generation
-      generateClientSideCaptcha();
-      setIsLoading(false);
-    }
+    // Always use client-side generation to avoid API issues
+    generateClientSideCaptcha();
+    setIsLoading(false);
   };
 
   const generateClientSideCaptcha = () => {
