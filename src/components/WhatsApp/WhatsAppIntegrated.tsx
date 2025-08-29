@@ -9,14 +9,16 @@ export default function WhatsAppIntegrated() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showConfig, setShowConfig] = useState(!user?.whatsapp);
+  const [showConfig, setShowConfig] = useState(false);
   const [savedWhatsApp, setSavedWhatsApp] = useState(user?.whatsapp || "");
   const [adminWhatsApp, setAdminWhatsApp] = useState("");
 
   useEffect(() => {
+    // Solo mostrar config si realmente no hay WhatsApp guardado
+    const hasWhatsApp = user?.whatsapp && user.whatsapp.trim() !== "";
     setPhoneNumber(user?.whatsapp || "");
     setSavedWhatsApp(user?.whatsapp || "");
-    setShowConfig(!user?.whatsapp);
+    setShowConfig(!hasWhatsApp);
     fetchAdminWhatsApp();
   }, [user?.whatsapp]);
 
@@ -96,12 +98,17 @@ export default function WhatsAppIntegrated() {
         console.log("WhatsApp save response:", data);
         setMessage(`¡Suscripción premium activada para ${phoneNumber.trim()}!`);
         setSavedWhatsApp(phoneNumber.trim());
-        setShowConfig(false);
+        setShowConfig(false); // Ocultar formulario después de guardar
         
         // Update user context
         if (updateUser) {
           updateUser({ ...user, whatsapp: phoneNumber.trim() });
         }
+        
+        // Limpiar mensaje después de unos segundos
+        setTimeout(() => {
+          setMessage("");
+        }, 5000);
       } else {
         const errorData = await response.json();
         console.error("WhatsApp save error:", errorData);
@@ -128,23 +135,10 @@ export default function WhatsAppIntegrated() {
   const handleEditWhatsApp = () => {
     setShowConfig(true);
     setMessage("");
+    // Mantener el número actual en el campo para editar
+    setPhoneNumber(savedWhatsApp);
   };
 
-  const testAuth = async () => {
-    try {
-      console.log("🔍 Testing auth with user:", user);
-      
-      const response = await fetch("/api/debug/whatsapp-auth", {
-        method: "GET",
-      });
-      const data = await response.json();
-      console.log("Auth test result:", data);
-      setMessage(`Session: ${data.hasSession ? 'OK' : 'FAIL'} | User: ${user?.email || 'None'} | Pro: ${user?.subscription === 'PRO'}`);
-    } catch (error) {
-      console.error("Auth test error:", error);
-      setMessage(`Error testing auth | User: ${user?.email || 'None'}`);
-    }
-  };
 
   return (
     <div className="border-t border-[#00d4ff]/20 p-3 lg:p-4">
@@ -182,7 +176,7 @@ export default function WhatsAppIntegrated() {
         {/* WhatsApp Content */}
         {isExpanded && (
           <div className="space-y-3 bg-[#1a1a2e]/30 rounded-lg p-4">
-            {showConfig || !savedWhatsApp ? (
+            {showConfig ? (
               // Configuration Form
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-white">
@@ -213,16 +207,18 @@ export default function WhatsAppIntegrated() {
                       disabled={isLoading}
                       className="w-full bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded-lg transition-colors disabled:opacity-50"
                     >
-                      {isLoading ? "Activando..." : "Activar Premium WhatsApp"}
+                      {isLoading ? "Activando..." : savedWhatsApp ? "Actualizar Número" : "Activar Premium WhatsApp"}
                     </button>
                     
-                    <button
-                      type="button"
-                      onClick={testAuth}
-                      className="w-full bg-gray-600/80 hover:bg-gray-600 text-white text-xs py-1 rounded-lg transition-colors"
-                    >
-                      🔍 Debug Info
-                    </button>
+                    {savedWhatsApp && (
+                      <button
+                        type="button"
+                        onClick={() => setShowConfig(false)}
+                        className="w-full bg-gray-600/80 hover:bg-gray-600 text-white text-xs py-2 rounded-lg transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                    )}
                   </div>
                 </form>
 
