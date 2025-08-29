@@ -9,29 +9,22 @@ import { useState, useEffect } from "react";
 import MagicLink from "../MagicLink";
 import Loader from "@/components/Common/Loader";
 import HCaptcha from "@/components/Common/HCaptcha";
-import MathCaptcha from "@/components/Common/MathCaptcha";
 
 const SignUp = () => {
   const router = useRouter();
   const [isPassword, setIsPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [hcaptchaSiteKey, setHcaptchaSiteKey] = useState<string>('');
   const [hcaptchaToken, setHcaptchaToken] = useState<string>('');
-  const [mathCaptcha, setMathCaptcha] = useState<{answer: string, correctAnswer: number} | null>(null);
   const [captchaVerified, setCaptchaVerified] = useState(false);
 
-  // Get hCaptcha site key from environment
+  const hcaptchaSiteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || '';
+  
   useEffect(() => {
-    const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
-    console.log('hCaptcha Site Key from env:', siteKey ? `${siteKey.substring(0, 10)}...` : 'NOT_SET');
-    if (siteKey && siteKey.trim() !== '') {
-      setHcaptchaSiteKey(siteKey);
-      console.log('Using hCaptcha');
-    } else {
-      setHcaptchaSiteKey('');
-      console.log('Using MathCaptcha fallback');
+    console.log('hCaptcha Site Key:', hcaptchaSiteKey ? `${hcaptchaSiteKey.substring(0, 10)}...` : 'NOT_SET');
+    if (!hcaptchaSiteKey || hcaptchaSiteKey.trim() === '') {
+      console.error('NEXT_PUBLIC_HCAPTCHA_SITE_KEY not configured!');
     }
-  }, []);
+  }, [hcaptchaSiteKey]);
 
   const handleHCaptchaVerify = (token: string) => {
     setHcaptchaToken(token);
@@ -39,12 +32,6 @@ const SignUp = () => {
     console.log('hCaptcha verified:', token.substring(0, 20) + '...');
   };
 
-  const handleMathCaptchaVerify = (answer: string, correctAnswer: number) => {
-    setMathCaptcha({ answer, correctAnswer });
-    const isCorrect = parseInt(answer, 10) === correctAnswer;
-    setCaptchaVerified(isCorrect);
-    console.log('Math captcha:', { answer, correctAnswer, isCorrect });
-  };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -60,8 +47,7 @@ const SignUp = () => {
     
     const finalData = { 
       ...value,
-      hcaptchaToken: hcaptchaToken || undefined,
-      mathCaptcha: mathCaptcha || undefined
+      hcaptchaToken: hcaptchaToken
     };
 
     fetch("/api/register", {
@@ -88,7 +74,6 @@ const SignUp = () => {
         // Reset captcha on error
         setCaptchaVerified(false);
         setHcaptchaToken('');
-        setMathCaptcha(null);
       });
   };
 
@@ -164,9 +149,9 @@ const SignUp = () => {
                     />
                   </div>
                   
-                  {/* CAPTCHA Section */}
+                  {/* hCaptcha Section */}
                   <div className="mb-6">
-                    {console.log('Rendering CAPTCHA, hcaptchaSiteKey:', hcaptchaSiteKey)}
+                    {console.log('Rendering hCaptcha with sitekey:', hcaptchaSiteKey)}
                     {hcaptchaSiteKey && hcaptchaSiteKey.trim() !== '' ? (
                       <HCaptcha
                         sitekey={hcaptchaSiteKey}
@@ -174,25 +159,28 @@ const SignUp = () => {
                         onError={() => {
                           setCaptchaVerified(false);
                           setHcaptchaToken('');
-                          toast.error("Error en la verificación CAPTCHA");
+                          toast.error("Error en la verificación hCaptcha");
                         }}
                         onExpire={() => {
                           setCaptchaVerified(false);
                           setHcaptchaToken('');
-                          toast.warning("CAPTCHA expirado, por favor verifica nuevamente");
+                          toast.warning("hCaptcha expirado, por favor verifica nuevamente");
+                        }}
+                        onLoad={() => {
+                          console.log('hCaptcha loaded successfully');
                         }}
                         theme="light"
                         size="normal"
                       />
                     ) : (
-                      <MathCaptcha
-                        onVerify={handleMathCaptchaVerify}
-                        onError={() => {
-                          setCaptchaVerified(false);
-                          setMathCaptcha(null);
-                        }}
-                        className="mb-4"
-                      />
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-red-600 text-sm font-medium">
+                          ⚠️ hCaptcha no configurado
+                        </p>
+                        <p className="text-red-500 text-xs mt-1">
+                          NEXT_PUBLIC_HCAPTCHA_SITE_KEY no está definida en las variables de entorno
+                        </p>
+                      </div>
                     )}
                   </div>
 
@@ -210,7 +198,7 @@ const SignUp = () => {
                     </button>
                     {!captchaVerified && (
                       <p className="text-center text-sm text-red-500 mt-2">
-                        Complete la verificación CAPTCHA para continuar
+                        Complete la verificación hCaptcha para continuar
                       </p>
                     )}
                   </div>
