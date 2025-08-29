@@ -5,6 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { prisma } from "./prismaDB";
 import { getSiteUrl, getOAuthCallbackUrl, isOwnDomain } from "./siteConfig";
+import { triggerUserRegistered } from "./userEvents";
 
 // Get production URL from centralized configuration
 const PRODUCTION_URL = getSiteUrl();
@@ -103,6 +104,44 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       console.log("🔐 SignIn callback - account:", account?.provider);
+      
+      if (account?.provider && account.provider !== "credentials" && user?.email) {
+        try {
+          // Check if user already exists
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+
+          if (!existingUser) {
+            // Create new user for OAuth providers
+            const newUser = await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name || "Usuario OAuth",
+                emailVerified: new Date(), // OAuth users have verified emails
+                image: user.image,
+              },
+            });
+
+            // Trigger welcome email for new OAuth users
+            try {
+              await triggerUserRegistered(newUser.email, newUser.name, false);
+              console.log(`✅ Welcome email triggered for OAuth user: ${newUser.email}`);
+            } catch (error) {
+              console.error(`❌ Failed to trigger welcome email for OAuth user: ${newUser.email}`, error);
+            }
+          } else if (!existingUser.emailVerified && account.provider === "google") {
+            // Update email verification for existing Google users
+            await prisma.user.update({
+              where: { email: user.email },
+              data: { emailVerified: new Date() }
+            });
+          }
+        } catch (error) {
+          console.error("Error in OAuth signIn callback:", error);
+        }
+      }
+      
       return true;
     },
     async redirect({ url, baseUrl }) {

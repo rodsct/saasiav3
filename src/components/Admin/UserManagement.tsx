@@ -187,6 +187,29 @@ export default function UserManagement() {
     }
   };
 
+  const sendTestEmail = async (userId: string, emailType: 'welcome' | 'verification') => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/send-test-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ emailType }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(`✅ Correo de ${emailType === 'welcome' ? 'bienvenida' : 'verificación'} enviado a ${data.sentTo}`);
+      } else {
+        const error = await response.json();
+        toast.error(`❌ Error: ${error.error || 'No se pudo enviar el correo'}`);
+      }
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      toast.error("Error enviando correo de prueba");
+    }
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -356,12 +379,30 @@ export default function UserManagement() {
                         </button>
                       </div>
                       
+                      {/* Email Test Buttons */}
+                      <div className="flex flex-col space-y-1">
+                        <button
+                          onClick={() => sendTestEmail(user.id, 'welcome')}
+                          className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors w-full"
+                          title="Enviar correo de bienvenida"
+                        >
+                          📧 Bienvenida
+                        </button>
+                        <button
+                          onClick={() => sendTestEmail(user.id, 'verification')}
+                          className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors w-full"
+                          title="Enviar correo de verificación"
+                        >
+                          ✉️ Verificación
+                        </button>
+                      </div>
+                      
                       {/* Delete Button */}
                       <button
                         onClick={() => deleteUser(user.id)}
                         className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors w-full"
                       >
-                        Eliminar
+                        🗑️ Eliminar
                       </button>
                     </div>
                   </td>
