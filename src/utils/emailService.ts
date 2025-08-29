@@ -88,27 +88,17 @@ function replaceVariables(content: string, variables: EmailVariables): string {
   return processedContent;
 }
 
-// Get sender information
+// Get sender information (fixed version that works like sendTestEmail)
 async function getSenderInfo(): Promise<{ name: string; address: string }> {
-  try {
-    const siteConfig = await prisma.siteConfig.findFirst({
-      select: {
-        emailFromName: true,
-        emailFromAddress: true,
-      }
-    });
-
-    return {
-      name: siteConfig?.emailFromName || 'Aranza.io',
-      address: siteConfig?.emailFromAddress || process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io'
-    };
-  } catch (error) {
-    console.error('Error getting sender info:', error);
-    return {
-      name: 'Aranza.io',
-      address: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io'
-    };
-  }
+  // Use the same values as the working sendTestEmail function
+  // This avoids issues with siteConfig database queries
+  const senderName = 'Aranza.io';
+  const senderAddress = process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io';
+  
+  return {
+    name: senderName,
+    address: senderAddress
+  };
 }
 
 // Main function to send email

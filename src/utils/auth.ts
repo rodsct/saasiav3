@@ -79,6 +79,12 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          // Check if email is verified (only for credential logins)
+          if (!user.emailVerified) {
+            console.log(`❌ Login denied for unverified email: ${user.email}`);
+            throw new Error("Por favor verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada.");
+          }
+
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.password

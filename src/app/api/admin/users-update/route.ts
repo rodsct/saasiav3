@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
+import { sendSubscriptionActivated, sendSubscriptionCancelled } from "@/utils/emailService";
 
 // Simplified user update endpoint that just checks for rodsct@gmail.com as admin
 export async function PATCH(request: NextRequest) {
@@ -32,10 +33,35 @@ export async function PATCH(request: NextRequest) {
     
     console.log("Admin check passed, updating user:", userId);
 
+    // Get current user data to compare changes
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        subscription: true,
+        subscriptionEndsAt: true,
+        role: true,
+      }
+    });
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     // Build update data
     const updateData: any = {};
-    if (subscription !== undefined) {
+    let subscriptionChanged = false;
+    let oldSubscription = currentUser.subscription;
+    let newSubscription = subscription;
+
+    if (subscription !== undefined && subscription !== currentUser.subscription) {
       updateData.subscription = subscription;
+      subscriptionChanged = true;
       if (subscription === "PRO") {
         updateData.subscriptionEndsAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
       }
@@ -57,6 +83,40 @@ export async function PATCH(request: NextRequest) {
         role: true,
       }
     });
+
+    // Send email notifications for subscription changes
+    if (subscriptionChanged) {
+      try {
+        const userName = updatedUser.name || 'Usuario';
+        
+        if (newSubscription === "PRO" && oldSubscription !== "PRO") {
+          // User upgraded to PRO
+          await sendSubscriptionActivated(
+            updatedUser.email,
+            "PRO",
+            "$49.00/mes",
+            userName
+          );
+          console.log(`✅ Subscription activated email sent to: ${updatedUser.email}`);
+        } else if (oldSubscription === "PRO" && newSubscription !== "PRO") {
+          // User downgraded from PRO
+          const expirationDate = updatedUser.subscriptionEndsAt 
+            ? new Date(updatedUser.subscriptionEndsAt).toLocaleDateString()
+            : 'inmediatamente';
+          
+          await sendSubscriptionCancelled(
+            updatedUser.email,
+            "PRO",
+            expirationDate,
+            userName
+          );
+          console.log(`✅ Subscription cancelled email sent to: ${updatedUser.email}`);
+        }
+      } catch (emailError) {
+        console.error("Error sending subscription email:", emailError);
+        // Don't fail the user update if email fails
+      }
+    }
 
     console.log("User updated successfully:", updatedUser);
     return NextResponse.json({ 
