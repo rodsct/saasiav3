@@ -18,6 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateUser?: (user: User) => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -124,6 +125,10 @@ export const useAuthState = () => {
     await checkAuth();
   };
 
+  const updateUser = (newUser: User) => {
+    setUser(newUser);
+  };
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -134,5 +139,6 @@ export const useAuthState = () => {
     login,
     logout,
     refreshUser,
+    updateUser,
   };
 };

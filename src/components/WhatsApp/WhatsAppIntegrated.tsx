@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function WhatsAppIntegrated() {
-  const { user, updateUser } = useAuth();
+  const { user, isLoading, refreshUser } = useAuth();
   const [phoneNumber, setPhoneNumber] = useState(user?.whatsapp || "");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
@@ -16,6 +16,12 @@ export default function WhatsAppIntegrated() {
   useEffect(() => {
     // Solo mostrar config si realmente no hay WhatsApp guardado
     const hasWhatsApp = user?.whatsapp && user.whatsapp.trim() !== "";
+    console.log("WhatsApp component effect:", {
+      userWhatsApp: user?.whatsapp,
+      hasWhatsApp,
+      willShowConfig: !hasWhatsApp
+    });
+    
     setPhoneNumber(user?.whatsapp || "");
     setSavedWhatsApp(user?.whatsapp || "");
     setShowConfig(!hasWhatsApp);
@@ -49,7 +55,7 @@ export default function WhatsAppIntegrated() {
       return;
     }
 
-    setIsLoading(true);
+    setIsSaving(true);
     setMessage("");
 
     try {
@@ -100,10 +106,8 @@ export default function WhatsAppIntegrated() {
         setSavedWhatsApp(phoneNumber.trim());
         setShowConfig(false); // Ocultar formulario después de guardar
         
-        // Update user context
-        if (updateUser) {
-          updateUser({ ...user, whatsapp: phoneNumber.trim() });
-        }
+        // Refresh user data from server to get updated WhatsApp
+        await refreshUser();
         
         // Limpiar mensaje después de unos segundos
         setTimeout(() => {
@@ -118,7 +122,7 @@ export default function WhatsAppIntegrated() {
       console.error("Error saving WhatsApp:", error);
       setMessage("Error al conectar con el servidor");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -139,6 +143,17 @@ export default function WhatsAppIntegrated() {
     setPhoneNumber(savedWhatsApp);
   };
 
+
+  // Show loading while auth is loading
+  if (isLoading) {
+    return (
+      <div className="border-t border-[#00d4ff]/20 p-3 lg:p-4">
+        <div className="flex items-center justify-center p-4">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#00d4ff]"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border-t border-[#00d4ff]/20 p-3 lg:p-4">
@@ -194,7 +209,7 @@ export default function WhatsAppIntegrated() {
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       placeholder="+52 55 1234 5678"
                       className="w-full bg-[#0a0a0a]/50 border border-[#00d4ff]/30 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-[#00d4ff]"
-                      disabled={isLoading}
+                      disabled={isSaving}
                     />
                     <p className="mt-1 text-xs text-gray-500">
                       Incluye código de país
@@ -204,10 +219,10 @@ export default function WhatsAppIntegrated() {
                   <div className="space-y-2">
                     <button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={isSaving}
                       className="w-full bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded-lg transition-colors disabled:opacity-50"
                     >
-                      {isLoading ? "Activando..." : savedWhatsApp ? "Actualizar Número" : "Activar Premium WhatsApp"}
+                      {isSaving ? "Activando..." : savedWhatsApp ? "Actualizar Número" : "Activar Premium WhatsApp"}
                     </button>
                     
                     {savedWhatsApp && (
