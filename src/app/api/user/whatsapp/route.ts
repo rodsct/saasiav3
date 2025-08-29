@@ -68,38 +68,6 @@ export async function POST(request: NextRequest) {
       select: { id: true, email: true, name: true, whatsapp: true }
     });
 
-    // Send WhatsApp info to n8n webhook
-    try {
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://infra-v2-n8n-v2.uclxiv.easypanel.host/webhook/saasiav3";
-      
-      const webhookData = {
-        action: "whatsapp_setup",
-        user: {
-          id: updatedUser.id,
-          email: updatedUser.email,
-          name: updatedUser.name,
-          whatsapp: updatedUser.whatsapp
-        },
-        timestamp: new Date().toISOString()
-      };
-
-      const webhookResponse = await fetch(n8nWebhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(webhookData),
-      });
-
-      console.log("n8n webhook response status:", webhookResponse.status);
-      
-      if (!webhookResponse.ok) {
-        console.error("n8n webhook failed:", await webhookResponse.text());
-      }
-    } catch (webhookError) {
-      console.error("Error sending to n8n webhook:", webhookError);
-      // Don't fail the main operation if webhook fails
-    }
 
     return NextResponse.json({
       success: true,
