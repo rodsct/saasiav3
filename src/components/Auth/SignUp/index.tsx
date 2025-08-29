@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import MagicLink from "../MagicLink";
 import Loader from "@/components/Common/Loader";
 import HCaptcha from "@/components/Common/HCaptcha";
+import { getHCaptchaSiteKey, isHCaptchaConfigured } from "@/config/hcaptcha";
 
 const SignUp = () => {
   const router = useRouter();
@@ -17,15 +18,17 @@ const SignUp = () => {
   const [hcaptchaToken, setHcaptchaToken] = useState<string>('');
   const [captchaVerified, setCaptchaVerified] = useState(false);
 
-  const hcaptchaSiteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || '';
+  const hcaptchaSiteKey = getHCaptchaSiteKey();
   
   useEffect(() => {
     console.log('🔧 hCaptcha Configuration:');
     console.log('- hCaptcha Site Key:', hcaptchaSiteKey ? `${hcaptchaSiteKey.substring(0, 10)}...` : 'NOT_SET');
+    console.log('- Environment var:', process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || 'NOT_SET');
+    console.log('- Using fallback:', !process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY && isHCaptchaConfigured());
     console.log('- All NEXT_PUBLIC_ vars:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')));
     
-    if (!hcaptchaSiteKey || hcaptchaSiteKey.trim() === '') {
-      console.error('❌ NEXT_PUBLIC_HCAPTCHA_SITE_KEY not configured!');
+    if (!isHCaptchaConfigured()) {
+      console.error('❌ hCaptcha not configured!');
     } else {
       console.log('✅ hCaptcha configurado correctamente');
     }
@@ -157,7 +160,7 @@ const SignUp = () => {
                   {/* hCaptcha Section */}
                   <div className="mb-6">
                     {console.log('Rendering hCaptcha with sitekey:', hcaptchaSiteKey)}
-                    {hcaptchaSiteKey && hcaptchaSiteKey.trim() !== '' ? (
+                    {isHCaptchaConfigured() ? (
                       <HCaptcha
                         sitekey={hcaptchaSiteKey}
                         onVerify={handleHCaptchaVerify}
