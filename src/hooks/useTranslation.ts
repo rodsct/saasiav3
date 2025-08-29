@@ -13,7 +13,7 @@ const translations = {
       blog: "Blog",
       contact: "Contacto",
       downloads: "Descargas",
-      "aranza-asistente": "Aranza Asistente Personal",
+      "aranza-asistente": "Agente Aranza",
       signin: "Iniciar Sesión",
       signup: "Registrarse",
       signout: "Cerrar Sesión",
@@ -27,8 +27,8 @@ const translations = {
       tech_subtitle: "Especializados en las tecnologías más avanzadas de IA"
     },
     chatbot: {
-      title: "Aranza Asistente Personal",
-      subtitle: "Tu asistente de IA especializado en inteligencia artificial, automatizaciones y consultoría empresarial. Disponible en la web y WhatsApp para usuarios premium.",
+      title: "Agente Aranza",
+      subtitle: "Tu agente de IA especializado en inteligencia artificial, automatizaciones y consultoría empresarial. Disponible en la web y WhatsApp para usuarios premium.",
       new_chat: "Nuevo chat",
       recent: "Recientes", 
       chats: "Conversaciones",
@@ -229,7 +229,7 @@ const translations = {
       blog: "Blog",
       contact: "Contact",
       downloads: "Downloads",
-      "aranza-asistente": "Aranza Personal Assistant", 
+      "aranza-asistente": "Aranza Agent", 
       signin: "Sign In",
       signup: "Sign Up",
       signout: "Sign Out",
@@ -243,8 +243,8 @@ const translations = {
       tech_subtitle: "Specialized in the most advanced AI technologies"
     },
     chatbot: {
-      title: "Aranza Personal Assistant",
-      subtitle: "Your AI assistant specialized in artificial intelligence, automation and business consulting. Available on web and WhatsApp for premium users.",
+      title: "Aranza Agent",
+      subtitle: "Your AI agent specialized in artificial intelligence, automation and business consulting. Available on web and WhatsApp for premium users.",
       new_chat: "New chat",
       recent: "Recent",
       chats: "Conversations", 

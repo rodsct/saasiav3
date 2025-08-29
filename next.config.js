@@ -18,6 +18,17 @@ const nextConfig = {
     unoptimized: process.env.NODE_ENV === 'development',
   },
   
+  // Redirects
+  async redirects() {
+    return [
+      {
+        source: '/chatbot',
+        destination: '/agente',
+        permanent: true,
+      },
+    ];
+  },
+
   // Security headers
   async headers() {
     return [

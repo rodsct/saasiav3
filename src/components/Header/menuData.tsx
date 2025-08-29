@@ -10,7 +10,7 @@ const menuData: Menu[] = [
   {
     id: 2,
     title: "navigation.aranza-asistente",
-    path: "/chatbot",
+    path: "/agente",
     newTab: false,
   },
   {

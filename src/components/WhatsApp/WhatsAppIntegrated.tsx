@@ -11,12 +11,26 @@ export default function WhatsAppIntegrated() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showConfig, setShowConfig] = useState(!user?.whatsapp);
   const [savedWhatsApp, setSavedWhatsApp] = useState(user?.whatsapp || "");
+  const [adminWhatsApp, setAdminWhatsApp] = useState("");
 
   useEffect(() => {
     setPhoneNumber(user?.whatsapp || "");
     setSavedWhatsApp(user?.whatsapp || "");
     setShowConfig(!user?.whatsapp);
+    fetchAdminWhatsApp();
   }, [user?.whatsapp]);
+
+  const fetchAdminWhatsApp = async () => {
+    try {
+      const response = await fetch("/api/whatsapp-qr");
+      if (response.ok) {
+        const data = await response.json();
+        setAdminWhatsApp(data.whatsappNumber || "");
+      }
+    } catch (error) {
+      console.error("Error fetching admin WhatsApp:", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +94,7 @@ export default function WhatsAppIntegrated() {
       if (response.ok) {
         const data = await response.json();
         console.log("WhatsApp save response:", data);
-        setMessage("¡WhatsApp configurado exitosamente!");
+        setMessage(`¡Suscripción premium activada para ${phoneNumber.trim()}!`);
         setSavedWhatsApp(phoneNumber.trim());
         setShowConfig(false);
         
@@ -102,12 +116,12 @@ export default function WhatsAppIntegrated() {
   };
 
   const generateWhatsAppUrl = () => {
-    if (!savedWhatsApp) return "";
-    const message = `Hola Aranza, soy ${user?.name || 'un usuario'} premium. Quiero usar mis funciones de WhatsApp.`;
-    return `https://wa.me/${savedWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    if (!adminWhatsApp) return "";
+    const message = `Hola Aranza, soy ${user?.name || 'un usuario'} premium con número ${savedWhatsApp}. Quiero usar mis funciones de WhatsApp.`;
+    return `https://wa.me/${adminWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
   };
 
-  const qrApiUrl = savedWhatsApp 
+  const qrApiUrl = savedWhatsApp && adminWhatsApp
     ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(generateWhatsAppUrl())}`
     : "";
 
@@ -172,10 +186,10 @@ export default function WhatsAppIntegrated() {
               // Configuration Form
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-white">
-                  📱 Configura tu WhatsApp
+                  📱 Activa Premium para WhatsApp
                 </h4>
                 <p className="text-xs text-gray-400">
-                  Conecta tu número para usar Aranza desde WhatsApp
+                  Registra tu número para recibir servicio premium de Aranza por WhatsApp
                 </p>
                 
                 <form onSubmit={handleSubmit} className="space-y-3">
@@ -199,7 +213,7 @@ export default function WhatsAppIntegrated() {
                       disabled={isLoading}
                       className="w-full bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded-lg transition-colors disabled:opacity-50"
                     >
-                      {isLoading ? "Guardando..." : "Configurar WhatsApp"}
+                      {isLoading ? "Activando..." : "Activar Premium WhatsApp"}
                     </button>
                     
                     <button
@@ -235,11 +249,14 @@ export default function WhatsAppIntegrated() {
                   </div>
                   
                   <p className="text-xs text-green-300 mb-2">
-                    📱 Escanea para chatear
+                    📱 Escanea para chatear con Aranza
                   </p>
                   
-                  <p className="text-xs text-gray-400 mb-3">
-                    {savedWhatsApp}
+                  <p className="text-xs text-gray-400 mb-1">
+                    Agente: {adminWhatsApp}
+                  </p>
+                  <p className="text-xs text-green-400 mb-3">
+                    Tu número registrado: {savedWhatsApp}
                   </p>
                   
                   <div className="space-y-2">
