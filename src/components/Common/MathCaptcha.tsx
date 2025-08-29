@@ -19,6 +19,7 @@ const MathCaptcha: React.FC<MathCaptchaProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const generateCaptcha = () => {
+    console.log('Generating MathCaptcha...');
     setIsLoading(true);
     // Always use client-side generation to avoid API issues
     generateClientSideCaptcha();
@@ -75,6 +76,8 @@ const MathCaptcha: React.FC<MathCaptchaProps> = ({
     );
   }
 
+  console.log('MathCaptcha rendering with question:', question);
+  
   return (
     <div className={`math-captcha p-4 border border-gray-300 rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-600 ${className}`}>
       <div className="flex items-center justify-between mb-3">

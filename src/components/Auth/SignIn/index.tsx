@@ -31,8 +31,13 @@ const Signin = () => {
   // Get hCaptcha site key from environment
   useEffect(() => {
     const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
-    if (siteKey) {
+    console.log('hCaptcha Site Key from env:', siteKey ? `${siteKey.substring(0, 10)}...` : 'NOT_SET');
+    if (siteKey && siteKey.trim() !== '') {
       setHcaptchaSiteKey(siteKey);
+      console.log('Using hCaptcha');
+    } else {
+      setHcaptchaSiteKey('');
+      console.log('Using MathCaptcha fallback');
     }
   }, []);
 
@@ -151,7 +156,8 @@ const Signin = () => {
                   
                   {/* CAPTCHA Section */}
                   <div className="mb-6">
-                    {hcaptchaSiteKey ? (
+                    {console.log('Rendering CAPTCHA, hcaptchaSiteKey:', hcaptchaSiteKey)}
+                    {hcaptchaSiteKey && hcaptchaSiteKey.trim() !== '' ? (
                       <HCaptcha
                         sitekey={hcaptchaSiteKey}
                         onVerify={handleHCaptchaVerify}
