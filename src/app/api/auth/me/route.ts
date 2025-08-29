@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
         subscription: true,
         subscriptionEndsAt: true,
         role: true,
+        whatsapp: true,
       },
     });
 
@@ -40,6 +41,7 @@ export async function GET(request: NextRequest) {
         subscription: user.subscription,
         subscriptionEndsAt: user.subscriptionEndsAt,
         role: user.role,
+        whatsapp: user.whatsapp,
       },
     });
 
