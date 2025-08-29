@@ -13,13 +13,13 @@ const MagicLink = () => {
     e.preventDefault();
 
     if (!email) {
-      return toast.error("Please enter your email address.");
+      return toast.error("Por favor ingresa tu dirección de correo electrónico.");
     }
 
     setLoader(true);
     if (!validateEmail(email)) {
       setLoader(false);
-      return toast.error("Please enter a valid email address.");
+      return toast.error("Por favor ingresa una dirección de correo válida.");
     } else {
       signIn("email", {
         redirect: false,
@@ -27,14 +27,14 @@ const MagicLink = () => {
       })
         .then((callback) => {
           if (callback?.ok) {
-            toast.success("Email sent");
+            toast.success("Correo enviado");
             setEmail("");
             setLoader(false);
           }
         })
         .catch((error) => {
           console.log(error);
-          toast.error("Unable to send email!");
+          toast.error("¡No se pudo enviar el correo!");
           setLoader(false);
         });
     }
@@ -45,7 +45,7 @@ const MagicLink = () => {
       <div className="mb-[22px]">
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Correo electrónico"
           name="email"
           required
           value={email}
@@ -58,7 +58,7 @@ const MagicLink = () => {
           type="submit"
           className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-blue-dark"
         >
-          Send Magic Link {loader && <Loader />}
+          Enviar Enlace Mágico {loader && <Loader />}
         </button>
       </div>
     </form>

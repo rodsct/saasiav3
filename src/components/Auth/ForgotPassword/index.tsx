@@ -15,7 +15,7 @@ const ForgotPassword = () => {
     e.preventDefault();
 
     if (!email) {
-      toast.error("Please enter your email address.");
+      toast.error("Por favor ingresa tu dirección de correo electrónico.");
 
       return;
     }
@@ -28,7 +28,7 @@ const ForgotPassword = () => {
       });
 
       if (res.status === 404) {
-        toast.error("User not found.");
+        toast.error("Usuario no encontrado.");
         return;
       }
 
@@ -77,7 +77,7 @@ const ForgotPassword = () => {
                 <div className="mb-[22px]">
                   <input
                     type="email"
-                    placeholder="Email"
+                    placeholder="Correo electrónico"
                     name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -90,7 +90,7 @@ const ForgotPassword = () => {
                     type="submit"
                     className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-blue-dark"
                   >
-                    Send Email {loader && <Loader />}
+                    Enviar Correo {loader && <Loader />}
                   </button>
                 </div>
               </form>

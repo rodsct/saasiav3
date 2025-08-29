@@ -94,31 +94,13 @@ const SignUp = () => {
               className="wow fadeInUp shadow-form relative mx-auto max-w-[525px] overflow-hidden rounded-xl bg-white px-8 py-14 text-center dark:bg-dark-2 sm:px-12 md:px-[60px]"
               data-wow-delay=".15s"
             >
-              <div className="mb-10 text-center">
-                <Link href="/" className="mx-auto inline-block max-w-[160px]">
-                  <Image
-                    src="/images/logo/logo.svg"
-                    alt="logo"
-                    width={140}
-                    height={30}
-                    className="dark:hidden"
-                  />
-                  <Image
-                    src="/images/logo/logo-white.svg"
-                    alt="logo"
-                    width={140}
-                    height={30}
-                    className="hidden dark:block"
-                  />
-                </Link>
-              </div>
 
               <SocialSignIn />
 
               <span className="z-1 relative my-8 block text-center">
                 <span className="-z-1 absolute left-0 top-1/2 block h-px w-full bg-stroke dark:bg-dark-3"></span>
                 <span className="text-body-secondary relative z-10 inline-block bg-white px-3 text-base dark:bg-dark-2">
-                  OR
+                  O
                 </span>
               </span>
 
@@ -132,7 +114,7 @@ const SignUp = () => {
                   <div className="mb-[22px]">
                     <input
                       type="text"
-                      placeholder="Name"
+                      placeholder="Nombre"
                       name="name"
                       required
                       className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
@@ -141,7 +123,7 @@ const SignUp = () => {
                   <div className="mb-[22px]">
                     <input
                       type="email"
-                      placeholder="Email"
+                      placeholder="Correo electrónico"
                       name="email"
                       required
                       className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
@@ -150,7 +132,7 @@ const SignUp = () => {
                   <div className="mb-[22px]">
                     <input
                       type="password"
-                      placeholder="Password"
+                      placeholder="Contraseña"
                       name="password"
                       required
                       className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
@@ -202,7 +184,7 @@ const SignUp = () => {
                           : 'bg-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      Sign Up {loading && <Loader />}
+                      Registrarse {loading && <Loader />}
                     </button>
                     {!captchaVerified && (
                       <p className="text-center text-sm text-red-500 mt-2">
@@ -216,23 +198,23 @@ const SignUp = () => {
               )}
 
               <p className="text-body-secondary mb-4 text-base">
-                By creating an account you are agree with our{" "}
+                Al crear una cuenta, aceptas nuestros{" "}
                 <Link href="/#" className="text-primary hover:underline">
-                  Privacy
+                  Términos de Privacidad
                 </Link>{" "}
-                and{" "}
+                y{" "}
                 <Link href="/#" className="text-primary hover:underline">
-                  Policy
+                  Políticas
                 </Link>
               </p>
 
               <p className="text-body-secondary text-base">
-                Already have an account?
+                ¿Ya tienes una cuenta?
                 <Link
                   href="/signin"
                   className="pl-2 text-primary hover:underline"
                 >
-                  Sign In
+                  Iniciar Sesión
                 </Link>
               </p>
 

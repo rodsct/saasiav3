@@ -67,7 +67,7 @@ const Signin = () => {
         }
 
         if (callback?.ok && !callback?.error) {
-          toast.success("Login successful");
+          toast.success("Inicio de sesión exitoso");
           setLoading(false);
           router.push("/");
         }
@@ -91,31 +91,13 @@ const Signin = () => {
               className="wow fadeInUp relative mx-auto max-w-[525px] overflow-hidden rounded-lg bg-white px-8 py-14 text-center dark:bg-dark-2 sm:px-12 md:px-[60px]"
               data-wow-delay=".15s"
             >
-              <div className="mb-10 text-center">
-                <Link href="/" className="mx-auto inline-block max-w-[160px]">
-                  <Image
-                    src="/images/logo/logo.svg"
-                    alt="logo"
-                    width={140}
-                    height={30}
-                    className="dark:hidden"
-                  />
-                  <Image
-                    src="/images/logo/logo-white.svg"
-                    alt="logo"
-                    width={140}
-                    height={30}
-                    className="hidden dark:block"
-                  />
-                </Link>
-              </div>
 
               <SocialSignIn />
 
               <span className="z-1 relative my-8 block text-center">
                 <span className="-z-1 absolute left-0 top-1/2 block h-px w-full bg-stroke dark:bg-dark-3"></span>
                 <span className="text-body-secondary relative z-10 inline-block bg-white px-3 text-base dark:bg-dark-2">
-                  OR
+                  O
                 </span>
               </span>
 
@@ -129,7 +111,7 @@ const Signin = () => {
                   <div className="mb-[22px]">
                     <input
                       type="email"
-                      placeholder="Email"
+                      placeholder="Correo electrónico"
                       onChange={(e) =>
                         setLoginData({ ...loginData, email: e.target.value })
                       }
@@ -139,7 +121,7 @@ const Signin = () => {
                   <div className="mb-[22px]">
                     <input
                       type="password"
-                      placeholder="Password"
+                      placeholder="Contraseña"
                       onChange={(e) =>
                         setLoginData({ ...loginData, password: e.target.value })
                       }
@@ -193,7 +175,7 @@ const Signin = () => {
                           : 'bg-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      Sign In {loading && <Loader />}
+                      Iniciar Sesión {loading && <Loader />}
                     </button>
                     {!captchaVerified && (
                       <p className="text-center text-sm text-red-500 mt-2">
@@ -210,12 +192,12 @@ const Signin = () => {
                 href="/forgot-password"
                 className="mb-2 inline-block text-base text-dark hover:text-primary dark:text-white dark:hover:text-primary"
               >
-                Forget Password?
+¿Olvidaste tu contraseña?
               </Link>
               <p className="text-body-secondary text-base">
-                Not a member yet?{" "}
+¿Aún no tienes cuenta?{" "}
                 <Link href="/signup" className="text-primary hover:underline">
-                  Sign Up
+                  Regístrate
                 </Link>
               </p>
 
