@@ -208,6 +208,12 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl, "prodUrl:", PRODUCTION_URL);
       
+      // Special handling: if redirecting to signup/signin and it's exactly those URLs (not with params), redirect to home
+      if ((url === `${PRODUCTION_URL}/signup` || url === `${PRODUCTION_URL}/signin`) && !url.includes('?')) {
+        console.log("🪄 Magic link successful - redirecting to home instead of signup/signin");
+        return PRODUCTION_URL;
+      }
+      
       // Log all redirects to debug magic link flow
       console.log("🔍 Analyzing redirect URL:", url);
       
