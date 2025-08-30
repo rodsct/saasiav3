@@ -31,13 +31,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      allowDangerousEmailAccountLinking: true,
     }),
     
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
-      allowDangerousEmailAccountLinking: true,
     }),
     
     CredentialsProvider({
@@ -101,53 +99,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       console.log(`🔐 SignIn attempt - Provider: ${account?.provider}, Email: ${user?.email}`);
-      
-      try {
-        // For OAuth providers, ensure user exists in database
-        if (account?.provider === "google" || account?.provider === "github") {
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
-          });
-
-          if (!existingUser) {
-            console.log(`👤 Creating new user for ${account.provider}: ${user.email}`);
-            
-            const newUser = await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name || `Usuario ${account.provider}`,
-                emailVerified: new Date(), // OAuth users have verified emails
-                image: user.image,
-                role: "USER",
-                subscription: "FREE",
-              },
-            });
-
-            // Send welcome email (async, don't wait)
-            triggerUserRegistered(newUser.email, newUser.name, false).catch(err => 
-              console.error("Failed to send welcome email:", err)
-            );
-          } else {
-            // Update existing user's info if needed
-            if (!existingUser.emailVerified) {
-              await prisma.user.update({
-                where: { email: user.email! },
-                data: { 
-                  emailVerified: new Date(),
-                  name: user.name || existingUser.name,
-                  image: user.image || existingUser.image,
-                }
-              });
-            }
-          }
-        }
-
-        console.log(`✅ SignIn approved for: ${user.email}`);
-        return true;
-      } catch (error) {
-        console.error(`❌ SignIn error for ${user.email}:`, error);
-        return false;
-      }
+      return true; // Let NextAuth PrismaAdapter handle user creation
     },
 
     async session({ session, user }) {
