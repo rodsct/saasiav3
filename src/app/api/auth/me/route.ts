@@ -17,7 +17,14 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Returning user session for: ${session.user.email}`);
     return NextResponse.json({
-      user: session.user
+      user: {
+        id: (session.user as any).id,
+        email: session.user.email,
+        name: session.user.name,
+        image: session.user.image,
+        subscription: (session.user as any).subscription,
+        role: (session.user as any).role,
+      }
     });
 
   } catch (error) {

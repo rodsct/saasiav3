@@ -3,7 +3,6 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prismaDB";
 import { getSiteUrl, getOAuthCallbackUrl, isOwnDomain } from "./siteConfig";
 import { triggerUserRegistered } from "./userEvents";
@@ -22,11 +21,10 @@ console.log("  NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 console.log("  NEXTAUTH_URL_INTERNAL:", process.env.NEXTAUTH_URL_INTERNAL);
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
   
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   
   providers: [
@@ -149,28 +147,86 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
-            // Trigger welcome email
-            try {
-              await triggerUserRegistered(newUser.email, newUser.name, false);
-              console.log(`✅ Welcome email triggered for OAuth user: ${newUser.email}`);
-            } catch (error) {
-              console.error(`❌ Failed to trigger welcome email`, error);
-            }
+            console.log(`✅ Created new OAuth user: ${newUser.email}`);
           } else if (!existingUser.emailVerified) {
             // Update email verification
             await prisma.user.update({
               where: { email: user.email! },
               data: { emailVerified: new Date() }
             });
+            console.log(`✅ Updated email verification for: ${existingUser.email}`);
           }
         } catch (error) {
           console.error("Error in OAuth signIn:", error);
+          return false; // Fail the sign in if database error
         }
       }
       
       console.log(`✅ SignIn approved for ${account?.provider}`);
       return true;
     },
+    
+    async jwt({ token, user, account }) {
+      console.log(`🔑 JWT callback - User: ${user?.email || 'EXISTING'}, Account: ${account?.provider || 'N/A'}`);
+      
+      // On first sign in, add user info to token
+      if (user) {
+        console.log(`📝 Adding user data to JWT for: ${user.email}`);
+        
+        // For OAuth users, get data from database
+        if (account?.provider === "google" || account?.provider === "github") {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { email: user.email! },
+            });
+            
+            if (dbUser) {
+              token.id = dbUser.id;
+              token.email = dbUser.email;
+              token.name = dbUser.name;
+              token.image = dbUser.image;
+              token.subscription = dbUser.subscription || "FREE";
+              token.role = dbUser.role || "USER";
+              console.log(`✅ OAuth token populated from DB for: ${dbUser.email}`);
+            }
+          } catch (error) {
+            console.error("Error fetching OAuth user from DB:", error);
+          }
+        } else if (account?.provider === "credentials") {
+          // For credentials, use data from authorize function
+          token.id = user.id;
+          token.email = user.email;
+          token.name = user.name;
+          token.image = user.image;
+          token.subscription = (user as any).subscription || "FREE";
+          token.role = (user as any).role || "USER";
+          console.log(`✅ Credentials token populated for: ${user.email}`);
+        }
+      }
+      
+      return token;
+    },
+    
+    async session({ session, token }) {
+      console.log(`📋 Session callback - Token exists: ${!!token}, Email: ${token?.email || 'N/A'}`);
+      
+      // Send properties to the client
+      if (token && session.user) {
+        (session.user as any).id = token.id;
+        (session.user as any).email = token.email;
+        (session.user as any).name = token.name;
+        (session.user as any).image = token.image;
+        (session.user as any).subscription = token.subscription || "FREE";
+        (session.user as any).role = token.role || "USER";
+        
+        console.log(`✅ Session populated for: ${token.email}`);
+      } else {
+        console.log(`❌ Session callback failed - missing token or session.user`);
+      }
+      
+      return session;
+    },
+    
     async redirect({ url, baseUrl }) {
       console.log("🔀 Redirect:", url);
       
@@ -180,20 +236,6 @@ export const authOptions: NextAuthOptions = {
       if (isOwnDomain(url)) return url;
       
       return PRODUCTION_URL;
-    },
-    async session({ session, user }) {
-      console.log(`📋 Session callback - User: ${user?.email || session?.user?.email || 'N/A'}`);
-      
-      if (user && session.user) {
-        (session.user as any).id = user.id;
-        (session.user as any).subscription = user.subscription || "FREE";
-        (session.user as any).subscriptionEndsAt = user.subscriptionEndsAt;
-        (session.user as any).role = user.role || "USER";
-        
-        console.log(`✅ Session populated for: ${user.email}`);
-      }
-      
-      return session;
     },
   },
 
