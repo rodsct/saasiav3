@@ -75,7 +75,13 @@ export const authOptions: NextAuthOptions = {
             where: { email: credentials.email },
           });
 
+          console.log(`🔍 Login attempt for: ${credentials.email}`);
+          console.log(`👤 User found: ${user ? 'YES' : 'NO'}`);
+          console.log(`🔑 Password exists: ${user?.password ? 'YES' : 'NO'}`);
+          console.log(`✅ Email verified: ${user?.emailVerified ? 'YES' : 'NO'}`);
+
           if (!user || !user.password) {
+            console.log(`❌ Login failed: User not found or no password`);
             return null;
           }
 
@@ -101,6 +107,10 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           console.error("Auth error:", error);
+          // Re-throw verification errors so they reach the frontend
+          if (error instanceof Error && error.message.includes("verifica tu email")) {
+            throw error;
+          }
           return null;
         }
       },

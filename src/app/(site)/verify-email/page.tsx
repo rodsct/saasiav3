@@ -10,18 +10,17 @@ export default function VerifyEmailPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const email = searchParams?.get('email');
     const token = searchParams?.get('token');
 
-    if (!email) {
+    if (!token) {
       setStatus('error');
-      setMessage('Email parameter is missing');
+      setMessage('Token de verificación faltante. Por favor usa el enlace del email de verificación.');
       return;
     }
 
     const verifyEmail = async () => {
       try {
-        const response = await fetch(`/api/verify-email?email=${encodeURIComponent(email)}${token ? `&token=${token}` : ''}`);
+        const response = await fetch(`/api/verify-email?token=${encodeURIComponent(token)}`);
         const data = await response.json();
 
         if (response.ok) {
