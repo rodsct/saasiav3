@@ -32,9 +32,9 @@ export const authOptions: NextAuthOptions = {
   // Custom redirect override
   redirectProxyUrl: PRODUCTION_URL,
   
-  // Use JWT strategy (hybrid approach for email + credentials)
+  // Use database strategy for email provider compatibility
   session: {
-    strategy: "jwt",
+    strategy: "database",
   },
   
   providers: [
@@ -256,21 +256,13 @@ export const authOptions: NextAuthOptions = {
       
       return true; // Allow other providers
     },
-    async jwt({ token, user, account }) {
-      if (user) {
-        token.id = user.id;
-        token.subscription = user.subscription || "FREE";
-        token.subscriptionEndsAt = user.subscriptionEndsAt;
-        token.role = user.role || "USER";
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).subscription = token.subscription || "FREE";
-        (session.user as any).subscriptionEndsAt = token.subscriptionEndsAt;
-        (session.user as any).role = token.role || "USER";
+    async session({ session, user }) {
+      if (user && session.user) {
+        // With database strategy, user data comes from database
+        (session.user as any).id = user.id;
+        (session.user as any).subscription = user.subscription || "FREE";
+        (session.user as any).subscriptionEndsAt = user.subscriptionEndsAt;
+        (session.user as any).role = user.role || "USER";
       }
       return session;
     },
