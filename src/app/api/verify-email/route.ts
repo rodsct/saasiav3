@@ -76,7 +76,15 @@ export async function GET(request: NextRequest) {
       })
     ]);
 
-    // Note: Welcome email removed - verification email was already sent during registration
+    // Send welcome email after successful verification
+    try {
+      const { sendSimpleWelcomeEmail } = await import('@/utils/simpleEmail');
+      await sendSimpleWelcomeEmail(user.email, user.name || 'Usuario');
+      console.log(`✅ Welcome email sent to verified user: ${user.email}`);
+    } catch (emailError) {
+      console.error(`❌ Failed to send welcome email to: ${user.email}`, emailError);
+      // Don't fail verification if welcome email fails
+    }
 
     console.log(`✅ Email verified successfully for: ${user.email}`);
     return NextResponse.json({ 
