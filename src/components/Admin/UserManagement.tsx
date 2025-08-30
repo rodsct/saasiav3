@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 interface User {
   id: string;
   email: string;
-  name: string;
+  name: string | null;
   subscription: string;
   subscriptionEndsAt?: string;
   role: string;
@@ -190,8 +190,8 @@ export default function UserManagement() {
 
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (user.email || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterSubscription === "ALL" || user.subscription === filterSubscription;
     return matchesSearch && matchesFilter;
   });
@@ -287,7 +287,7 @@ export default function UserManagement() {
                       </div>
                       <div className="ml-3">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {user.name}
+                          {user.name || 'Sin nombre'}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-300">
                           {user.email}
