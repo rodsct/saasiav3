@@ -10,6 +10,7 @@ interface User {
   subscription: string;
   subscriptionEndsAt?: string;
   role: string;
+  emailVerified?: Date | null;
   _count?: {
     downloads: number;
     conversations: number;
@@ -261,6 +262,9 @@ export default function UserManagement() {
                   Suscripción
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Verificación
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Actividad
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -311,6 +315,20 @@ export default function UserManagement() {
                     {user.subscriptionEndsAt && (
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Expira: {new Date(user.subscriptionEndsAt).toLocaleDateString()}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      user.emailVerified 
+                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                    }`}>
+                      {user.emailVerified ? "✅ Verificado" : "❌ Sin verificar"}
+                    </span>
+                    {user.emailVerified && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {new Date(user.emailVerified).toLocaleDateString()}
                       </div>
                     )}
                   </td>

@@ -60,7 +60,17 @@ const Signin = () => {
     signIn("credentials", { ...loginData, redirect: false })
       .then((callback) => {
         if (callback?.error) {
-          toast.error(callback?.error);
+          // Check if it's an email verification error
+          if (callback.error.includes("verifica tu email")) {
+            toast.error(
+              "⚠️ Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada y haz clic en el enlace de verificación.",
+              { duration: 6000 }
+            );
+          } else if (callback.error === "CredentialsSignin") {
+            toast.error("Email o contraseña incorrectos");
+          } else {
+            toast.error(callback.error);
+          }
           console.log(callback?.error);
           setLoading(false);
           return;
@@ -187,6 +197,19 @@ const Signin = () => {
               ) : (
                 <MagicLink />
               )}
+
+              {/* Email Verification Notice */}
+              <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r-md dark:bg-blue-900/20 dark:border-blue-400">
+                <div className="flex">
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      📧 <strong>¿No puedes iniciar sesión?</strong><br />
+                      Asegúrate de haber verificado tu email. Si no recibiste el email de verificación, 
+                      intenta registrarte nuevamente para recibir un nuevo enlace.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <Link
                 href="/forgot-password"
