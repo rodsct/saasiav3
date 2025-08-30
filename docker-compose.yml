@@ -58,7 +58,7 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://agente.aranza.io}
       NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL:-https://agente.aranza.io}
       AUTH_TRUST_HOST: true
-      NODE_ENV: development
+      NODE_ENV: production
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://agente.aranza.io}
       SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://agente.aranza.io}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
@@ -77,6 +77,8 @@ services:
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      HCAPTCHA_SECRET_KEY: ${HCAPTCHA_SECRET_KEY:-ES_6d8d74194a744cee91d12bdc526b2ce8}
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: ${NEXT_PUBLIC_HCAPTCHA_SITE_KEY:-3c8c7fc4-1566-44ca-bb54-809c2f2657b6}
     depends_on:
       postgres:
         condition: service_healthy
