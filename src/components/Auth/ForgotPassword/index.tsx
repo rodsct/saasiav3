@@ -6,17 +6,34 @@ import axios from "axios";
 import Loader from "@/components/Common/Loader";
 import Link from "next/link";
 import Image from "next/image";
+import MathCaptcha from "@/components/Common/MathCaptcha";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loader, setLoader] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+
+  const handleCaptchaVerify = (answer: string, correctAnswer: number) => {
+    const userAnswer = parseInt(answer);
+    if (userAnswer === correctAnswer) {
+      setCaptchaVerified(true);
+      toast.success("Captcha verificado correctamente");
+    } else {
+      setCaptchaVerified(false);
+      toast.error("Captcha incorrecto, inténtalo de nuevo");
+    }
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     if (!email) {
       toast.error("Por favor ingresa tu dirección de correo electrónico.");
+      return;
+    }
 
+    if (!captchaVerified) {
+      toast.error("Por favor completa el captcha antes de continuar.");
       return;
     }
 
@@ -85,12 +102,20 @@ const ForgotPassword = () => {
                     className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
                   />
                 </div>
+                
+                <div className="mb-[22px]">
+                  <MathCaptcha
+                    onVerify={handleCaptchaVerify}
+                    className="w-full"
+                  />
+                </div>
                 <div className="">
                   <button
                     type="submit"
-                    className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-blue-dark"
+                    disabled={loader || !captchaVerified}
+                    className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Enviar Correo {loader && <Loader />}
+                    {loader ? "Enviando..." : "Enviar Correo"} {loader && <Loader />}
                   </button>
                 </div>
               </form>

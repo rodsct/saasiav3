@@ -33,6 +33,7 @@ export async function POST(request: Request) {
 				password: hashedPassword,
 				passwordResetToken: null,
 				passwordResetTokenExp: null,
+				emailVerified: new Date(), // Marcar email como verificado al resetear contraseña
 			},
 		});
 

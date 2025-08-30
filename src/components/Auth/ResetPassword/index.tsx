@@ -4,8 +4,6 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Loader from "@/components/Common/Loader";
-import Link from "next/link";
-import Image from "next/image";
 
 const ResetPassword = ({ token }: { token: string }) => {
   const [data, setData] = useState({
@@ -106,22 +104,12 @@ const ResetPassword = ({ token }: { token: string }) => {
               data-wow-delay=".15s"
             >
               <div className="mb-10 text-center">
-                <Link href="/" className="mx-auto inline-block max-w-[160px]">
-                  <Image
-                    src="/images/logo/logo.svg"
-                    alt="logo"
-                    width={140}
-                    height={30}
-                    className="dark:hidden"
-                  />
-                  <Image
-                    src="/images/logo/logo-white.svg"
-                    alt="logo"
-                    width={140}
-                    height={30}
-                    className="hidden dark:block"
-                  />
-                </Link>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Nueva Contraseña
+                </h2>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  Ingresa tu nueva contraseña para completar el proceso
+                </p>
               </div>
 
               <form onSubmit={handleSubmit}>
