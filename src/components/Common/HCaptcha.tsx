@@ -107,8 +107,9 @@ const HCaptcha: React.FC<HCaptchaProps> = ({
               // Don't reset the widget after verification
             },
             'error-callback': (err: any) => {
-              console.error('hCaptcha error:', err);
-              onErrorRef.current?.();
+              console.error('hCaptcha error-callback triggered:', err);
+              setScriptError('hCaptcha error: ' + (err?.message || err || 'Unknown error'));
+              onErrorRef.current?.(err);
             },
             'expired-callback': () => {
               console.log('hCaptcha expired - will need new verification');

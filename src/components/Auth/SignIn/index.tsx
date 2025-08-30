@@ -57,9 +57,23 @@ const Signin = () => {
   }, []);
 
   const handleHCaptchaVerify = (token: string) => {
+    console.log('hCaptcha verified:', token.substring(0, 20) + '...');
     setHcaptchaToken(token);
     setCaptchaVerified(true);
-    console.log('hCaptcha verified:', token.substring(0, 20) + '...');
+  };
+
+  const handleHCaptchaError = (error: any) => {
+    console.error('hCaptcha error:', error);
+    setCaptchaVerified(false);
+    setHcaptchaToken('');
+    toast.error("Error en la verificación hCaptcha. Por favor, recarga la página.");
+  };
+
+  const handleHCaptchaExpire = () => {
+    console.log('hCaptcha expired');
+    setCaptchaVerified(false);
+    setHcaptchaToken('');
+    toast.warning("hCaptcha expirado, por favor verifica nuevamente");
   };
 
   const loginUser = (e: any) => {
@@ -107,9 +121,15 @@ const Signin = () => {
         setLoading(false);
         console.log(err.message);
         toast.error(err.message);
-        // Reset captcha on error
+        // Reset captcha on error to prevent callback issues
         setCaptchaVerified(false);
         setHcaptchaToken('');
+        // Force page reload on critical errors to reset hCaptcha state
+        if (err.message.includes('hCaptcha') || err.message.includes('callback')) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        }
       });
   };
 
@@ -167,18 +187,10 @@ const Signin = () => {
                       <HCaptcha
                         sitekey={hcaptchaSiteKey}
                         onVerify={handleHCaptchaVerify}
-                        onError={() => {
-                          setCaptchaVerified(false);
-                          setHcaptchaToken('');
-                          toast.error("Error en la verificación hCaptcha");
-                        }}
-                        onExpire={() => {
-                          setCaptchaVerified(false);
-                          setHcaptchaToken('');
-                          toast.warning("hCaptcha expirado, por favor verifica nuevamente");
-                        }}
+                        onError={handleHCaptchaError}
+                        onExpire={handleHCaptchaExpire}
                         onLoad={() => {
-                          console.log('hCaptcha loaded successfully');
+                          console.log('hCaptcha loaded successfully in SignIn');
                         }}
                         theme="light"
                         size="normal"
