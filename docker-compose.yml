@@ -42,6 +42,7 @@ services:
       cp -r /tmp/source/* . &&
       cp -r /tmp/source/.* . 2>/dev/null || true &&
       npm install --legacy-peer-deps &&
+      npm install --save-exact --save-dev typescript @types/react --legacy-peer-deps &&
       npx prisma generate &&
       npx prisma db push --accept-data-loss &&
       node scripts/create-users.js || echo 'User creation failed - continuing' &&
@@ -58,7 +59,7 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://agente.aranza.io}
       NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL:-https://agente.aranza.io}
       AUTH_TRUST_HOST: true
-      NODE_ENV: production
+      NODE_ENV: development
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://agente.aranza.io}
       SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://agente.aranza.io}
       SITE_NAME: ${SITE_NAME:-Aranza.io}
