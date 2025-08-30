@@ -32,9 +32,9 @@ export const authOptions: NextAuthOptions = {
   // Custom redirect override
   redirectProxyUrl: PRODUCTION_URL,
   
-  // Use database strategy for sessions (required for email provider)
+  // Use JWT strategy (hybrid approach for email + credentials)
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   
   providers: [
@@ -229,13 +229,67 @@ export const authOptions: NextAuthOptions = {
       console.log("🔀 Default redirect to production URL:", PRODUCTION_URL);
       return PRODUCTION_URL;
     },
-    async session({ session, user }) {
-      if (user && session.user) {
-        // With database strategy, we get user object directly
-        (session.user as any).id = user.id;
-        (session.user as any).subscription = user.subscription || "FREE";
-        (session.user as any).subscriptionEndsAt = user.subscriptionEndsAt;
-        (session.user as any).role = user.role || "USER";
+    async signIn({ user, account, profile, email, credentials }) {
+      // For email provider (magic links)
+      if (account?.provider === "email") {
+        try {
+          // Find or create user for magic link
+          let existingUser = await prisma.user.findUnique({
+            where: { email: user.email! }
+          });
+          
+          if (!existingUser) {
+            // Create user if doesn't exist
+            existingUser = await prisma.user.create({
+              data: {
+                email: user.email!,
+                name: user.name || user.email?.split('@')[0],
+                emailVerified: new Date(), // Magic link users are verified
+                subscription: "FREE",
+                role: "USER"
+              }
+            });
+            
+            // Send welcome email for new users (async)
+            try {
+              await triggerUserRegistered(existingUser.email, existingUser.name || undefined, false);
+              console.log(`✅ Welcome email triggered for magic link user: ${existingUser.email}`);
+            } catch (error) {
+              console.error(`❌ Failed to trigger welcome email for magic link user: ${existingUser.email}`, error);
+            }
+          } else if (!existingUser.emailVerified) {
+            // Update verification status for existing unverified users
+            await prisma.user.update({
+              where: { email: user.email! },
+              data: { emailVerified: new Date() }
+            });
+          }
+          
+          console.log(`✅ Magic link sign in successful for: ${user.email}`);
+          return true;
+        } catch (error) {
+          console.error("Magic link sign in error:", error);
+          return false;
+        }
+      }
+      
+      return true; // Allow other providers
+    },
+    async jwt({ token, user, account }) {
+      if (user) {
+        token.id = user.id;
+        token.subscription = user.subscription || "FREE";
+        token.subscriptionEndsAt = user.subscriptionEndsAt;
+        token.role = user.role || "USER";
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        (session.user as any).id = token.id;
+        (session.user as any).subscription = token.subscription || "FREE";
+        (session.user as any).subscriptionEndsAt = token.subscriptionEndsAt;
+        (session.user as any).role = token.role || "USER";
       }
       return session;
     },
