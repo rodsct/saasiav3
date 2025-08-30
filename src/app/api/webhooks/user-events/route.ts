@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { 
-  sendWelcomeEmail, 
   sendSubscriptionActivated, 
   sendSubscriptionCancelled,
   sendPaymentSuccess,
@@ -58,17 +57,27 @@ async function handleUserRegistered(data: any) {
   try {
     const { userEmail, userName, needsVerification } = data;
     
-    let verificationUrl;
+    // If needs verification, send verification email instead of welcome
     if (needsVerification && data.verificationToken) {
-      verificationUrl = buildUrl(`/verify-email?token=${data.verificationToken}`);
-    }
-
-    const success = await sendWelcomeEmail(userEmail, userName, verificationUrl);
-    
-    if (success) {
-      console.log('✅ Welcome email sent to:', userEmail);
+      const verificationUrl = buildUrl(`/verify-email?token=${data.verificationToken}`);
+      const { sendSimpleVerificationEmail } = await import('@/utils/simpleEmail');
+      const success = await sendSimpleVerificationEmail(userEmail, verificationUrl, userName);
+      
+      if (success) {
+        console.log('✅ Verification email sent to:', userEmail);
+      } else {
+        console.error('❌ Failed to send verification email to:', userEmail);
+      }
     } else {
-      console.error('❌ Failed to send welcome email to:', userEmail);
+      // User doesn't need verification (e.g. OAuth), send welcome email
+      const { sendSimpleWelcomeEmail } = await import('@/utils/simpleEmail');
+      const success = await sendSimpleWelcomeEmail(userEmail, userName);
+      
+      if (success) {
+        console.log('✅ Welcome email sent to:', userEmail);
+      } else {
+        console.error('❌ Failed to send welcome email to:', userEmail);
+      }
     }
   } catch (error) {
     console.error('Error handling user registration:', error);
