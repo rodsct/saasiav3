@@ -27,6 +27,11 @@ export default function VerifyEmailPage() {
           setStatus('success');
           setMessage(data.message);
           toast.success('✅ Email verificado correctamente');
+          
+          // Auto-redirect to login after 3 seconds
+          setTimeout(() => {
+            window.location.href = '/signin?message=email-verified';
+          }, 3000);
         } else {
           setStatus('error');
           setMessage(data.error || 'Error verifying email');
@@ -67,12 +72,15 @@ export default function VerifyEmailPage() {
                 </svg>
               </div>
               <p className="text-green-600 dark:text-green-300 font-medium">{message}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Serás redirigido al login en unos segundos...
+              </p>
               <div className="mt-4">
                 <a
                   href="/signin"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#00d4ff] hover:bg-[#00b8e6] transition-colors"
                 >
-                  Iniciar Sesión
+                  Iniciar Sesión Ahora
                 </a>
               </div>
             </div>

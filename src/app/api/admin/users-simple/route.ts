@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
         subscription: true,
         subscriptionEndsAt: true,
         role: true,
+        emailVerified: true,
       },
       orderBy: { id: "desc" },
     });

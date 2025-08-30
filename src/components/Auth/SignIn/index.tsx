@@ -14,6 +14,7 @@ import { getHCaptchaSiteKey, isHCaptchaConfigured } from "@/config/hcaptcha";
 
 const Signin = () => {
   const router = useRouter();
+  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -41,6 +42,19 @@ const Signin = () => {
       console.log('✅ hCaptcha configurado correctamente');
     }
   }, [hcaptchaSiteKey]);
+
+  useEffect(() => {
+    // Get URL search params
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    setSearchParams(urlSearchParams);
+    
+    // Show success message if coming from email verification
+    if (urlSearchParams.get('message') === 'email-verified') {
+      toast.success('🎉 ¡Email verificado exitosamente! Ya puedes iniciar sesión.', {
+        duration: 5000
+      });
+    }
+  }, []);
 
   const handleHCaptchaVerify = (token: string) => {
     setHcaptchaToken(token);
