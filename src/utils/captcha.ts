@@ -7,9 +7,7 @@ export async function verifyCaptcha(token: string, remoteip?: string): Promise<b
     
     if (!secret) {
       console.error('❌ HCAPTCHA_SECRET_KEY not configured');
-      console.log('🚨 BYPASS TEMPORAL: Permitiendo registro sin hCaptcha debido a problema de configuración');
-      // Bypass temporal mientras se resuelve el problema de variables de entorno en EasyPanel
-      return true; // TEMPORAL: Permitir sin verificación hCaptcha
+      return false;
     }
 
     console.log(`🌐 Making request to hCaptcha API with token: ${token.substring(0, 20)}...`);
