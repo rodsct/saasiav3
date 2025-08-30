@@ -6,22 +6,21 @@ import axios from "axios";
 import Loader from "@/components/Common/Loader";
 import Link from "next/link";
 import Image from "next/image";
-import MathCaptcha from "@/components/Common/MathCaptcha";
+import HCaptcha from "@/components/Common/HCaptcha";
+import { getHCaptchaSiteKey, isHCaptchaConfigured } from "@/config/hcaptcha";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loader, setLoader] = useState(false);
+  const [hcaptchaToken, setHcaptchaToken] = useState<string>('');
   const [captchaVerified, setCaptchaVerified] = useState(false);
 
-  const handleCaptchaVerify = (answer: string, correctAnswer: number) => {
-    const userAnswer = parseInt(answer);
-    if (userAnswer === correctAnswer) {
-      setCaptchaVerified(true);
-      toast.success("Captcha verificado correctamente");
-    } else {
-      setCaptchaVerified(false);
-      toast.error("Captcha incorrecto, inténtalo de nuevo");
-    }
+  const hcaptchaSiteKey = getHCaptchaSiteKey();
+
+  const handleHCaptchaVerify = (token: string) => {
+    setHcaptchaToken(token);
+    setCaptchaVerified(true);
+    console.log('hCaptcha verified in forgot password:', token.substring(0, 20) + '...');
   };
 
   const handleSubmit = async (e: any) => {
@@ -42,6 +41,7 @@ const ForgotPassword = () => {
     try {
       const res = await axios.post("/api/forgot-password/reset", {
         email: email.toLowerCase(),
+        hcaptchaToken: hcaptchaToken,
       });
 
       if (res.status === 404) {
@@ -103,11 +103,31 @@ const ForgotPassword = () => {
                   />
                 </div>
                 
-                <div className="mb-[22px]">
-                  <MathCaptcha
-                    onVerify={handleCaptchaVerify}
-                    className="w-full"
-                  />
+                <div className="mb-6">
+                  {isHCaptchaConfigured() ? (
+                    <HCaptcha
+                      sitekey={hcaptchaSiteKey}
+                      onVerify={handleHCaptchaVerify}
+                      onError={() => {
+                        setCaptchaVerified(false);
+                        setHcaptchaToken('');
+                        toast.error("Error en la verificación hCaptcha");
+                      }}
+                      onExpire={() => {
+                        setCaptchaVerified(false);
+                        setHcaptchaToken('');
+                        toast.warning("hCaptcha expirado, por favor verifica nuevamente");
+                      }}
+                      theme="light"
+                      size="normal"
+                    />
+                  ) : (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-red-600 text-sm font-medium">
+                        ⚠️ hCaptcha no configurado
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="">
                   <button
@@ -117,6 +137,11 @@ const ForgotPassword = () => {
                   >
                     {loader ? "Enviando..." : "Enviar Correo"} {loader && <Loader />}
                   </button>
+                  {!captchaVerified && (
+                    <p className="text-center text-sm text-red-500 mt-2">
+                      Complete la verificación hCaptcha para continuar
+                    </p>
+                  )}
                 </div>
               </form>
 

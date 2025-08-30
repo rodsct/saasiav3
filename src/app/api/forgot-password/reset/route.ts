@@ -2,14 +2,31 @@ import { prisma } from "@/utils/prismaDB";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { sendEmail } from "@/utils/email";
+import { verifyCaptcha } from "@/utils/captcha";
 
 export async function POST(request: Request) {
 	const body = await request.json();
-	const { email } = body;
+	const { email, hcaptchaToken } = body;
 
 	if (!email) {
 		return new NextResponse("Missing Fields", { status: 400 });
 	}
+
+	// Verify hCaptcha
+	if (!hcaptchaToken) {
+		return NextResponse.json({ 
+			error: "Verificación CAPTCHA requerida" 
+		}, { status: 400 });
+	}
+
+	const captchaValid = await verifyCaptcha(hcaptchaToken);
+	if (!captchaValid) {
+		return NextResponse.json({ 
+			error: "Verificación CAPTCHA falló. Por favor inténtalo de nuevo." 
+		}, { status: 400 });
+	}
+
+	console.log(`✅ CAPTCHA verified for password reset: ${email}`);
 
 	const formatedEmail = email.toLowerCase();
 
