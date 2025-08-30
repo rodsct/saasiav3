@@ -100,11 +100,14 @@ export const authOptions: NextAuthOptions = {
             user.password
           );
 
+          console.log(`🔐 Password validation result: ${isPasswordValid ? 'VALID' : 'INVALID'}`);
+
           if (!isPasswordValid) {
+            console.log(`❌ Login failed: Invalid password for ${user.email}`);
             return null;
           }
 
-          return {
+          const userData = {
             id: user.id,
             email: user.email,
             name: user.name,
@@ -113,6 +116,9 @@ export const authOptions: NextAuthOptions = {
             subscriptionEndsAt: user.subscriptionEndsAt,
             role: user.role,
           };
+          
+          console.log(`✅ Credentials authorize successful for: ${user.email}`);
+          return userData;
         } catch (error) {
           console.error("Auth error:", error);
           // Re-throw verification errors so they reach the frontend
@@ -163,17 +169,24 @@ export const authOptions: NextAuthOptions = {
       return PRODUCTION_URL;
     },
     async jwt({ token, user, account }) {
+      console.log(`🔑 JWT callback - User: ${user?.email}, Provider: ${account?.provider}`);
+      
       // If user is provided (first sign in), fetch full user data from database
       if (user) {
         try {
+          console.log(`📝 Processing JWT for user: ${user.email}`);
+          
           // For OAuth providers, we need to fetch/create user in database
           if (account?.provider === "google" || account?.provider === "github") {
+            console.log(`🔍 OAuth provider detected: ${account.provider}`);
+            
             // Check if user exists in database
             let dbUser = await prisma.user.findUnique({
               where: { email: user.email! },
             });
 
             if (!dbUser) {
+              console.log(`👤 Creating new OAuth user: ${user.email}`);
               // Create new user for OAuth providers
               dbUser = await prisma.user.create({
                 data: {
@@ -192,6 +205,7 @@ export const authOptions: NextAuthOptions = {
                 console.error(`❌ Failed to trigger welcome email for OAuth user: ${dbUser.email}`, error);
               }
             } else if (!dbUser.emailVerified) {
+              console.log(`📧 Updating email verification for existing OAuth user: ${user.email}`);
               // Update email verification for existing users
               dbUser = await prisma.user.update({
                 where: { email: user.email! },
@@ -207,8 +221,12 @@ export const authOptions: NextAuthOptions = {
             token.subscription = dbUser.subscription || "FREE";
             token.subscriptionEndsAt = dbUser.subscriptionEndsAt;
             token.role = dbUser.role || "USER";
-          } else {
-            // For credentials provider, user data already comes from database
+            
+            console.log(`✅ OAuth JWT token populated for: ${token.email}`);
+          } else if (account?.provider === "credentials") {
+            console.log(`🔐 Credentials provider - using user data from authorize`);
+            
+            // For credentials provider, user data already comes from database via authorize()
             token.id = user.id;
             token.email = user.email;
             token.name = user.name;
@@ -216,20 +234,36 @@ export const authOptions: NextAuthOptions = {
             token.subscription = (user as any).subscription || "FREE";
             token.subscriptionEndsAt = (user as any).subscriptionEndsAt;
             token.role = (user as any).role || "USER";
+            
+            console.log(`✅ Credentials JWT token populated for: ${token.email}`);
+          } else {
+            console.log(`⚠️ Unknown provider or missing account info`);
+            // Fallback for any other case
+            token.id = user.id;
+            token.email = user.email;
+            token.name = user.name;
+            token.image = user.image;
+            token.subscription = "FREE";
+            token.role = "USER";
           }
         } catch (error) {
-          console.error("Error in JWT callback:", error);
+          console.error("❌ Error in JWT callback:", error);
           // Fallback to provided user data
           token.id = user.id;
           token.email = user.email;
           token.name = user.name;
+          token.image = user.image;
           token.subscription = "FREE";
           token.role = "USER";
         }
       }
+      
+      console.log(`🎯 JWT callback completed for: ${token.email}`);
       return token;
     },
     async session({ session, token }) {
+      console.log(`📋 Session callback - Token exists: ${token ? 'YES' : 'NO'}, User: ${token?.email || 'N/A'}`);
+      
       // Send properties to the client from JWT token
       if (token && session.user) {
         (session.user as any).id = token.id;
@@ -239,7 +273,12 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).subscription = token.subscription || "FREE";
         (session.user as any).subscriptionEndsAt = token.subscriptionEndsAt;
         (session.user as any).role = token.role || "USER";
+        
+        console.log(`✅ Session populated for: ${token.email}`);
+      } else {
+        console.log(`❌ Session callback failed - missing token or session.user`);
       }
+      
       return session;
     },
   },
