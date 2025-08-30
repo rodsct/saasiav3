@@ -76,7 +76,30 @@ export const authOptions: NextAuthOptions = {
           pass: process.env.EMAIL_SERVER_PASSWORD
         }
       },
-      from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io'
+      from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io',
+      async sendVerificationRequest({ identifier: email, url, provider }) {
+        try {
+          console.log(`📧 Sending Magic Link to: ${email}`);
+          console.log(`🔗 Magic Link URL: ${url}`);
+          
+          // Use our beautiful email system for Magic Links
+          const { sendSimpleMagicLinkEmail } = await import('@/utils/simpleEmail');
+          
+          // Extract user name from email for personalization
+          const userName = email.split('@')[0];
+          const success = await sendSimpleMagicLinkEmail(email, url, userName);
+          
+          if (success) {
+            console.log(`✅ Magic Link sent successfully to: ${email}`);
+          } else {
+            console.error(`❌ Failed to send Magic Link to: ${email}`);
+            throw new Error(`Failed to send Magic Link email to ${email}`);
+          }
+        } catch (error) {
+          console.error('❌ Magic Link send error:', error);
+          throw error;
+        }
+      }
     }),
     CredentialsProvider({
       name: "credentials",
@@ -181,6 +204,12 @@ export const authOptions: NextAuthOptions = {
     },
     async redirect({ url, baseUrl }) {
       console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl, "prodUrl:", PRODUCTION_URL);
+      
+      // Special handling for magic link success - redirect to home page
+      if (url.includes('/api/auth/callback/email') || url.includes('/signin?')) {
+        console.log("🪄 Magic link callback detected, redirecting to home");
+        return PRODUCTION_URL;
+      }
       
       // Force production URL for all redirects
       if (url.startsWith("/")) {
