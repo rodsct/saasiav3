@@ -231,34 +231,16 @@ const Signin = () => {
                 <MagicLink />
               )}
 
-              {/* Email Verification Notice */}
-              <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg dark:from-blue-900/20 dark:to-cyan-900/20 dark:border-blue-400">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <span className="text-2xl">📧</span>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                      ¿Problemas para iniciar sesión?
-                    </h3>
-                    <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                      <p>• Debes verificar tu email antes de poder iniciar sesión</p>
-                      <p>• Revisa tu bandeja de entrada y carpeta de spam</p>
-                      <p>• Si no recibiste el email, puedes registrarte nuevamente</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               <Link
                 href="/forgot-password"
-                className="mb-2 inline-block text-base text-dark hover:text-primary dark:text-white dark:hover:text-primary"
+                className="mb-2 inline-block text-base text-gray-700 hover:text-[#00d4ff] hover:underline transition-all duration-200 dark:text-gray-300 dark:hover:text-[#00d4ff]"
               >
 ¿Olvidaste tu contraseña?
               </Link>
-              <p className="text-body-secondary text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-base">
 ¿Aún no tienes cuenta?{" "}
-                <Link href="/signup" className="text-primary hover:underline">
+                <Link href="/signup" className="text-[#00d4ff] hover:text-[#0099cc] hover:underline font-medium transition-all duration-200">
                   Regístrate
                 </Link>
               </p>

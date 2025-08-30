@@ -214,22 +214,22 @@ const SignUp = () => {
                 <MagicLink />
               )}
 
-              <p className="text-body-secondary mb-4 text-base">
+              <p className="text-gray-600 dark:text-gray-400 mb-4 text-base">
                 Al crear una cuenta, aceptas nuestros{" "}
-                <Link href="/#" className="text-primary hover:underline">
+                <Link href="/#" className="text-[#00d4ff] hover:text-[#0099cc] hover:underline font-medium transition-all duration-200">
                   Términos de Privacidad
                 </Link>{" "}
                 y{" "}
-                <Link href="/#" className="text-primary hover:underline">
+                <Link href="/#" className="text-[#00d4ff] hover:text-[#0099cc] hover:underline font-medium transition-all duration-200">
                   Políticas
                 </Link>
               </p>
 
-              <p className="text-body-secondary text-base">
+              <p className="text-gray-600 dark:text-gray-400 text-base">
                 ¿Ya tienes una cuenta?
                 <Link
                   href="/signin"
-                  className="pl-2 text-primary hover:underline"
+                  className="pl-2 text-[#00d4ff] hover:text-[#0099cc] hover:underline font-medium transition-all duration-200"
                 >
                   Iniciar Sesión
                 </Link>
