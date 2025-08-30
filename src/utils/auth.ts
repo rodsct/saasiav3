@@ -3,7 +3,6 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prismaDB";
 import { getSiteUrl, getOAuthCallbackUrl, isOwnDomain } from "./siteConfig";
 import { triggerUserRegistered } from "./userEvents";
@@ -22,7 +21,6 @@ console.log("  NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 console.log("  NEXTAUTH_URL_INTERNAL:", process.env.NEXTAUTH_URL_INTERNAL);
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
   
   // Force production URL for callbacks
@@ -110,6 +108,10 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             email: user.email,
             name: user.name,
+            image: user.image,
+            subscription: user.subscription,
+            subscriptionEndsAt: user.subscriptionEndsAt,
+            role: user.role,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -126,46 +128,6 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       console.log(`🔐 SignIn callback - Provider: ${account?.provider}, Email: ${user?.email}`);
-      
-      // Handle OAuth providers explicitly (not email provider)
-      if (account?.provider === "google" || account?.provider === "github") {
-        try {
-          // Check if user already exists
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
-          });
-
-          if (!existingUser) {
-            // Create new user for OAuth providers
-            const newUser = await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name || "Usuario OAuth",
-                emailVerified: new Date(), // OAuth users have verified emails
-                image: user.image,
-              },
-            });
-
-            // Trigger welcome email for new OAuth users
-            try {
-              await triggerUserRegistered(newUser.email, newUser.name, false);
-              console.log(`✅ Welcome email triggered for OAuth user: ${newUser.email}`);
-            } catch (error) {
-              console.error(`❌ Failed to trigger welcome email for OAuth user: ${newUser.email}`, error);
-            }
-          } else if (!existingUser.emailVerified) {
-            // Update email verification for existing users
-            await prisma.user.update({
-              where: { email: user.email! },
-              data: { emailVerified: new Date() }
-            });
-          }
-        } catch (error) {
-          console.error("Error in OAuth signIn callback:", error);
-        }
-      }
-      
-      // Let PrismaAdapter handle email provider automatically
       console.log(`✅ SignIn approved for ${account?.provider} provider`);
       return true;
     },
@@ -200,20 +162,80 @@ export const authOptions: NextAuthOptions = {
       console.log("🔀 Default redirect to production URL:", PRODUCTION_URL);
       return PRODUCTION_URL;
     },
-    async jwt({ token, user }) {
-      // If user is provided (first time), add user info to token
+    async jwt({ token, user, account }) {
+      // If user is provided (first sign in), fetch full user data from database
       if (user) {
-        token.id = user.id;
-        token.subscription = user.subscription || "FREE";
-        token.subscriptionEndsAt = user.subscriptionEndsAt;
-        token.role = user.role || "USER";
+        try {
+          // For OAuth providers, we need to fetch/create user in database
+          if (account?.provider === "google" || account?.provider === "github") {
+            // Check if user exists in database
+            let dbUser = await prisma.user.findUnique({
+              where: { email: user.email! },
+            });
+
+            if (!dbUser) {
+              // Create new user for OAuth providers
+              dbUser = await prisma.user.create({
+                data: {
+                  email: user.email!,
+                  name: user.name || "Usuario OAuth",
+                  emailVerified: new Date(),
+                  image: user.image,
+                },
+              });
+
+              // Trigger welcome email for new OAuth users
+              try {
+                await triggerUserRegistered(dbUser.email, dbUser.name, false);
+                console.log(`✅ Welcome email triggered for OAuth user: ${dbUser.email}`);
+              } catch (error) {
+                console.error(`❌ Failed to trigger welcome email for OAuth user: ${dbUser.email}`, error);
+              }
+            } else if (!dbUser.emailVerified) {
+              // Update email verification for existing users
+              dbUser = await prisma.user.update({
+                where: { email: user.email! },
+                data: { emailVerified: new Date() }
+              });
+            }
+
+            // Use database user data
+            token.id = dbUser.id;
+            token.email = dbUser.email;
+            token.name = dbUser.name;
+            token.image = dbUser.image;
+            token.subscription = dbUser.subscription || "FREE";
+            token.subscriptionEndsAt = dbUser.subscriptionEndsAt;
+            token.role = dbUser.role || "USER";
+          } else {
+            // For credentials provider, user data already comes from database
+            token.id = user.id;
+            token.email = user.email;
+            token.name = user.name;
+            token.image = user.image;
+            token.subscription = (user as any).subscription || "FREE";
+            token.subscriptionEndsAt = (user as any).subscriptionEndsAt;
+            token.role = (user as any).role || "USER";
+          }
+        } catch (error) {
+          console.error("Error in JWT callback:", error);
+          // Fallback to provided user data
+          token.id = user.id;
+          token.email = user.email;
+          token.name = user.name;
+          token.subscription = "FREE";
+          token.role = "USER";
+        }
       }
       return token;
     },
     async session({ session, token }) {
-      // Send properties to the client
+      // Send properties to the client from JWT token
       if (token && session.user) {
         (session.user as any).id = token.id;
+        (session.user as any).email = token.email;
+        (session.user as any).name = token.name;
+        (session.user as any).image = token.image;
         (session.user as any).subscription = token.subscription || "FREE";
         (session.user as any).subscriptionEndsAt = token.subscriptionEndsAt;
         (session.user as any).role = token.role || "USER";
