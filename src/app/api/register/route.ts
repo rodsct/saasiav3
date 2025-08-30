@@ -22,6 +22,13 @@ export async function POST(request: any) {
   console.log(`🔍 CAPTCHA Debug - hcaptchaToken: ${hcaptchaToken ? 'YES' : 'NO'}, mathCaptcha: ${mathCaptcha ? 'YES' : 'NO'}`);
   console.log(`🔑 Environment - HCAPTCHA_SECRET_KEY: ${process.env.HCAPTCHA_SECRET_KEY ? 'SET' : 'NOT SET'}`);
   
+  // Debug extra para entender por qué las variables no cargan
+  console.log('🔧 Environment Debug Info:');
+  console.log('- NODE_ENV:', process.env.NODE_ENV);
+  console.log('- All HCAPTCHA vars:', Object.keys(process.env).filter(k => k.includes('HCAPTCHA')));
+  console.log('- Total env vars count:', Object.keys(process.env).length);
+  console.log('- Sample env vars:', Object.keys(process.env).slice(0, 10));
+  
   if (hcaptchaToken) {
     console.log(`🚀 Verifying hCaptcha token: ${hcaptchaToken.substring(0, 20)}...`);
     captchaValid = await verifyCaptcha(hcaptchaToken);
