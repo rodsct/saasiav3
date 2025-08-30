@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
-import { sendEmailVerification } from "@/utils/emailService";
 import { getSiteUrl } from "@/utils/siteConfig";
 import { verifyCaptcha, verifyMathCaptcha } from "@/utils/captcha";
 import crypto from "crypto";
@@ -100,25 +99,13 @@ export async function POST(request: any) {
   try {
     const verificationUrl = `${getSiteUrl()}/verify-email?token=${verificationToken}`;
     
-    // Try advanced email service first, fallback to simple email
-    let emailSent = false;
-    try {
-      await sendEmailVerification(user.email, verificationUrl, user.name);
-      emailSent = true;
-      console.log(`✅ Verification email sent via template system to: ${user.email}`);
-    } catch (emailError) {
-      console.log(`⚠️ Template email failed, trying simple email...`, emailError);
-      
-      // Fallback to simple email without templates
-      const { sendSimpleVerificationEmail } = await import('@/utils/simpleEmail');
-      emailSent = await sendSimpleVerificationEmail(user.email, verificationUrl, user.name);
-      
-      if (emailSent) {
-        console.log(`✅ Verification email sent via simple system to: ${user.email}`);
-      }
-    }
+    // Use simple email system directly (no more old templates)
+    const { sendSimpleVerificationEmail } = await import('@/utils/simpleEmail');
+    const emailSent = await sendSimpleVerificationEmail(user.email, verificationUrl, user.name);
     
-    if (!emailSent) {
+    if (emailSent) {
+      console.log(`✅ Verification email sent via simple system to: ${user.email}`);
+    } else {
       console.error(`❌ Failed to send verification email to: ${user.email}`);
     }
   } catch (error) {
