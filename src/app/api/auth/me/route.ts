@@ -1,52 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/utils/prismaDB";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || "simple-auth-secret-key";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/utils/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("auth-token")?.value;
-
-    if (!token) {
-      return NextResponse.json({ user: null });
-    }
-
-    // Verify JWT
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    console.log("🔍 /api/auth/me - Checking session...");
     
-    // Get fresh user data
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        subscription: true,
-        subscriptionEndsAt: true,
-        role: true,
-        whatsapp: true,
-      },
-    });
+    // Get NextAuth session
+    const session = await getServerSession(authOptions);
+    
+    console.log(`📋 Session found: ${session ? 'YES' : 'NO'}, User: ${session?.user?.email || 'N/A'}`);
 
-    if (!user) {
+    if (!session || !session.user) {
+      console.log("❌ No session found");
       return NextResponse.json({ user: null });
     }
 
+    console.log(`✅ Returning user session for: ${session.user.email}`);
     return NextResponse.json({
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        subscription: user.subscription,
-        subscriptionEndsAt: user.subscriptionEndsAt,
-        role: user.role,
-        whatsapp: user.whatsapp,
+        id: (session.user as any).id,
+        email: session.user.email,
+        name: session.user.name,
+        image: session.user.image,
+        subscription: (session.user as any).subscription,
+        subscriptionEndsAt: (session.user as any).subscriptionEndsAt,
+        role: (session.user as any).role,
       },
     });
 
   } catch (error) {
-    console.error("Auth check error:", error);
+    console.error("❌ Auth check error:", error);
     return NextResponse.json({ user: null });
   }
 }
