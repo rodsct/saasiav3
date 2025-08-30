@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import SocialSignIn from "../SocialSignIn";
-import SwitchOption from "../SwitchOption";
-import MagicLink from "../MagicLink";
 import Loader from "@/components/Common/Loader";
 import HCaptcha from "@/components/Common/HCaptcha";
 import { getHCaptchaSiteKey, isHCaptchaConfigured } from "@/config/hcaptcha";
@@ -22,7 +20,6 @@ const Signin = () => {
     checkboxToggle: false,
   });
 
-  const [isPassword, setIsPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hcaptchaToken, setHcaptchaToken] = useState<string>('');
   const [captchaVerified, setCaptchaVerified] = useState(false);
@@ -152,13 +149,7 @@ const Signin = () => {
                 </span>
               </span>
 
-              <SwitchOption
-                isPassword={isPassword}
-                setIsPassword={setIsPassword}
-              />
-
-              {isPassword ? (
-                <form onSubmit={(e) => e.preventDefault()}>
+              <form onSubmit={(e) => e.preventDefault()}>
                   <div className="mb-[22px]">
                     <input
                       type="email"
@@ -227,9 +218,6 @@ const Signin = () => {
                     )}
                   </div>
                 </form>
-              ) : (
-                <MagicLink />
-              )}
 
 
               <Link

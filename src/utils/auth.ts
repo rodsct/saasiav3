@@ -3,7 +3,6 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prismaDB";
 import { getSiteUrl, getOAuthCallbackUrl, isOwnDomain } from "./siteConfig";
@@ -32,9 +31,8 @@ export const authOptions: NextAuthOptions = {
   // Custom redirect override
   redirectProxyUrl: PRODUCTION_URL,
   
-  // Use database strategy for email provider compatibility
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   
   providers: [
@@ -66,40 +64,6 @@ export const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
-    }),
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD
-        }
-      },
-      from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io',
-      async sendVerificationRequest({ identifier: email, url, provider }) {
-        try {
-          console.log(`📧 Sending Magic Link to: ${email}`);
-          console.log(`🔗 Magic Link URL: ${url}`);
-          
-          // Use our beautiful email system for Magic Links
-          const { sendSimpleMagicLinkEmail } = await import('@/utils/simpleEmail');
-          
-          // Extract user name from email for personalization
-          const userName = email.split('@')[0];
-          const success = await sendSimpleMagicLinkEmail(email, url, userName);
-          
-          if (success) {
-            console.log(`✅ Magic Link sent successfully to: ${email}`);
-          } else {
-            console.error(`❌ Failed to send Magic Link to: ${email}`);
-            throw new Error(`Failed to send Magic Link email to ${email}`);
-          }
-        } catch (error) {
-          console.error('❌ Magic Link send error:', error);
-          throw error;
-        }
-      }
     }),
     CredentialsProvider({
       name: "credentials",
@@ -208,14 +172,6 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl, "prodUrl:", PRODUCTION_URL);
       
-      // Special handling: if redirecting to signup/signin and it's exactly those URLs (not with params), redirect to home
-      if ((url === `${PRODUCTION_URL}/signup` || url === `${PRODUCTION_URL}/signin`) && !url.includes('?')) {
-        console.log("🪄 Magic link successful - redirecting to home instead of signup/signin");
-        return PRODUCTION_URL;
-      }
-      
-      // Log all redirects to debug magic link flow
-      console.log("🔍 Analyzing redirect URL:", url);
       
       // Force production URL for all redirects
       if (url.startsWith("/")) {
@@ -244,47 +200,31 @@ export const authOptions: NextAuthOptions = {
       console.log("🔀 Default redirect to production URL:", PRODUCTION_URL);
       return PRODUCTION_URL;
     },
-    async signIn({ user, account, profile, email, credentials }) {
-      console.log(`🔍 SignIn callback - Provider: ${account?.provider}, Email: ${user?.email}`);
-      
-      // Let NextAuth handle email provider users automatically
-      // The PrismaAdapter will create/find users as needed
-      if (account?.provider === "email") {
-        console.log(`✅ Magic link sign in approved for: ${user.email}`);
-        return true;
+    async jwt({ token, user }) {
+      // If user is provided (first time), add user info to token
+      if (user) {
+        token.id = user.id;
+        token.subscription = user.subscription || "FREE";
+        token.subscriptionEndsAt = user.subscriptionEndsAt;
+        token.role = user.role || "USER";
       }
-      
-      return true; // Allow other providers
+      return token;
     },
-    async session({ session, user }) {
-      if (user && session.user) {
-        // With database strategy, user data comes from database
-        (session.user as any).id = user.id;
-        (session.user as any).subscription = user.subscription || "FREE";
-        (session.user as any).subscriptionEndsAt = user.subscriptionEndsAt;
-        (session.user as any).role = user.role || "USER";
+    async session({ session, token }) {
+      // Send properties to the client
+      if (token && session.user) {
+        (session.user as any).id = token.id;
+        (session.user as any).subscription = token.subscription || "FREE";
+        (session.user as any).subscriptionEndsAt = token.subscriptionEndsAt;
+        (session.user as any).role = token.role || "USER";
       }
       return session;
     },
   },
 
-  events: {
-    async signIn({ user, account, profile, isNewUser }) {
-      if (account?.provider === "email" && isNewUser) {
-        // Send welcome email for new magic link users (async, don't wait)
-        try {
-          await triggerUserRegistered(user.email!, user.name || undefined, false);
-          console.log(`✅ Welcome email triggered for new magic link user: ${user.email}`);
-        } catch (error) {
-          console.error(`❌ Failed to trigger welcome email for magic link user: ${user.email}`, error);
-        }
-      }
-    }
-  },
 
   pages: {
     signIn: "/signin",
-    verifyRequest: "/auth/verify-request",
     error: "/auth/error"
   },
 };
