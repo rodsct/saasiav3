@@ -96,11 +96,31 @@ export async function POST(request: any) {
     },
   });
 
-  // Send verification email
+  // Send verification email using simple approach
   try {
     const verificationUrl = `${getSiteUrl()}/verify-email?token=${verificationToken}`;
-    await sendEmailVerification(user.email, verificationUrl, user.name);
-    console.log(`✅ Verification email sent to: ${user.email}`);
+    
+    // Try advanced email service first, fallback to simple email
+    let emailSent = false;
+    try {
+      await sendEmailVerification(user.email, verificationUrl, user.name);
+      emailSent = true;
+      console.log(`✅ Verification email sent via template system to: ${user.email}`);
+    } catch (emailError) {
+      console.log(`⚠️ Template email failed, trying simple email...`, emailError);
+      
+      // Fallback to simple email without templates
+      const { sendSimpleVerificationEmail } = await import('@/utils/simpleEmail');
+      emailSent = await sendSimpleVerificationEmail(user.email, verificationUrl, user.name);
+      
+      if (emailSent) {
+        console.log(`✅ Verification email sent via simple system to: ${user.email}`);
+      }
+    }
+    
+    if (!emailSent) {
+      console.error(`❌ Failed to send verification email to: ${user.email}`);
+    }
   } catch (error) {
     console.error(`❌ Failed to send verification email to: ${user.email}`, error);
     // Don't fail registration if email fails

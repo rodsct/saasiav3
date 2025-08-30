@@ -61,11 +61,18 @@ const Signin = () => {
       .then((callback) => {
         if (callback?.error) {
           // Check if it's an email verification error
-          if (callback.error.includes("verifica tu email")) {
+          if (callback.error.includes("verifica tu email") || callback.error.includes("Por favor verifica")) {
             toast.error(
-              "⚠️ Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada y haz clic en el enlace de verificación.",
-              { duration: 6000 }
+              "📧 Tu cuenta no está verificada. Revisa tu email y haz clic en el enlace de verificación para activar tu cuenta.",
+              { duration: 8000 }
             );
+            // Show additional info in a separate toast
+            setTimeout(() => {
+              toast("💡 Si no encuentras el email, revisa tu carpeta de spam o intenta registrarte nuevamente.", {
+                duration: 6000,
+                icon: "ℹ️"
+              });
+            }, 1000);
           } else if (callback.error === "CredentialsSignin") {
             toast.error("Email o contraseña incorrectos");
           } else {
@@ -199,14 +206,20 @@ const Signin = () => {
               )}
 
               {/* Email Verification Notice */}
-              <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r-md dark:bg-blue-900/20 dark:border-blue-400">
-                <div className="flex">
+              <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg dark:from-blue-900/20 dark:to-cyan-900/20 dark:border-blue-400">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <span className="text-2xl">📧</span>
+                  </div>
                   <div className="ml-3">
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
-                      📧 <strong>¿No puedes iniciar sesión?</strong><br />
-                      Asegúrate de haber verificado tu email. Si no recibiste el email de verificación, 
-                      intenta registrarte nuevamente para recibir un nuevo enlace.
-                    </p>
+                    <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                      ¿Problemas para iniciar sesión?
+                    </h3>
+                    <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                      <p>• Debes verificar tu email antes de poder iniciar sesión</p>
+                      <p>• Revisa tu bandeja de entrada y carpeta de spam</p>
+                      <p>• Si no recibiste el email, puedes registrarte nuevamente</p>
+                    </div>
                   </div>
                 </div>
               </div>
