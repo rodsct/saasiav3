@@ -273,6 +273,125 @@ ${getSiteUrl()}
   }
 }
 
+export async function sendSimpleMagicLinkEmail(
+  userEmail: string,
+  magicLinkUrl: string,
+  userName?: string
+): Promise<boolean> {
+  try {
+    console.log(`📧 Sending simple magic link email to: ${userEmail}`);
+
+    const transporter = createSimpleTransporter();
+    if (!transporter) {
+      console.error('❌ No email transporter available');
+      return false;
+    }
+
+    const senderName = 'Aranza.io';
+    const senderAddress = process.env.EMAIL_SERVER_USER || process.env.EMAIL_FROM || 'noreply@agente.aranza.io';
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Enlace mágico de acceso - Aranza.io</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="margin: 0; font-size: 28px;">🪄 Enlace mágico de acceso</h1>
+        </div>
+        
+        <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+          <h2 style="color: #333; margin-top: 0;">¡Hola ${userName || 'Usuario'}!</h2>
+          
+          <p>Haz clic en el siguiente enlace para acceder a tu cuenta en <strong>Aranza.io</strong> sin necesidad de contraseña:</p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${magicLinkUrl}" 
+               style="display: inline-block; background: #00d4ff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px;">
+              🔑 Acceder a mi cuenta
+            </a>
+          </div>
+          
+          <p style="color: #666; font-size: 14px;">
+            Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
+            <a href="${magicLinkUrl}" style="color: #00d4ff; word-break: break-all;">${magicLinkUrl}</a>
+          </p>
+          
+          <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+            <p style="margin: 0; color: #856404; font-size: 14px;">
+              <strong>⚠️ Importante:</strong> Este enlace expirará en 24 horas por motivos de seguridad.
+            </p>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+          
+          <p style="color: #999; font-size: 12px; text-align: center;">
+            Si no solicitaste este enlace de acceso, puedes ignorar este email.<br>
+            Tu cuenta permanecerá segura.
+          </p>
+        </div>
+        
+        <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+          <p>© ${new Date().getFullYear()} Aranza.io - Tu asistente de IA</p>
+          <p><a href="${getSiteUrl()}" style="color: #00d4ff;">${getSiteUrl()}</a></p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const textContent = `
+Enlace mágico de acceso - Aranza.io
+
+¡Hola ${userName || 'Usuario'}!
+
+Haz clic en el siguiente enlace para acceder a tu cuenta en Aranza.io sin necesidad de contraseña:
+
+${magicLinkUrl}
+
+⚠️ Este enlace expirará en 24 horas por motivos de seguridad.
+
+Si no solicitaste este enlace de acceso, puedes ignorar este email.
+
+© ${new Date().getFullYear()} Aranza.io
+${getSiteUrl()}
+    `;
+
+    // Generate unique timestamp to prevent caching
+    const timestamp = Date.now();
+    
+    const mailOptions = {
+      from: `"${senderName}" <${senderAddress}>`,
+      to: userEmail,
+      subject: `🪄 Tu enlace mágico de acceso a Aranza.io`,
+      html: htmlContent,
+      text: textContent,
+      // Add unique headers
+      headers: {
+        'X-Entity-ID': `magic-link-${timestamp}`,
+        'Message-ID': `<magic-link-${timestamp}-${userEmail.replace('@', '-at-')}@aranza.io>`,
+        'X-Priority': '3',
+        'X-MSMail-Priority': 'Normal',
+      },
+    };
+
+    console.log('📤 Sending magic link email...', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject
+    });
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Magic link email sent successfully:', result.messageId);
+    return true;
+
+  } catch (error) {
+    console.error('❌ Error sending simple magic link email:', error);
+    return false;
+  }
+}
+
 export async function sendSimplePasswordResetEmail(
   userEmail: string,
   resetUrl: string,

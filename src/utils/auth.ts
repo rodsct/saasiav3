@@ -3,6 +3,8 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
+import EmailProvider from "next-auth/providers/email";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prismaDB";
 import { getSiteUrl, getOAuthCallbackUrl, isOwnDomain } from "./siteConfig";
 import { triggerUserRegistered } from "./userEvents";
@@ -21,6 +23,7 @@ console.log("  NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 console.log("  NEXTAUTH_URL_INTERNAL:", process.env.NEXTAUTH_URL_INTERNAL);
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
   
   // Force production URL for callbacks
@@ -28,6 +31,11 @@ export const authOptions: NextAuthOptions = {
   
   // Custom redirect override
   redirectProxyUrl: PRODUCTION_URL,
+  
+  // Use database strategy for sessions (required for email provider)
+  session: {
+    strategy: "database",
+  },
   
   providers: [
     {
@@ -58,6 +66,37 @@ export const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
+    }),
+    EmailProvider({
+      server: {
+        host: process.env.EMAIL_SERVER_HOST,
+        port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASSWORD
+        }
+      },
+      from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io',
+      async sendVerificationRequest({ identifier: email, url, provider }) {
+        try {
+          console.log(`📧 Sending Magic Link to: ${email}`);
+          console.log(`🔗 Magic Link URL: ${url}`);
+          
+          // Use our simple email system for Magic Links
+          const { sendSimpleMagicLinkEmail } = await import('@/utils/simpleEmail');
+          const success = await sendSimpleMagicLinkEmail(email, url);
+          
+          if (success) {
+            console.log(`✅ Magic Link sent successfully to: ${email}`);
+          } else {
+            console.error(`❌ Failed to send Magic Link to: ${email}`);
+            throw new Error(`Failed to send Magic Link email to ${email}`);
+          }
+        } catch (error) {
+          console.error('❌ Magic Link send error:', error);
+          throw error;
+        }
+      }
     }),
     CredentialsProvider({
       name: "credentials",
@@ -190,35 +229,13 @@ export const authOptions: NextAuthOptions = {
       console.log("🔀 Default redirect to production URL:", PRODUCTION_URL);
       return PRODUCTION_URL;
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        (session.user as any).id = token.id;
-        
-        // Get current user data including subscription
-        try {
-          const userData = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: {
-              subscription: true,
-              subscriptionEndsAt: true,
-              role: true,
-            },
-          });
-          
-          (session.user as any).subscription = userData?.subscription || "FREE";
-          (session.user as any).subscriptionEndsAt = userData?.subscriptionEndsAt;
-          (session.user as any).role = userData?.role || "USER";
-        } catch (error) {
-          console.error("Session callback error:", error);
-          (session.user as any).subscription = "FREE";
-          (session.user as any).role = "USER";
-        }
+    async session({ session, user }) {
+      if (user && session.user) {
+        // With database strategy, we get user object directly
+        (session.user as any).id = user.id;
+        (session.user as any).subscription = user.subscription || "FREE";
+        (session.user as any).subscriptionEndsAt = user.subscriptionEndsAt;
+        (session.user as any).role = user.role || "USER";
       }
       return session;
     },
