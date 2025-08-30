@@ -24,12 +24,20 @@ export default function WhatsAppConfig() {
     fetchConfig();
   }, []);
 
-  useEffect(() => {
+  const generateQRUrl = () => {
     if (config.whatsappNumber && config.isWhatsappEnabled) {
-      generateQRUrl();
+      const cleanNumber = config.whatsappNumber.replace(/[+\s-()]/g, '');
+      const message = encodeURIComponent(config.whatsappMessage || "Hola");
+      const whatsappUrl = `https://wa.me/${cleanNumber}?text=${message}`;
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(whatsappUrl)}`;
+      setQrUrl(qrApiUrl);
     } else {
       setQrUrl("");
     }
+  };
+
+  useEffect(() => {
+    generateQRUrl();
   }, [config.whatsappNumber, config.whatsappMessage, config.isWhatsappEnabled]);
 
   const fetchConfig = async () => {
@@ -53,17 +61,6 @@ export default function WhatsAppConfig() {
     }
   };
 
-  const generateQRUrl = () => {
-    if (!config.whatsappNumber) return;
-    
-    const cleanNumber = config.whatsappNumber.replace(/[+\s-()]/g, '');
-    const message = encodeURIComponent(config.whatsappMessage || "Hola");
-    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${message}`;
-    
-    // Generate QR using qr-server API
-    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(whatsappUrl)}`;
-    setQrUrl(qrApiUrl);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

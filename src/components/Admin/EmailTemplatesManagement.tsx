@@ -20,8 +20,6 @@ export default function EmailTemplatesManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [showEditor, setShowEditor] = useState(false);
-  const [testEmail, setTestEmail] = useState("");
-  const [isSendingTest, setIsSendingTest] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
 
   useEffect(() => {
@@ -98,39 +96,6 @@ export default function EmailTemplatesManagement() {
     }
   };
 
-  const sendTestEmail = async () => {
-    if (!testEmail) {
-      toast.error("Ingresa un email para la prueba");
-      return;
-    }
-
-    setIsSendingTest(true);
-    try {
-      const response = await fetch("/api/admin/email-simple-test", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ to: testEmail }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast.success("Email de prueba enviado exitosamente");
-        console.log("Email sent with ID:", data.messageId);
-        setTestEmail("");
-      } else {
-        const data = await response.json();
-        toast.error(data.error || "Error al enviar email de prueba");
-        console.error("Email error details:", data.details);
-      }
-    } catch (error) {
-      console.error("Error sending test email:", error);
-      toast.error("Error de conexión");
-    } finally {
-      setIsSendingTest(false);
-    }
-  };
 
   const getTemplateDisplayName = (type: string): string => {
     const names: { [key: string]: string } = {
@@ -182,35 +147,6 @@ export default function EmailTemplatesManagement() {
         )}
       </div>
 
-      {/* Test Email Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
-          🧪 Probar Configuración de Email
-        </h4>
-        <div className="flex gap-3">
-          <button
-            onClick={initializeTemplates}
-            disabled={isInitializing}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm transition-colors"
-          >
-            {isInitializing ? "Iniciando..." : "🔧 Inicializar Plantillas"}
-          </button>
-          <input
-            type="email"
-            value={testEmail}
-            onChange={(e) => setTestEmail(e.target.value)}
-            placeholder="tu-email@ejemplo.com"
-            className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]"
-          />
-          <button
-            onClick={sendTestEmail}
-            disabled={isSendingTest || !testEmail}
-            className="bg-[#00d4ff] hover:bg-[#0099cc] disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm transition-colors"
-          >
-            {isSendingTest ? "Enviando..." : "📧 Enviar Prueba"}
-          </button>
-        </div>
-      </div>
 
       {/* Templates List */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">

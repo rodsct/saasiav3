@@ -187,74 +187,6 @@ export default function UserManagement() {
     }
   };
 
-  const sendTestEmail = async (userId: string, emailType: 'welcome' | 'verification') => {
-    try {
-      const response = await fetch(`/api/admin/users/${userId}/send-test-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ emailType }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast.success(`✅ Correo de ${emailType === 'welcome' ? 'bienvenida' : 'verificación'} enviado a ${data.sentTo}`);
-      } else {
-        const error = await response.json();
-        toast.error(`❌ Error: ${error.error || 'No se pudo enviar el correo'}`);
-      }
-    } catch (error) {
-      console.error("Error sending test email:", error);
-      toast.error("Error enviando correo de prueba");
-    }
-  };
-
-  const sendDirectEmail = async (userId: string, emailType: 'welcome' | 'verification') => {
-    try {
-      const response = await fetch(`/api/admin/users/${userId}/send-direct-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ emailType }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast.success(`✅ Correo DIRECTO de ${emailType === 'welcome' ? 'bienvenida' : 'verificación'} enviado a ${data.sentTo}`);
-      } else {
-        const error = await response.json();
-        toast.error(`❌ Error directo: ${error.error || 'No se pudo enviar el correo'}`);
-      }
-    } catch (error) {
-      console.error("Error sending direct email:", error);
-      toast.error("Error enviando correo directo");
-    }
-  };
-
-  const sendFixedEmail = async (userId: string, emailType: 'welcome' | 'verification') => {
-    try {
-      const response = await fetch(`/api/admin/users/${userId}/send-fixed-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ emailType }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast.success(`✅ Correo FIJO de ${emailType === 'welcome' ? 'bienvenida' : 'verificación'} enviado a ${data.sentTo}`);
-      } else {
-        const error = await response.json();
-        toast.error(`❌ Error fijo: ${error.error || 'No se pudo enviar el correo'}`);
-      }
-    } catch (error) {
-      console.error("Error sending fixed email:", error);
-      toast.error("Error enviando correo fijo");
-    }
-  };
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -422,57 +354,6 @@ export default function UserManagement() {
                           title="Extender 1 mes"
                         >
                           +1m
-                        </button>
-                      </div>
-                      
-                      {/* Email Test Buttons */}
-                      <div className="flex flex-col space-y-1">
-                        <div className="text-xs text-gray-500 font-medium">Con plantillas BD:</div>
-                        <button
-                          onClick={() => sendTestEmail(user.id, 'welcome')}
-                          className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors w-full"
-                          title="Enviar correo de bienvenida usando plantillas BD"
-                        >
-                          📧 Bienvenida (BD)
-                        </button>
-                        <button
-                          onClick={() => sendTestEmail(user.id, 'verification')}
-                          className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors w-full"
-                          title="Enviar correo de verificación usando plantillas BD"
-                        >
-                          ✉️ Verificación (BD)
-                        </button>
-                        
-                        <div className="text-xs text-gray-500 font-medium mt-2">Directo (sin BD):</div>
-                        <button
-                          onClick={() => sendDirectEmail(user.id, 'welcome')}
-                          className="px-2 py-1 rounded text-xs font-medium bg-green-200 text-green-800 hover:bg-green-300 transition-colors w-full"
-                          title="Enviar correo directo de bienvenida (sin BD)"
-                        >
-                          📧 Directo Bienvenida
-                        </button>
-                        <button
-                          onClick={() => sendDirectEmail(user.id, 'verification')}
-                          className="px-2 py-1 rounded text-xs font-medium bg-blue-200 text-blue-800 hover:bg-blue-300 transition-colors w-full"
-                          title="Enviar correo directo de verificación (sin BD)"
-                        >
-                          ✉️ Directo Verificación
-                        </button>
-                        
-                        <div className="text-xs text-gray-500 font-medium mt-2">FIJO (con BD):</div>
-                        <button
-                          onClick={() => sendFixedEmail(user.id, 'welcome')}
-                          className="px-2 py-1 rounded text-xs font-medium bg-purple-200 text-purple-800 hover:bg-purple-300 transition-colors w-full"
-                          title="Enviar correo ARREGLADO de bienvenida"
-                        >
-                          📧 FIJO Bienvenida
-                        </button>
-                        <button
-                          onClick={() => sendFixedEmail(user.id, 'verification')}
-                          className="px-2 py-1 rounded text-xs font-medium bg-purple-200 text-purple-800 hover:bg-purple-300 transition-colors w-full"
-                          title="Enviar correo ARREGLADO de verificación"
-                        >
-                          ✉️ FIJO Verificación
                         </button>
                       </div>
                       
