@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 
+export async function GET() {
+  return NextResponse.json({ 
+    message: "Use POST method to execute OAuth cleanup",
+    endpoint: "/api/fix-oauth",
+    method: "POST"
+  });
+}
+
 export async function POST() {
   try {
     console.log('🔍 Ejecutando limpieza OAuth...');
