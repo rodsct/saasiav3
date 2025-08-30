@@ -3,11 +3,15 @@ export async function verifyCaptcha(token: string, remoteip?: string): Promise<b
   try {
     const secret = process.env.HCAPTCHA_SECRET_KEY;
     
+    console.log(`🔑 hCaptcha Secret Key: ${secret ? `${secret.substring(0, 10)}...` : 'NOT SET'}`);
+    
     if (!secret) {
-      console.warn('HCAPTCHA_SECRET_KEY not configured');
+      console.error('❌ HCAPTCHA_SECRET_KEY not configured');
       return false;
     }
 
+    console.log(`🌐 Making request to hCaptcha API with token: ${token.substring(0, 20)}...`);
+    
     const response = await fetch('https://hcaptcha.com/siteverify', {
       method: 'POST',
       headers: {
@@ -21,11 +25,17 @@ export async function verifyCaptcha(token: string, remoteip?: string): Promise<b
     });
 
     const data = await response.json();
-    console.log('hCaptcha verification response:', data);
+    console.log('🎯 hCaptcha verification response:', data);
+    
+    if (data.success === true) {
+      console.log('✅ hCaptcha verification successful');
+    } else {
+      console.error('❌ hCaptcha verification failed:', data['error-codes']);
+    }
     
     return data.success === true;
   } catch (error) {
-    console.error('Error verifying hCaptcha:', error);
+    console.error('💥 Error verifying hCaptcha:', error);
     return false;
   }
 }

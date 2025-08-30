@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import MagicLink from "../MagicLink";
 import Loader from "@/components/Common/Loader";
 import HCaptcha from "@/components/Common/HCaptcha";
+import MathCaptcha from "@/components/Common/MathCaptcha";
 import { getHCaptchaSiteKey, isHCaptchaConfigured } from "@/config/hcaptcha";
 
 const SignUp = () => {
@@ -17,6 +18,8 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const [hcaptchaToken, setHcaptchaToken] = useState<string>('');
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [mathCaptcha, setMathCaptcha] = useState<{answer: string, correctAnswer: number} | null>(null);
+  const [useMathCaptcha, setUseMathCaptcha] = useState(false);
 
   const hcaptchaSiteKey = getHCaptchaSiteKey();
   
@@ -40,6 +43,19 @@ const SignUp = () => {
     console.log('hCaptcha verified:', token.substring(0, 20) + '...');
   };
 
+  const handleMathCaptchaVerify = (answer: string, correctAnswer: number) => {
+    const userAnswer = parseInt(answer);
+    if (userAnswer === correctAnswer) {
+      setMathCaptcha({answer, correctAnswer});
+      setCaptchaVerified(true);
+      toast.success("Captcha verificado correctamente");
+    } else {
+      setMathCaptcha(null);
+      setCaptchaVerified(false);
+      toast.error("Captcha incorrecto, inténtalo de nuevo");
+    }
+  };
+
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -55,7 +71,8 @@ const SignUp = () => {
     
     const finalData = { 
       ...value,
-      hcaptchaToken: hcaptchaToken
+      hcaptchaToken: hcaptchaToken,
+      mathCaptcha: mathCaptcha
     };
 
     fetch("/api/register", {

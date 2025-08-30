@@ -19,21 +19,32 @@ export async function POST(request: any) {
   // Verify CAPTCHA (try hCaptcha first, fallback to math captcha)
   let captchaValid = false;
   
+  console.log(`🔍 CAPTCHA Debug - hcaptchaToken: ${hcaptchaToken ? 'YES' : 'NO'}, mathCaptcha: ${mathCaptcha ? 'YES' : 'NO'}`);
+  console.log(`🔑 Environment - HCAPTCHA_SECRET_KEY: ${process.env.HCAPTCHA_SECRET_KEY ? 'SET' : 'NOT SET'}`);
+  
   if (hcaptchaToken) {
+    console.log(`🚀 Verifying hCaptcha token: ${hcaptchaToken.substring(0, 20)}...`);
     captchaValid = await verifyCaptcha(hcaptchaToken);
+    console.log(`✅ hCaptcha verification result: ${captchaValid}`);
+    
     if (!captchaValid) {
+      console.error(`❌ hCaptcha verification failed for token: ${hcaptchaToken.substring(0, 20)}...`);
       return NextResponse.json({ 
         error: "Verificación CAPTCHA falló. Por favor inténtalo de nuevo." 
       }, { status: 400 });
     }
   } else if (mathCaptcha && mathCaptcha.answer && mathCaptcha.correctAnswer) {
+    console.log(`🧮 Verifying math captcha: ${mathCaptcha.answer} === ${mathCaptcha.correctAnswer}`);
     captchaValid = verifyMathCaptcha(mathCaptcha.answer, mathCaptcha.correctAnswer);
+    console.log(`✅ Math captcha verification result: ${captchaValid}`);
+    
     if (!captchaValid) {
       return NextResponse.json({ 
         error: "Respuesta matemática incorrecta. Por favor inténtalo de nuevo." 
       }, { status: 400 });
     }
   } else {
+    console.error(`❌ No captcha provided - hcaptchaToken: ${!!hcaptchaToken}, mathCaptcha: ${!!mathCaptcha}`);
     return NextResponse.json({ 
       error: "Verificación CAPTCHA requerida" 
     }, { status: 400 });
