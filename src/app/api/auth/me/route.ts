@@ -6,7 +6,6 @@ export async function GET(request: NextRequest) {
   try {
     console.log("🔍 /api/auth/me - Checking session...");
     
-    // Get NextAuth session
     const session = await getServerSession(authOptions);
     
     console.log(`📋 Session found: ${session ? 'YES' : 'NO'}, User: ${session?.user?.email || 'N/A'}`);
@@ -18,15 +17,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Returning user session for: ${session.user.email}`);
     return NextResponse.json({
-      user: {
-        id: (session.user as any).id,
-        email: session.user.email,
-        name: session.user.name,
-        image: session.user.image,
-        subscription: (session.user as any).subscription,
-        subscriptionEndsAt: (session.user as any).subscriptionEndsAt,
-        role: (session.user as any).role,
-      },
+      user: session.user
     });
 
   } catch (error) {
