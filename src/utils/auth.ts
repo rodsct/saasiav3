@@ -76,27 +76,7 @@ export const authOptions: NextAuthOptions = {
           pass: process.env.EMAIL_SERVER_PASSWORD
         }
       },
-      from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io',
-      async sendVerificationRequest({ identifier: email, url, provider }) {
-        try {
-          console.log(`📧 Sending Magic Link to: ${email}`);
-          console.log(`🔗 Magic Link URL: ${url}`);
-          
-          // Use our simple email system for Magic Links
-          const { sendSimpleMagicLinkEmail } = await import('@/utils/simpleEmail');
-          const success = await sendSimpleMagicLinkEmail(email, url);
-          
-          if (success) {
-            console.log(`✅ Magic Link sent successfully to: ${email}`);
-          } else {
-            console.error(`❌ Failed to send Magic Link to: ${email}`);
-            throw new Error(`Failed to send Magic Link email to ${email}`);
-          }
-        } catch (error) {
-          console.error('❌ Magic Link send error:', error);
-          throw error;
-        }
-      }
+      from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'noreply@agente.aranza.io'
     }),
     CredentialsProvider({
       name: "credentials",
@@ -297,5 +277,7 @@ export const authOptions: NextAuthOptions = {
 
   pages: {
     signIn: "/signin",
+    verifyRequest: "/auth/verify-request",
+    error: "/auth/error"
   },
 };
