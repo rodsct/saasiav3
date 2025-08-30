@@ -70,7 +70,7 @@ const Signin = () => {
     console.log('hCaptcha expired');
     setCaptchaVerified(false);
     setHcaptchaToken('');
-    toast.warning("hCaptcha expirado, por favor verifica nuevamente");
+    toast("hCaptcha expirado, por favor verifica nuevamente", { icon: "⚠️" });
   };
 
   const loginUser = (e: any) => {

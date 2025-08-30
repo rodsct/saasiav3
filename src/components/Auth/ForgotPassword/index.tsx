@@ -116,7 +116,7 @@ const ForgotPassword = () => {
                       onExpire={() => {
                         setCaptchaVerified(false);
                         setHcaptchaToken('');
-                        toast.warning("hCaptcha expirado, por favor verifica nuevamente");
+                        toast("hCaptcha expirado, por favor verifica nuevamente", { icon: "⚠️" });
                       }}
                       theme="light"
                       size="normal"

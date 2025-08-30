@@ -162,7 +162,7 @@ const SignUp = () => {
                         onExpire={() => {
                           setCaptchaVerified(false);
                           setHcaptchaToken('');
-                          toast.warning("hCaptcha expirado, por favor verifica nuevamente");
+                          toast("hCaptcha expirado, por favor verifica nuevamente", { icon: "⚠️" });
                         }}
                         onLoad={() => {
                           console.log('hCaptcha loaded successfully');

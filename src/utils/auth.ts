@@ -3,60 +3,41 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prismaDB";
-import { getSiteUrl, getOAuthCallbackUrl, isOwnDomain } from "./siteConfig";
+import { getSiteUrl } from "./siteConfig";
 import { triggerUserRegistered } from "./userEvents";
 
-// Get production URL from centralized configuration
+// Production URL for callbacks
 const PRODUCTION_URL = getSiteUrl();
 
-// Ensure consistency across all URL environment variables
-process.env.NEXTAUTH_URL = PRODUCTION_URL;
-process.env.NEXTAUTH_URL_INTERNAL = PRODUCTION_URL;
-process.env.SITE_URL = PRODUCTION_URL;
-
-// Log for debugging
-console.log("🔧 Forcing production URLs:");
-console.log("  NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
-console.log("  NEXTAUTH_URL_INTERNAL:", process.env.NEXTAUTH_URL_INTERNAL);
-
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET || "nextauth-secret-development-key",
   
   session: {
-    strategy: "jwt",
+    strategy: "database",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   
+  pages: {
+    signIn: "/signin",
+    error: "/auth/error"
+  },
+
   providers: [
-    {
-      id: "google",
-      name: "Google",
-      type: "oauth",
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      authorization: {
-        url: "https://accounts.google.com/o/oauth2/v2/auth",
-        params: {
-          scope: "openid email profile",
-          response_type: "code",
-          redirect_uri: getOAuthCallbackUrl("google")
-        }
-      },
-      token: "https://oauth2.googleapis.com/token",
-      userinfo: "https://www.googleapis.com/oauth2/v2/userinfo",
-      profile(profile: any) {
-        return {
-          id: profile.id,
-          name: profile.name,
-          email: profile.email,
-          image: profile.picture,
-        };
-      },
-    },
+      allowDangerousEmailAccountLinking: true,
+    }),
+    
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
+      allowDangerousEmailAccountLinking: true,
     }),
+    
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -65,27 +46,24 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log("❌ Missing credentials");
           return null;
         }
 
         try {
+          console.log(`🔍 Login attempt for: ${credentials.email}`);
+          
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
           });
 
-          console.log(`🔍 Login attempt for: ${credentials.email}`);
-          console.log(`👤 User found: ${user ? 'YES' : 'NO'}`);
-          console.log(`🔑 Password exists: ${user?.password ? 'YES' : 'NO'}`);
-          console.log(`✅ Email verified: ${user?.emailVerified ? 'YES' : 'NO'}`);
-
           if (!user || !user.password) {
-            console.log(`❌ Login failed: User not found or no password`);
+            console.log(`❌ User not found or no password: ${credentials.email}`);
             return null;
           }
 
-          // Check if email is verified (only for credential logins)
           if (!user.emailVerified) {
-            console.log(`❌ Login denied for unverified email: ${user.email}`);
+            console.log(`❌ Email not verified: ${credentials.email}`);
             throw new Error("Por favor verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada.");
           }
 
@@ -94,28 +72,21 @@ export const authOptions: NextAuthOptions = {
             user.password
           );
 
-          console.log(`🔐 Password validation result: ${isPasswordValid ? 'VALID' : 'INVALID'}`);
-
           if (!isPasswordValid) {
-            console.log(`❌ Login failed: Invalid password for ${user.email}`);
+            console.log(`❌ Invalid password for: ${credentials.email}`);
             return null;
           }
 
-          const userData = {
+          console.log(`✅ Login successful for: ${credentials.email}`);
+          
+          return {
             id: user.id,
             email: user.email,
             name: user.name,
             image: user.image,
-            subscription: user.subscription,
-            subscriptionEndsAt: user.subscriptionEndsAt,
-            role: user.role,
           };
-          
-          console.log(`✅ Credentials authorize successful for: ${user.email}`);
-          return userData;
         } catch (error) {
           console.error("Auth error:", error);
-          // Re-throw verification errors so they reach the frontend
           if (error instanceof Error && error.message.includes("verifica tu email")) {
             throw error;
           }
@@ -127,121 +98,105 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log(`🔐 SignIn callback - Provider: ${account?.provider}, Email: ${user?.email}`);
+      console.log(`🔐 SignIn attempt - Provider: ${account?.provider}, Email: ${user?.email}`);
       
-      // For OAuth providers, handle user creation/update
-      if (account?.provider === "google" || account?.provider === "github") {
-        try {
+      try {
+        // For OAuth providers, ensure user exists in database
+        if (account?.provider === "google" || account?.provider === "github") {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
           });
 
           if (!existingUser) {
-            // Create new user
+            console.log(`👤 Creating new user for ${account.provider}: ${user.email}`);
+            
             const newUser = await prisma.user.create({
               data: {
                 email: user.email!,
-                name: user.name || "Usuario OAuth",
-                emailVerified: new Date(),
+                name: user.name || `Usuario ${account.provider}`,
+                emailVerified: new Date(), // OAuth users have verified emails
                 image: user.image,
+                role: "USER",
+                subscription: "FREE",
               },
             });
 
-            console.log(`✅ Created new OAuth user: ${newUser.email}`);
-          } else if (!existingUser.emailVerified) {
-            // Update email verification
-            await prisma.user.update({
-              where: { email: user.email! },
-              data: { emailVerified: new Date() }
-            });
-            console.log(`✅ Updated email verification for: ${existingUser.email}`);
-          }
-        } catch (error) {
-          console.error("Error in OAuth signIn:", error);
-          return false; // Fail the sign in if database error
-        }
-      }
-      
-      console.log(`✅ SignIn approved for ${account?.provider}`);
-      return true;
-    },
-    
-    async jwt({ token, user, account }) {
-      console.log(`🔑 JWT callback - User: ${user?.email || 'EXISTING'}, Account: ${account?.provider || 'N/A'}`);
-      
-      // On first sign in, add user info to token
-      if (user) {
-        console.log(`📝 Adding user data to JWT for: ${user.email}`);
-        
-        // For OAuth users, get data from database
-        if (account?.provider === "google" || account?.provider === "github") {
-          try {
-            const dbUser = await prisma.user.findUnique({
-              where: { email: user.email! },
-            });
-            
-            if (dbUser) {
-              token.id = dbUser.id;
-              token.email = dbUser.email;
-              token.name = dbUser.name;
-              token.image = dbUser.image;
-              token.subscription = dbUser.subscription || "FREE";
-              token.role = dbUser.role || "USER";
-              console.log(`✅ OAuth token populated from DB for: ${dbUser.email}`);
+            // Send welcome email (async, don't wait)
+            triggerUserRegistered(newUser.email, newUser.name, false).catch(err => 
+              console.error("Failed to send welcome email:", err)
+            );
+          } else {
+            // Update existing user's info if needed
+            if (!existingUser.emailVerified) {
+              await prisma.user.update({
+                where: { email: user.email! },
+                data: { 
+                  emailVerified: new Date(),
+                  name: user.name || existingUser.name,
+                  image: user.image || existingUser.image,
+                }
+              });
             }
-          } catch (error) {
-            console.error("Error fetching OAuth user from DB:", error);
           }
-        } else if (account?.provider === "credentials") {
-          // For credentials, use data from authorize function
-          token.id = user.id;
-          token.email = user.email;
-          token.name = user.name;
-          token.image = user.image;
-          token.subscription = (user as any).subscription || "FREE";
-          token.role = (user as any).role || "USER";
-          console.log(`✅ Credentials token populated for: ${user.email}`);
         }
+
+        console.log(`✅ SignIn approved for: ${user.email}`);
+        return true;
+      } catch (error) {
+        console.error(`❌ SignIn error for ${user.email}:`, error);
+        return false;
       }
-      
-      return token;
     },
-    
-    async session({ session, token }) {
-      console.log(`📋 Session callback - Token exists: ${!!token}, Email: ${token?.email || 'N/A'}`);
+
+    async session({ session, user }) {
+      console.log(`📋 Session callback for: ${user?.email || session?.user?.email}`);
       
-      // Send properties to the client
-      if (token && session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).email = token.email;
-        (session.user as any).name = token.name;
-        (session.user as any).image = token.image;
-        (session.user as any).subscription = token.subscription || "FREE";
-        (session.user as any).role = token.role || "USER";
+      if (user && session.user) {
+        // Add user properties to session
+        (session.user as any).id = user.id;
+        (session.user as any).role = user.role || "USER";
+        (session.user as any).subscription = user.subscription || "FREE";
+        (session.user as any).subscriptionEndsAt = user.subscriptionEndsAt;
         
-        console.log(`✅ Session populated for: ${token.email}`);
-      } else {
-        console.log(`❌ Session callback failed - missing token or session.user`);
+        console.log(`✅ Session populated for: ${user.email}`);
       }
       
       return session;
     },
-    
+
     async redirect({ url, baseUrl }) {
-      console.log("🔀 Redirect:", url);
+      console.log(`🔀 Redirect: ${url} -> ${baseUrl}`);
       
-      // Force production URL for all redirects
+      // Ensure we always redirect to production URL
       if (url.startsWith("/")) return `${PRODUCTION_URL}${url}`;
-      if (url.includes("localhost")) return url.replace(/http:\/\/localhost:\d+/, PRODUCTION_URL);
-      if (isOwnDomain(url)) return url;
+      if (url.startsWith(PRODUCTION_URL)) return url;
       
+      // Default to home page
       return PRODUCTION_URL;
     },
   },
 
+  events: {
+    async signIn({ user, account, isNewUser }) {
+      console.log(`📊 SignIn event - User: ${user.email}, New: ${isNewUser}, Provider: ${account?.provider}`);
+    },
+    
+    async signOut({ session, token }) {
+      console.log(`📊 SignOut event - User: ${(session?.user as any)?.email || (token as any)?.email}`);
+    },
+  },
 
-  pages: {
-    signIn: "/signin",
-    error: "/auth/error"
+  logger: {
+    error(code, metadata) {
+      console.error(`NextAuth Error [${code}]:`, metadata);
+    },
+    warn(code) {
+      console.warn(`NextAuth Warning [${code}]`);
+    },
+    debug(code, metadata) {
+      if (process.env.NODE_ENV === "development") {
+        console.log(`NextAuth Debug [${code}]:`, metadata);
+      }
+    },
   },
 };
