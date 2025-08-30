@@ -161,20 +161,21 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log("🔐 SignIn callback - account:", account?.provider);
+      console.log(`🔐 SignIn callback - Provider: ${account?.provider}, Email: ${user?.email}`);
       
-      if (account?.provider && account.provider !== "credentials" && user?.email) {
+      // Handle OAuth providers explicitly (not email provider)
+      if (account?.provider === "google" || account?.provider === "github") {
         try {
           // Check if user already exists
           const existingUser = await prisma.user.findUnique({
-            where: { email: user.email },
+            where: { email: user.email! },
           });
 
           if (!existingUser) {
             // Create new user for OAuth providers
             const newUser = await prisma.user.create({
               data: {
-                email: user.email,
+                email: user.email!,
                 name: user.name || "Usuario OAuth",
                 emailVerified: new Date(), // OAuth users have verified emails
                 image: user.image,
@@ -188,10 +189,10 @@ export const authOptions: NextAuthOptions = {
             } catch (error) {
               console.error(`❌ Failed to trigger welcome email for OAuth user: ${newUser.email}`, error);
             }
-          } else if (!existingUser.emailVerified && account.provider === "google") {
-            // Update email verification for existing Google users
+          } else if (!existingUser.emailVerified) {
+            // Update email verification for existing users
             await prisma.user.update({
-              where: { email: user.email },
+              where: { email: user.email! },
               data: { emailVerified: new Date() }
             });
           }
@@ -200,16 +201,15 @@ export const authOptions: NextAuthOptions = {
         }
       }
       
+      // Let PrismaAdapter handle email provider automatically
+      console.log(`✅ SignIn approved for ${account?.provider} provider`);
       return true;
     },
     async redirect({ url, baseUrl }) {
       console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl, "prodUrl:", PRODUCTION_URL);
       
-      // Special handling for magic link success - redirect to home page
-      if (url.includes('/api/auth/callback/email') || url.includes('/signin?')) {
-        console.log("🪄 Magic link callback detected, redirecting to home");
-        return PRODUCTION_URL;
-      }
+      // Log all redirects to debug magic link flow
+      console.log("🔍 Analyzing redirect URL:", url);
       
       // Force production URL for all redirects
       if (url.startsWith("/")) {
