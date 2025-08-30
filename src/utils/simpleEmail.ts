@@ -239,12 +239,22 @@ Acceder: ${getSiteUrl()}/downloads
 ${getSiteUrl()}
     `;
 
+    // Generate unique timestamp to prevent Gmail caching
+    const timestamp = Date.now();
+    
     const mailOptions = {
       from: `"${senderName}" <${senderAddress}>`,
       to: userEmail,
-      subject: '🎉 ¡Bienvenido a Aranza.io! Tu asistente de IA está listo',
+      subject: `🚀 ¡Tu asistente Aranza está listo! Descubre todo lo que puedes hacer`,
       html: htmlContent,
       text: textContent,
+      // Add unique headers to prevent Gmail caching
+      headers: {
+        'X-Entity-ID': `welcome-${timestamp}`,
+        'Message-ID': `<welcome-${timestamp}-${userEmail.replace('@', '-at-')}@aranza.io>`,
+        'X-Priority': '3',
+        'X-MSMail-Priority': 'Normal',
+      },
     };
 
     console.log('📤 Sending welcome email...', {
