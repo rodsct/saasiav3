@@ -54,7 +54,26 @@ const ResetPassword = ({ token }: { token: string }) => {
     setLoader(true);
 
     if (data.newPassword === "") {
-      toast.error("Please enter your password.");
+      toast.error("Por favor ingresa tu nueva contraseña.");
+      setLoader(false);
+      return;
+    }
+
+    if (data.ReNewPassword === "") {
+      toast.error("Por favor confirma tu nueva contraseña.");
+      setLoader(false);
+      return;
+    }
+
+    if (data.newPassword !== data.ReNewPassword) {
+      toast.error("Las contraseñas no coinciden.");
+      setLoader(false);
+      return;
+    }
+
+    if (data.newPassword.length < 6) {
+      toast.error("La contraseña debe tener al menos 6 caracteres.");
+      setLoader(false);
       return;
     }
 
@@ -65,14 +84,14 @@ const ResetPassword = ({ token }: { token: string }) => {
       });
 
       if (res.status === 200) {
-        toast.success(res.data);
+        toast.success("Contraseña actualizada exitosamente");
         setData({ newPassword: "", ReNewPassword: "" });
         router.push("/signin");
       }
 
       setLoader(false);
     } catch (error: any) {
-      toast.error(error.response.data);
+      toast.error(error.response?.data || "Error al actualizar la contraseña");
       setLoader(false);
     }
   };
@@ -108,11 +127,12 @@ const ResetPassword = ({ token }: { token: string }) => {
               <form onSubmit={handleSubmit}>
                 <div className="mb-[22px]">
                   <input
-                    type="text"
-                    placeholder="New password"
+                    type="password"
+                    placeholder="Nueva contraseña"
                     name="newPassword"
                     value={data?.newPassword}
                     onChange={handleChange}
+                    autoComplete="new-password"
                     required
                     className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
                   />
@@ -120,11 +140,12 @@ const ResetPassword = ({ token }: { token: string }) => {
 
                 <div className="mb-[22px]">
                   <input
-                    type="text"
-                    placeholder="New password"
-                    name="newPassword"
-                    value={data?.newPassword}
+                    type="password"
+                    placeholder="Confirmar nueva contraseña"
+                    name="ReNewPassword"
+                    value={data?.ReNewPassword}
                     onChange={handleChange}
+                    autoComplete="new-password"
                     required
                     className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
                   />
@@ -132,9 +153,10 @@ const ResetPassword = ({ token }: { token: string }) => {
                 <div className="">
                   <button
                     type="submit"
-                    className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-blue-dark"
+                    disabled={loader}
+                    className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Save Password {loader && <Loader />}
+                    {loader ? "Guardando..." : "Guardar Contraseña"} {loader && <Loader />}
                   </button>
                 </div>
               </form>
